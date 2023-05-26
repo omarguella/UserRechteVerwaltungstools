@@ -5,7 +5,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.persistence.*;
 
-import java.util.Objects;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -30,14 +30,17 @@ public class User {
 
     @NotNull
     private String name;
-
     @NotNull
-    private String lastName;
-
+    private String lastname;
 
     private String phoneNumber;
     private boolean isVerifiedEmail = false;
 
+    @ManyToMany
+    @JoinTable(name = "user_role",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private List<Role> roles;
 
 
 
@@ -81,12 +84,12 @@ public class User {
         this.name = name;
     }
 
-    public String getLastName() {
-        return lastName;
+    public String getLastname() {
+        return lastname;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setLastname(String lastname) {
+        this.lastname = lastname;
     }
 
     public String getPhoneNumber() {
@@ -108,6 +111,16 @@ public class User {
         this.isVerifiedEmail = isVerifiedEmail;
     }
 
+
+
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -116,7 +129,7 @@ public class User {
                 ", password='" + password + '\'' +
                 ", username='" + username + '\'' +
                 ", name='" + name + '\'' +
-                ", lastName='" + lastName + '\'' +
+                ", lastname='" + lastname + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", verifiedEmail='" + isVerifiedEmail + '\'' +
                 '}';

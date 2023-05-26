@@ -5,14 +5,13 @@ import User.Recht.Tool.dtos.UserDto;
 import User.Recht.Tool.dtos.UserProfileDto;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.DuplicateElementException;
-import User.Recht.Tool.exception.UserNameDuplicateElementException;
-import User.Recht.Tool.exception.UserNotFoundException;
+import User.Recht.Tool.exception.user.UserNameDuplicateElementException;
+import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.factory.UserFactory;
 import User.Recht.Tool.factory.UserProfileFactory;
 import User.Recht.Tool.repository.UserRepository;
 import User.Recht.Tool.service.UserService;
 import User.Recht.Tool.util.Encoder;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,14 +31,15 @@ public class UserServiceImpl implements UserService {
     Encoder passwordEncoder;
     @Inject
     UserFactory userFactory;
-
     @Inject
     UserProfileFactory userProfileFactory;
+
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 
     private static final String EMAIL_REGEX = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
     private static final String PASSWORD_REGEX = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[.@$!%*?&])[A-Za-z\\d.@$!%*?&]{8,}$";
+    private static final String PHONE_REGEX = "^(\\+[0-9]{1,3})?[0-9]{9,15}$";
 
 
     @Transactional
@@ -48,17 +48,16 @@ public class UserServiceImpl implements UserService {
 
 
         if (userDto.getEmail().isBlank() || userDto.getPassword().isBlank() || userDto.getUsername().isBlank()
-                || userDto.getName().isBlank()||userDto.getLastName().isBlank()) {
+                || userDto.getName().isBlank() || userDto.getLastname().isBlank()) {
             throw new NullPointerException("Email , Password, Username, Name, LastName are Required");
         }
 
-        userDto.setEmail(userDto.getEmail().toUpperCase());
 
-        if (!isValidEmail(userDto.getEmail()) || !isValidPassword(userDto.getPassword())) {
-            throw new ValidationException("THE EMAIL OR THE PASSWORD IS NOT VALID");
+        if (!isValidEmail(userDto.getEmail()) || !isValidPassword(userDto.getPassword()) || !isValidPhone(userDto.getPhoneNumber())) {
+            throw new ValidationException(" EMAIL, PASSWORD OR PHONENUMBER IS NOT VALID");
         }
 
-
+        userDto.setEmail(userDto.getEmail().toUpperCase());
         userDto.setUsername(userDto.getUsername().toUpperCase());
 
         try {
@@ -110,7 +109,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByEmail(String email) throws UserNotFoundException {
-        User user = userRepository.find("email", email).firstResult();
+        User user = userRepository.find("email", email.toUpperCase()).firstResult();
         if (user != null) {
             return user;
         } else {
@@ -121,7 +120,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByUsername(String username) throws UserNotFoundException {
-        User user = userRepository.find("username", username).firstResult();
+        User user = userRepository.find("username", username.toUpperCase()).firstResult();
         if (user != null) {
             return user;
         } else {
@@ -145,7 +144,7 @@ public class UserServiceImpl implements UserService {
             throw new ValidationException("the New Mail is not valid");
         } else {
             try {
-                User checkUserEmail = getUserByEmail(newEmail);
+                User checkUserEmail = getUserByEmail(newEmail.toUpperCase());
                 if(checkUserEmail.getId()!=id){
                     throw new DuplicateElementException("USER EMAIL ALREADY USED");
                 }
@@ -155,8 +154,7 @@ public class UserServiceImpl implements UserService {
         }
 
 
-
-            userToUpdate.setEmail(newEmail);
+        userToUpdate.setEmail(newEmail.toUpperCase());
 
         userToUpdate.setIsVerifiedEmail(false);
         return saveUpdatedUser(userToUpdate);
@@ -202,9 +200,10 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public User updateProfilById(Long id, UserProfileDto userProfileDto) throws UserNotFoundException, DuplicateElementException {
+    public User updateProfilById(Long id, UserProfileDto userProfileDto) throws UserNotFoundException,ValidationException, DuplicateElementException {
 
         User userToUpdate;
+        userProfileDto.setUsername(userProfileDto.getUsername().toUpperCase());
 
         try {
             userToUpdate = getUserById(id);
@@ -215,15 +214,22 @@ public class UserServiceImpl implements UserService {
         if (userProfileDto.getUsername() != null) {
             try {
                 User checkUsername = getUserByUsername(userProfileDto.getUsername());
-                if(checkUsername.getId()!=id){
-                throw new DuplicateElementException("USERNAME ALREADY USED");
+                if (checkUsername.getId() != id) {
+                    throw new DuplicateElementException("USERNAME ALREADY USED");
                 }
             } catch (UserNotFoundException e) {
 
             }
         }
 
-        userToUpdate=userProfileFactory.userProfileFactory(userProfileDto);
+        if (userProfileDto.getPhoneNumber() != null) {
+            if (!isValidPhone(userProfileDto.getPhoneNumber())) {
+                throw new ValidationException(" PHONENUMBER IS NOT VALID");
+            }
+        }
+
+        userToUpdate = userProfileFactory.userProfileFactory(userToUpdate, userProfileDto);
+        LOGGER.info(String.valueOf(userToUpdate));
         return saveUpdatedUser(userToUpdate);
     }
 
@@ -249,6 +255,12 @@ public class UserServiceImpl implements UserService {
     public static boolean isValidPassword(String password) {
         Pattern pattern = Pattern.compile(PASSWORD_REGEX);
         Matcher matcher = pattern.matcher(password);
+        return matcher.matches();
+    }
+
+    public static boolean isValidPhone(String phoneNumber) {
+        Pattern pattern = Pattern.compile(PHONE_REGEX);
+        Matcher matcher = pattern.matcher(phoneNumber);
         return matcher.matches();
     }
 

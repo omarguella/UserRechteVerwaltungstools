@@ -1,6 +1,6 @@
-package User.Recht.Tool.exception;
+package User.Recht.Tool.exception.role;
 
-public class UserNotFoundException extends Exception {
+public class RoleNotFoundException extends Exception {
     private String reason = null;
 
     public String getReason() {
@@ -11,7 +11,7 @@ public class UserNotFoundException extends Exception {
         this.reason = reason;
     }
 
-    public UserNotFoundException(String reason) {
+    public RoleNotFoundException(String reason) {
 
         this.reason = reason;
     }

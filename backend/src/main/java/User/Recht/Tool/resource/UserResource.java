@@ -5,10 +5,9 @@ import User.Recht.Tool.dtos.UserDto;
 import User.Recht.Tool.dtos.UserProfileDto;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.DuplicateElementException;
-import User.Recht.Tool.exception.UserNameDuplicateElementException;
-import User.Recht.Tool.exception.UserNotFoundException;
+import User.Recht.Tool.exception.user.UserNameDuplicateElementException;
+import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.service.UserService;
-import com.oracle.svm.core.annotate.Delete;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,18 +45,18 @@ public class UserResource {
                     .build();
 
         } catch (UserNameDuplicateElementException e) {
-            return Response.status(406, "USERNAME IS ALREADY USER")
-                    .header("status", " USERNAME IS ALREADY USER ").build();
+            return Response.status(406, "USERNAME IS ALREADY USED")
+                    .header("status", " USERNAME IS ALREADY USED ").build();
         } catch (DuplicateElementException e) {
-            return Response.status(406, "EMAIL IS ALREADY USER")
-                    .header("status", " EMAIL IS ALREADY USER").build();
+            return Response.status(406, "EMAIL IS ALREADY USED")
+                    .header("status", " EMAIL IS ALREADY USED").build();
         } catch (NullPointerException a) {
             return Response.status(406, "EMAIL, PASSWORD AND USERNAME ARE REQUIRED")
                     .header("status", " EMAIL, PASSWORD, USERNAME, NAME AND LASTNAME ARE REQUIRED ").build();
 
         }catch (ValidationException a) {
-            return Response.status(406, "THE EMAIL OR THE PASSWORD IS NOT VALID")
-                    .header("status", "THE EMAIL OR THE PASSWORD IS NOT VALID").build();
+            return Response.status(406, "EMAIL, PASSWORD OR PHONENUMBER IS NOT VALID")
+                    .header("status", "EMAIL, PASSWORD OR PHONENUMBER IS NOT VALID").build();
 
         }
     }
@@ -75,7 +74,7 @@ public class UserResource {
                     .build();
 
         } catch (UserNotFoundException e) {
-            return Response.status(406, "USER WITH DOSENT EXIST")
+            return Response.status(406, "USER  DOSENT EXIST")
                     .header("status", "USER DOSENT EXIST").build();
         }
 
@@ -88,7 +87,7 @@ public class UserResource {
             throws UserNotFoundException {
         try {
 
-            User user = userService.getUserByEmail(userEmail.toUpperCase());
+            User user = userService.getUserByEmail(userEmail);
 
             return Response.ok(user).header("Email", user.getEmail())
                     .build();
@@ -107,7 +106,7 @@ public class UserResource {
             throws UserNotFoundException {
         try {
 
-            User user = userService.getUserByUsername(username.toUpperCase());
+            User user = userService.getUserByUsername(username);
 
             return Response.ok(user).header("Email", user.getEmail())
                     .build();
@@ -201,7 +200,7 @@ public class UserResource {
     @PermitAll
     @Path("/profile/")
     public Response updateProfileUser (@HeaderParam("userId") String id, @RequestBody UserProfileDto userProfileDto, @Context SecurityContext securityContext)
-            throws UserNotFoundException, DuplicateElementException {
+            throws UserNotFoundException, DuplicateElementException ,ValidationException{
 
         try {
 
@@ -216,6 +215,9 @@ public class UserResource {
         } catch (DuplicateElementException e){
             return Response.status(406, "USERNAME IS ALREADY USED")
                     .header("status", "USERNAME IS ALREADY USED").build();
+        }catch (ValidationException e){
+            return Response.status(406, "PHONENUMBER IS NOT VALID")
+                    .header("status", "PHONENUMBER IS NOT VALID").build();
         }
 
     }

@@ -9,7 +9,7 @@ public class UserProfileDto {
     @NotNull
     private String name;
     @NotNull
-    private String lastName;
+    private String lastname;
     private String phoneNumber;
 
     public String getUsername() {
@@ -28,12 +28,12 @@ public class UserProfileDto {
         this.name = name;
     }
 
-    public String getLastName() {
-        return lastName;
+    public String getLastname() {
+        return lastname;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setLastname(String lastname) {
+        this.lastname = lastname;
     }
 
     public String getPhoneNumber() {
@@ -49,7 +49,7 @@ public class UserProfileDto {
         return "UserProfileDto{" +
                 "username='" + username + '\'' +
                 ", name='" + name + '\'' +
-                ", lastName='" + lastName + '\'' +
+                ", lastname='" + lastname + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 '}';
     }

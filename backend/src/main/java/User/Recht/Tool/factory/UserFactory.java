@@ -12,7 +12,7 @@ public class UserFactory {
         User user=new User();
         user.setEmail(userDto.getEmail());
         user.setName(userDto.getName());
-        user.setLastName(userDto.getLastName());
+        user.setLastname(userDto.getLastname());
         user.setUsername(userDto.getUsername());
         user.setPassword(userDto.getPassword());
         user.setIsVerifiedEmail(userDto.getIsVerifiedEmail());

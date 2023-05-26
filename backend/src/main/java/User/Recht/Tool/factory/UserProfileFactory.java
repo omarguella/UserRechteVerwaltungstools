@@ -9,8 +9,7 @@ import javax.enterprise.context.RequestScoped;
 @RequestScoped
 public class UserProfileFactory {
 
-    public User userProfileFactory(UserProfileDto userProfileDto){
-        User user=new User();
+    public User userProfileFactory(User user,UserProfileDto userProfileDto){
 
         if(userProfileDto.getUsername()!=null){
             user.setUsername(userProfileDto.getUsername());
@@ -18,8 +17,8 @@ public class UserProfileFactory {
         if(userProfileDto.getName()!=null){
             user.setName(userProfileDto.getName());
         }
-        if(userProfileDto.getLastName()!=null){
-            user.setLastName(userProfileDto.getLastName());
+        if(userProfileDto.getLastname()!=null){
+            user.setLastname(userProfileDto.getLastname());
         }
         if(userProfileDto.getPhoneNumber()!=null){
             user.setPhoneNumber(userProfileDto.getPhoneNumber());

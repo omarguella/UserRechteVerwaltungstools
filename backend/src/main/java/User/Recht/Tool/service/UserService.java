@@ -6,7 +6,7 @@ import User.Recht.Tool.dtos.UserProfileDto;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.dtos.UserDto;
 import User.Recht.Tool.exception.DuplicateElementException;
-import User.Recht.Tool.exception.UserNotFoundException;
+import User.Recht.Tool.exception.user.UserNotFoundException;
 
 import javax.transaction.Transactional;
 import javax.xml.bind.ValidationException;
@@ -39,5 +39,5 @@ public interface UserService {
     User updatePasswordById(Long id, UpdatePasswordDto updatePasswordDto) throws UserNotFoundException, ValidationException ,IllegalArgumentException;
 
     @Transactional
-    User updateProfilById(Long id, UserProfileDto userProfileDto) throws UserNotFoundException, DuplicateElementException;
+    User updateProfilById(Long id, UserProfileDto userProfileDto) throws UserNotFoundException,ValidationException, DuplicateElementException;
 }
