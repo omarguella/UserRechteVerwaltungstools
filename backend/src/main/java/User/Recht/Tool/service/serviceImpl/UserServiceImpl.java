@@ -2,11 +2,13 @@ package User.Recht.Tool.service.serviceImpl;
 
 import User.Recht.Tool.dtos.UpdatePasswordDto;
 import User.Recht.Tool.dtos.UserDto;
+import User.Recht.Tool.dtos.UserProfileDto;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.DuplicateElementException;
 import User.Recht.Tool.exception.UserNameDuplicateElementException;
 import User.Recht.Tool.exception.UserNotFoundException;
 import User.Recht.Tool.factory.UserFactory;
+import User.Recht.Tool.factory.UserProfileFactory;
 import User.Recht.Tool.repository.UserRepository;
 import User.Recht.Tool.service.UserService;
 import User.Recht.Tool.util.Encoder;
@@ -31,6 +33,9 @@ public class UserServiceImpl implements UserService {
     @Inject
     UserFactory userFactory;
 
+    @Inject
+    UserProfileFactory userProfileFactory;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 
     private static final String EMAIL_REGEX = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
@@ -42,8 +47,9 @@ public class UserServiceImpl implements UserService {
     public User createUser(UserDto userDto) throws DuplicateElementException, Exception {
 
 
-        if (userDto.getEmail().isBlank() || userDto.getPassword().isBlank() || userDto.getUserName().isBlank()) {
-            throw new NullPointerException("Email , Password and Username are Required");
+        if (userDto.getEmail().isBlank() || userDto.getPassword().isBlank() || userDto.getUsername().isBlank()
+                || userDto.getName().isBlank()||userDto.getLastName().isBlank()) {
+            throw new NullPointerException("Email , Password, Username, Name, LastName are Required");
         }
 
         userDto.setEmail(userDto.getEmail().toUpperCase());
@@ -53,7 +59,7 @@ public class UserServiceImpl implements UserService {
         }
 
 
-        userDto.setUserName(userDto.getUserName().toUpperCase());
+        userDto.setUsername(userDto.getUsername().toUpperCase());
 
         try {
             User userCheckWithEmail = getUserByEmail(userDto.getEmail());
@@ -62,8 +68,8 @@ public class UserServiceImpl implements UserService {
         }
 
         try {
-            User userCheckWithUsername = getUserByUsername(userDto.getUserName());
-            throw new UserNameDuplicateElementException("Username " + userDto.getUserName() + " existed");
+            User userCheckWithUsername = getUserByUsername(userDto.getUsername());
+            throw new UserNameDuplicateElementException("Username " + userDto.getUsername() + " existed");
         } catch (UserNotFoundException e) {
         }
 
@@ -126,7 +132,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public User updateEmailUser(Long id, String newEmail) throws UserNotFoundException, ValidationException {
+    public User updateEmailUser(Long id, String newEmail) throws UserNotFoundException, ValidationException,DuplicateElementException {
 
         User userToUpdate;
 
@@ -137,18 +143,25 @@ public class UserServiceImpl implements UserService {
         }
         if (!isValidEmail(newEmail)) {
             throw new ValidationException("the New Mail is not valid");
-        } else if (StringUtils.isNotBlank(newEmail)) {
-            userToUpdate.setEmail(newEmail);
+        } else {
+            try {
+                User checkUserEmail = getUserByEmail(newEmail);
+                if(checkUserEmail.getId()!=id){
+                    throw new DuplicateElementException("USER EMAIL ALREADY USED");
+                }
+            } catch (UserNotFoundException e) {
+
+            }
         }
+
+
+
+            userToUpdate.setEmail(newEmail);
+
         userToUpdate.setIsVerifiedEmail(false);
         return saveUpdatedUser(userToUpdate);
     }
 
-    @Transactional
-    public User saveUpdatedUser(User user) {
-        userRepository.getEntityManager().merge(user);
-        return user;
-    }
 
 
     @Transactional
@@ -177,13 +190,40 @@ public class UserServiceImpl implements UserService {
             throw new UserNotFoundException("USER DONT EXIST");
         }
 
-        if (!verifyPasswordById(updatePasswordDto.getOldPassword(),id)) {
+        if (!verifyPasswordById(updatePasswordDto.getOldPassword(), id)) {
             throw new IllegalArgumentException("OLD PASSWORD IS WRONG");
         } else if (!isValidPassword(updatePasswordDto.getNewPassword())) {
             throw new ValidationException(" NEW PASSWORD IS NOT VALID");
         }
 
         userToUpdate.setPassword(passwordEncoder.encode(updatePasswordDto.getNewPassword()));
+        return saveUpdatedUser(userToUpdate);
+    }
+
+    @Transactional
+    @Override
+    public User updateProfilById(Long id, UserProfileDto userProfileDto) throws UserNotFoundException, DuplicateElementException {
+
+        User userToUpdate;
+
+        try {
+            userToUpdate = getUserById(id);
+        } catch (UserNotFoundException e) {
+            throw new UserNotFoundException("USER DONT EXIST");
+        }
+
+        if (userProfileDto.getUsername() != null) {
+            try {
+                User checkUsername = getUserByUsername(userProfileDto.getUsername());
+                if(checkUsername.getId()!=id){
+                throw new DuplicateElementException("USERNAME ALREADY USED");
+                }
+            } catch (UserNotFoundException e) {
+
+            }
+        }
+
+        userToUpdate=userProfileFactory.userProfileFactory(userProfileDto);
         return saveUpdatedUser(userToUpdate);
     }
 
@@ -194,6 +234,11 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @Transactional
+    public User saveUpdatedUser(User user) {
+        userRepository.getEntityManager().merge(user);
+        return user;
+    }
 
     public static boolean isValidEmail(String email) {
         Pattern pattern = Pattern.compile(EMAIL_REGEX);

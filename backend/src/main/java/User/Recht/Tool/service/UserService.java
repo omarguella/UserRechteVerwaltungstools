@@ -2,6 +2,7 @@ package User.Recht.Tool.service;
 
 
 import User.Recht.Tool.dtos.UpdatePasswordDto;
+import User.Recht.Tool.dtos.UserProfileDto;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.dtos.UserDto;
 import User.Recht.Tool.exception.DuplicateElementException;
@@ -29,11 +30,14 @@ public interface UserService {
     User deleteUserById(Long id) throws UserNotFoundException;
 
     @Transactional
-    User updateEmailUser(Long id, String newEmail) throws UserNotFoundException, ValidationException;
+    User updateEmailUser(Long id, String newEmail) throws UserNotFoundException,DuplicateElementException, ValidationException;
 
     User saveUpdatedUser(User user);
 
 
     @Transactional
     User updatePasswordById(Long id, UpdatePasswordDto updatePasswordDto) throws UserNotFoundException, ValidationException ,IllegalArgumentException;
+
+    @Transactional
+    User updateProfilById(Long id, UserProfileDto userProfileDto) throws UserNotFoundException, DuplicateElementException;
 }

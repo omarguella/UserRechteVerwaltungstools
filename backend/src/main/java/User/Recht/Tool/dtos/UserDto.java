@@ -11,12 +11,12 @@ public class UserDto {
     private String email;
     @NotNull
     private String password;
-    private String userName;
+    @NotNull
+    private String username;
     @NotNull
     private String name;
     @NotNull
     private String lastName;
-
     private String phoneNumber;
     private boolean isVerifiedEmail;
 
@@ -64,12 +64,12 @@ public class UserDto {
         return phoneNumber;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public void setPhoneNumber(String phoneNumber) {
@@ -93,7 +93,7 @@ public class UserDto {
                 ", name='" + name + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
-                ", userName='" + userName + '\'' +
+                ", username='" + username + '\'' +
                 ", isVerifiedEmail='" + isVerifiedEmail + '\'' +
                 '}';
     }

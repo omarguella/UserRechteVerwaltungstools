@@ -2,6 +2,7 @@ package User.Recht.Tool.resource;
 
 import User.Recht.Tool.dtos.UpdatePasswordDto;
 import User.Recht.Tool.dtos.UserDto;
+import User.Recht.Tool.dtos.UserProfileDto;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.DuplicateElementException;
 import User.Recht.Tool.exception.UserNameDuplicateElementException;
@@ -52,7 +53,7 @@ public class UserResource {
                     .header("status", " EMAIL IS ALREADY USER").build();
         } catch (NullPointerException a) {
             return Response.status(406, "EMAIL, PASSWORD AND USERNAME ARE REQUIRED")
-                    .header("status", " Email , Password and Username are Required ").build();
+                    .header("status", " EMAIL, PASSWORD, USERNAME, NAME AND LASTNAME ARE REQUIRED ").build();
 
         }catch (ValidationException a) {
             return Response.status(406, "THE EMAIL OR THE PASSWORD IS NOT VALID")
@@ -164,6 +165,9 @@ public class UserResource {
         } catch (ValidationException e){
             return Response.status(406, "EMAIL IS NOT VALID")
                     .header("status", "EMAIL IS NOT VALID").build();
+        }catch (DuplicateElementException e){
+            return Response.status(406, "USER EMAIL IS ALREADY USED")
+                    .header("status", "USER EMAIL IS ALREADY USED").build();
         }
 
     }
@@ -189,6 +193,29 @@ public class UserResource {
         } catch (IllegalArgumentException e){
             return Response.status(406, "OLD PASSWORD IS WRONG")
                     .header("status", "OLD PASSWORD IS WRONG").build();
+        }
+
+    }
+
+    @PUT
+    @PermitAll
+    @Path("/profile/")
+    public Response updateProfileUser (@HeaderParam("userId") String id, @RequestBody UserProfileDto userProfileDto, @Context SecurityContext securityContext)
+            throws UserNotFoundException, DuplicateElementException {
+
+        try {
+
+            User user = userService.updateProfilById(Long.parseLong(id),userProfileDto);
+
+            return Response.ok(user).header("status", "PROFILE IS UPDATED")
+                    .build();
+
+        } catch (UserNotFoundException e) {
+            return Response.status(406, "USER DOSENT EXIST")
+                    .header("status", "USER DOSENT EXIST").build();
+        } catch (DuplicateElementException e){
+            return Response.status(406, "USERNAME IS ALREADY USED")
+                    .header("status", "USERNAME IS ALREADY USED").build();
         }
 
     }
