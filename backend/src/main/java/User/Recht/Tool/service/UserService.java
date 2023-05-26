@@ -1,12 +1,14 @@
 package User.Recht.Tool.service;
 
 
+import User.Recht.Tool.dtos.UpdatePasswordDto;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.dtos.UserDto;
 import User.Recht.Tool.exception.DuplicateElementException;
 import User.Recht.Tool.exception.UserNotFoundException;
 
 import javax.transaction.Transactional;
+import javax.xml.bind.ValidationException;
 import java.util.List;
 
 public interface UserService {
@@ -21,15 +23,17 @@ public interface UserService {
 
     User saveUser(UserDto user) throws Exception;
 
-    User deleteUserByEmail(String email) throws Exception;
 
-    Boolean verifyPasswordByEmail(String oldPassword, String email) throws UserNotFoundException;
-    void updatePasswordByEmail(String password, String email) throws UserNotFoundException;
+
+    @Transactional
+    User deleteUserById(Long id) throws UserNotFoundException;
+
+    @Transactional
+    User updateEmailUser(Long id, String newEmail) throws UserNotFoundException, ValidationException;
 
     User saveUpdatedUser(User user);
 
-    User updateEmailUser(String currentEmail, String newEmail) throws UserNotFoundException;
 
-
-
+    @Transactional
+    User updatePasswordById(Long id, UpdatePasswordDto updatePasswordDto) throws UserNotFoundException, ValidationException ,IllegalArgumentException;
 }

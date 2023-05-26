@@ -18,6 +18,7 @@ public class UserDto {
     private String lastName;
 
     private String phoneNumber;
+    private boolean isVerifiedEmail;
 
     public long getId() {
         return id;
@@ -75,6 +76,14 @@ public class UserDto {
         this.phoneNumber = phoneNumber;
     }
 
+    public boolean getIsVerifiedEmail() {
+        return isVerifiedEmail;
+    }
+
+    public void setIsVerifiedEmail(boolean isVerifiedEmail) {
+        this.isVerifiedEmail = isVerifiedEmail;
+    }
+
     @Override
     public String toString() {
         return "UserDto{" +
@@ -85,6 +94,7 @@ public class UserDto {
                 ", lastName='" + lastName + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", userName='" + userName + '\'' +
+                ", isVerifiedEmail='" + isVerifiedEmail + '\'' +
                 '}';
     }
 }

@@ -15,6 +15,8 @@ public class UserFactory {
         user.setLastName(userDto.getLastName());
         user.setUserName(userDto.getUserName());
         user.setPassword(userDto.getPassword());
+        user.setIsVerifiedEmail(userDto.getIsVerifiedEmail());
+        user.setPhoneNumber(userDto.getPhoneNumber());
         return user;
     }
 }

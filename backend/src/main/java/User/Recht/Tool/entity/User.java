@@ -36,6 +36,9 @@ public class User {
 
 
     private String phoneNumber;
+    private boolean isVerifiedEmail = false;
+
+
 
 
     public long getId() {
@@ -97,6 +100,14 @@ public class User {
     public User() {
     }
 
+    public boolean getIsVerifiedEmail() {
+        return isVerifiedEmail;
+    }
+
+    public void setIsVerifiedEmail(boolean isVerifiedEmail) {
+        this.isVerifiedEmail = isVerifiedEmail;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -107,6 +118,7 @@ public class User {
                 ", name='" + name + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
+                ", verifiedEmail='" + isVerifiedEmail + '\'' +
                 '}';
     }
 }
