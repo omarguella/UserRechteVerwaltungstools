@@ -3,15 +3,11 @@ package User.Recht.Tool.resource;
 
 import User.Recht.Tool.dtos.roleDtos.RoleDto;
 import User.Recht.Tool.dtos.roleDtos.UpdateRoleDto;
-import User.Recht.Tool.dtos.userDtos.UpdatePasswordDto;
-import User.Recht.Tool.dtos.userDtos.UserProfileDto;
+
 import User.Recht.Tool.entity.Role;
-import User.Recht.Tool.entity.User;
-import User.Recht.Tool.exception.DuplicateElementException;
 import User.Recht.Tool.exception.role.RoleNameDuplicateElementException;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
-import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.service.RoleService;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.slf4j.Logger;
@@ -24,7 +20,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import javax.xml.bind.ValidationException;
 import java.util.List;
 
 @Path("/role")
@@ -40,8 +35,7 @@ public class RoleResource {
 
     @POST
     @PermitAll
-    public Response createRole(@RequestBody RoleDto roleDto, @Context SecurityContext securityContext)
-            throws RoleNameDuplicateElementException, RoleNotFoundException {
+    public Response createRole(@RequestBody RoleDto roleDto, @Context SecurityContext securityContext) {
         try {
             Role role = roleService.createRole(roleDto);
 
@@ -85,8 +79,7 @@ public class RoleResource {
     @DELETE
     @PermitAll
     @Path("/name/{roleName}/")
-    public Response deleteRole(@PathParam("roleName") String roleName, @Context SecurityContext securityContext)
-            throws RoleNotFoundException, CannotModifySuperAdminException {
+    public Response deleteRole(@PathParam("roleName") String roleName, @Context SecurityContext securityContext) {
         try {
             Role role = roleService.deleteRoleByName(roleName);
 
@@ -105,8 +98,7 @@ public class RoleResource {
     @PUT
     @PermitAll
     @Path("/name/{roleName}/")
-    public Response updateRole(@PathParam("roleName") String roleName, @RequestBody UpdateRoleDto updateRoleDto, @Context SecurityContext securityContext)
-            throws RoleNotFoundException, RoleNameDuplicateElementException, IllegalArgumentException {
+    public Response updateRole(@PathParam("roleName") String roleName, @RequestBody UpdateRoleDto updateRoleDto, @Context SecurityContext securityContext) {
 
         try {
 

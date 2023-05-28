@@ -1,12 +1,10 @@
 package User.Recht.Tool.resource;
 
-import User.Recht.Tool.dtos.roleDtos.UpdateRoleDto;
 import User.Recht.Tool.dtos.userDtos.UpdatePasswordDto;
 import User.Recht.Tool.dtos.userDtos.UserDto;
 import User.Recht.Tool.dtos.userDtos.UserProfileDto;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.DuplicateElementException;
-import User.Recht.Tool.exception.role.RoleNameDuplicateElementException;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.user.UserNameDuplicateElementException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
@@ -43,11 +41,10 @@ public class UserResource {
     @POST
     @PermitAll
     @Path("registration/{roleName}")
-    public Response createUser(@RequestBody UserDto userDto, @PathParam("roleName") String roleName)
-            throws UserNotFoundException, Exception, RoleNotFoundException {
+    public Response createUser(@RequestBody UserDto userDto, @PathParam("roleName") String roleName){
         try {
-            User user = userService.createUser(userDto,roleName);
 
+            User user = userService.createUser(userDto,roleName);
             return Response.ok(userService.getUserByEmail(userDto.getEmail())).header("Email", userDto.getEmail())
                     .build();
 
@@ -65,14 +62,16 @@ public class UserResource {
             return Response.status(406, "ROLE NOT FOUND")
                     .header("status", "ROLE NOT FOUND").build();
 
+        } catch (UserNotFoundException e) {
+            return Response.status(406, "USER NOT SAVED")
+                    .header("status", "USER NOT SAVED").build();
         }
     }
 
     @GET
     @PermitAll
     @Path("/id/{userId}/")
-    public Response getUserWithId(@PathParam("userId") String id, @Context SecurityContext securityContext)
-            throws UserNotFoundException {
+    public Response getUserWithId(@PathParam("userId") String id, @Context SecurityContext securityContext) {
         try {
 
             User user = userService.getUserById(Long.parseLong(id));
@@ -90,8 +89,7 @@ public class UserResource {
     @GET
     @PermitAll
     @Path("/email/{userEmail}/")
-    public Response getUserWithEmail(@PathParam("userEmail") String userEmail, @Context SecurityContext securityContext)
-            throws UserNotFoundException {
+    public Response getUserWithEmail(@PathParam("userEmail") String userEmail, @Context SecurityContext securityContext){
         try {
 
             User user = userService.getUserByEmail(userEmail);
@@ -109,8 +107,7 @@ public class UserResource {
     @GET
     @PermitAll
     @Path("/username/{username}/")
-    public Response getUserWithUsername(@PathParam("username") String username, @Context SecurityContext securityContext)
-            throws UserNotFoundException {
+    public Response getUserWithUsername(@PathParam("username") String username, @Context SecurityContext securityContext) {
         try {
 
             User user = userService.getUserByUsername(username);
@@ -137,8 +134,7 @@ public class UserResource {
     @DELETE
     @PermitAll
     @Path("/id/{userId}/")
-    public Response deleteUserWithId(@PathParam("userId") String id, @Context SecurityContext securityContext)
-            throws UserNotFoundException {
+    public Response deleteUserWithId(@PathParam("userId") String id, @Context SecurityContext securityContext){
         try {
 
             User user = userService.deleteUserById(Long.parseLong(id));
@@ -156,8 +152,7 @@ public class UserResource {
     @PUT
     @PermitAll
     @Path("/email/")
-    public Response updateEmailUser (@HeaderParam("userId") String id, @HeaderParam("newEmail") String newEmail, @Context SecurityContext securityContext)
-            throws UserNotFoundException, ValidationException {
+    public Response updateEmailUser (@HeaderParam("userId") String id, @HeaderParam("newEmail") String newEmail, @Context SecurityContext securityContext) {
         try {
 
             User user = userService.updateEmailUser(Long.parseLong(id),newEmail);
@@ -181,8 +176,7 @@ public class UserResource {
     @PUT
     @PermitAll
     @Path("/password/")
-    public Response updatePasswordUser (@HeaderParam("userId") String id, @RequestBody UpdatePasswordDto updatePasswordDto, @Context SecurityContext securityContext)
-            throws UserNotFoundException, ValidationException {
+    public Response updatePasswordUser (@HeaderParam("userId") String id, @RequestBody UpdatePasswordDto updatePasswordDto, @Context SecurityContext securityContext) {
         try {
 
             User user = userService.updatePasswordById(Long.parseLong(id),updatePasswordDto);
@@ -206,8 +200,7 @@ public class UserResource {
     @PUT
     @PermitAll
     @Path("/profile/")
-    public Response updateProfileUser (@HeaderParam("userId") String id, @RequestBody UserProfileDto userProfileDto, @Context SecurityContext securityContext)
-            throws UserNotFoundException, DuplicateElementException ,ValidationException{
+    public Response updateProfileUser (@HeaderParam("userId") String id, @RequestBody UserProfileDto userProfileDto, @Context SecurityContext securityContext) {
 
         try {
 

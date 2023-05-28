@@ -47,7 +47,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public User createUser(UserDto userDto, String roleName) throws DuplicateElementException, Exception, RoleNotFoundException {
+    public User createUser(UserDto userDto, String roleName) throws DuplicateElementException, NullPointerException, ValidationException, RoleNotFoundException, UserNotFoundException {
 
         userDto.setRoles(new ArrayList<>());
 
@@ -80,23 +80,21 @@ public class UserServiceImpl implements UserService {
         userDto.setPassword(passwordEncoder.encode((userDto.getPassword())));
 
 
-        try {
-            userDto=assignRoleToUser(userDto,roleName);
-        }catch (RoleNotFoundException e ){
-            throw new RoleNotFoundException("ROLE NOT FOUND");
-        }
+
+        userDto=assignRoleToUser(userDto,roleName);
+
 
         LOGGER.info(String.valueOf(userDto));
-        return saveUser(userDto);
+         saveUser(userDto);
+         return getUserByEmail(userDto.getEmail());
+
     }
 
     @Transactional
-    @Override
-    public User saveUser(UserDto userDto) throws Exception {
+    public void saveUser(UserDto userDto)  {
         User user = new User();
         user = userFactory.userFactory(userDto);
         userRepository.persist(user);
-        return getUserByEmail(user.getEmail());
     }
 
     @Override
@@ -191,13 +189,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public User updatePasswordById(Long id, UpdatePasswordDto updatePasswordDto) throws UserNotFoundException, ValidationException ,IllegalArgumentException{
 
-        User userToUpdate;
+        User userToUpdate = getUserById(id);;
 
-        try {
-            userToUpdate = getUserById(id);
-        } catch (UserNotFoundException e) {
-            throw new UserNotFoundException("USER DONT EXIST");
-        }
 
         if (!verifyPasswordById(updatePasswordDto.getOldPassword(), id)) {
             throw new IllegalArgumentException("OLD PASSWORD IS WRONG");
@@ -213,13 +206,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public User updateProfilById(Long id, UserProfileDto userProfileDto) throws UserNotFoundException,ValidationException, DuplicateElementException {
 
-        User userToUpdate;
+        User userToUpdate= getUserById(id);;
 
-        try {
-            userToUpdate = getUserById(id);
-        } catch (UserNotFoundException e) {
-            throw new UserNotFoundException("USER DONT EXIST");
-        }
 
         if (userProfileDto.getUsername() != null) {
             try {
@@ -274,11 +262,11 @@ public class UserServiceImpl implements UserService {
         return matcher.matches();
     }
     @Transactional
-    public UserDto assignRoleToUser(UserDto userDto, String roleName) throws UserNotFoundException, RoleNotFoundException {
+    public UserDto assignRoleToUser(UserDto userDto, String roleName) throws RoleNotFoundException {
         roleName=roleName.toUpperCase();
         Role role = roleService.getRoleByName(roleName);
-            userDto.getRoles().add(role);
-            return userDto;
+        userDto.getRoles().add(role);
+        return userDto;
         }
 
 

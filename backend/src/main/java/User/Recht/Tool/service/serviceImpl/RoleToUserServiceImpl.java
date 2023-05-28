@@ -30,13 +30,8 @@ public class RoleToUserServiceImpl implements RoleToUserService {
     public User addRoleToUser(Long userId, String roleName)
             throws RoleNotFoundException, UserNotFoundException,CannotModifySuperAdminException {
 
-        try {
-            verifyExistUserAndRole(userId, roleName);
-        } catch (UserNotFoundException e) {
-            throw new UserNotFoundException("USER NOT FOUND");
-        } catch (RoleNotFoundException e) {
-            throw new RoleNotFoundException("ROLE NOT FOUND");
-        }
+        verifyExistUserAndRole(userId, roleName);
+
         if (userService.getUserById(userId).getUsername().equals("SUPERADMIN")){
             throw new CannotModifySuperAdminException("CANNOT MODIFY A SUPERADMIN");
         }
@@ -65,15 +60,10 @@ public class RoleToUserServiceImpl implements RoleToUserService {
     public User deleteRoleFromUser(Long userId, String roleName, String userMovedTo)
             throws RoleNotFoundException, UserNotFoundException,RoleNotAssignedToUserException,RoleMovedToException,CannotModifySuperAdminException {
 
-            try {
-                verifyExistUserAndRole(userId, roleName);
-            } catch (UserNotFoundException e) {
-                throw new UserNotFoundException("USER NOT FOUND");
-            } catch (RoleNotFoundException e) {
-                throw new RoleNotFoundException("ROLE NOT FOUND");
-            }
+        verifyExistUserAndRole(userId, roleName);
 
-            if (userService.getUserById(userId).getUsername().equals("SUPERADMIN")){
+
+        if (userService.getUserById(userId).getUsername().equals("SUPERADMIN")){
                 throw new CannotModifySuperAdminException("CANNOT MODIFY A SUPERADMIN");
             }
 

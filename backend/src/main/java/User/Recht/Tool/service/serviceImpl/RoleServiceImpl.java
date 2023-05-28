@@ -3,11 +3,9 @@ package User.Recht.Tool.service.serviceImpl;
 import User.Recht.Tool.dtos.roleDtos.RoleDto;
 import User.Recht.Tool.dtos.roleDtos.UpdateRoleDto;
 import User.Recht.Tool.entity.Role;
-import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.role.RoleNameDuplicateElementException;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
-import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.factory.roleFactorys.RoleFactory;
 import User.Recht.Tool.repository.RoleRepository;
 import User.Recht.Tool.service.RoleService;
@@ -39,7 +37,7 @@ public class RoleServiceImpl implements RoleService {
         try {
             Role roleCheckWithName = getRoleByName(roleDto.getName());
             throw new RoleNameDuplicateElementException("ROLE NAME " + roleDto.getName() + " EXISTED");
-        } catch (RoleNotFoundException e) {
+        } catch (RoleNotFoundException ignored) {
         }
         return saveRole(roleDto);
 
@@ -96,14 +94,7 @@ public class RoleServiceImpl implements RoleService {
             throw new CannotModifySuperAdminException("CANNOT MODIFY A SUPERADMIN");
         }
 
-        Role roleToUpdate;
-
-
-        try {
-            roleToUpdate = getRoleByName(name);
-        } catch (RoleNotFoundException e) {
-            throw new RoleNotFoundException("ROLE DOSENT EXIST");
-        }
+        Role roleToUpdate = getRoleByName(name);
 
         if (updateRoleDto.getName() != null) {
             try {
@@ -115,7 +106,7 @@ public class RoleServiceImpl implements RoleService {
                 if (!Objects.equals(checkName.getId(), roleToUpdate.getId())) {
                     throw new RoleNameDuplicateElementException("USERNAME ALREADY USED");
                 }
-            } catch (RoleNotFoundException e) {
+            } catch (RoleNotFoundException ignored) {
             }
         }
         roleToUpdate = roleFactory.updateRoleFactory(roleToUpdate, updateRoleDto);

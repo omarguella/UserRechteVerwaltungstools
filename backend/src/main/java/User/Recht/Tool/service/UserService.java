@@ -14,7 +14,7 @@ import javax.xml.bind.ValidationException;
 import java.util.List;
 
 public interface UserService {
-    User createUser(UserDto user,String name) throws DuplicateElementException, Exception, RoleNotFoundException;
+    User createUser(UserDto user,String name) throws DuplicateElementException, NullPointerException, ValidationException, RoleNotFoundException, UserNotFoundException;
 
     User getUserById(long id) throws UserNotFoundException;
 
@@ -24,7 +24,6 @@ public interface UserService {
     User getUserByEmail(String email) throws UserNotFoundException;
 
 
-    User saveUser(UserDto user) throws Exception;
 
 
 

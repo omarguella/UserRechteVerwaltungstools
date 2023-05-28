@@ -27,8 +27,7 @@ public class RoleToUserResource {
     @POST
     @PermitAll
     @Path("/add/")
-    public Response addRole(@HeaderParam("userId") Long userId, @HeaderParam("roleName") String roleName, @Context SecurityContext securityContext)
-            throws RoleNotFoundException, UserNotFoundException {
+    public Response addRole(@HeaderParam("userId") Long userId, @HeaderParam("roleName") String roleName, @Context SecurityContext securityContext) {
         try {
             User user = roleToUserService.addRoleToUser(userId, roleName);
             return Response.ok(user).header("status", "NEW ROLE IS ADDED")
@@ -48,8 +47,7 @@ public class RoleToUserResource {
     @DELETE
     @PermitAll
     @Path("/delete/")
-    public Response deleteRoleFromUser(@HeaderParam("userId") Long userId, @HeaderParam("roleName") String roleName, @HeaderParam("userMovedTo") String userMovedTo, @Context SecurityContext securityContext)
-            throws RoleNotFoundException, UserNotFoundException, RoleNotAssignedToUserException, RoleMovedToException {
+    public Response deleteRoleFromUser(@HeaderParam("userId") Long userId, @HeaderParam("roleName") String roleName, @HeaderParam("userMovedTo") String userMovedTo, @Context SecurityContext securityContext) {
         try {
            User user= roleToUserService.deleteRoleFromUser(userId,roleName,userMovedTo);
            String status;
