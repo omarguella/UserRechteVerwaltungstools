@@ -1,7 +1,11 @@
-package User.Recht.Tool.dtos;
+package User.Recht.Tool.dtos.userDtos;
 
+
+import User.Recht.Tool.entity.Role;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 public class UserDto {
 
@@ -19,6 +23,9 @@ public class UserDto {
     private String lastname;
     private String phoneNumber;
     private boolean isVerifiedEmail;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<Role> roles;
+
 
     public long getId() {
         return id;
@@ -84,17 +91,26 @@ public class UserDto {
         this.isVerifiedEmail = isVerifiedEmail;
     }
 
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
+    }
+
     @Override
     public String toString() {
         return "UserDto{" +
                 "id=" + id +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
+                ", username='" + username + '\'' +
                 ", name='" + name + '\'' +
                 ", lastname='" + lastname + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
-                ", username='" + username + '\'' +
-                ", isVerifiedEmail='" + isVerifiedEmail + '\'' +
+                ", isVerifiedEmail=" + isVerifiedEmail +
+                ", roles=" + roles +
                 '}';
     }
 }

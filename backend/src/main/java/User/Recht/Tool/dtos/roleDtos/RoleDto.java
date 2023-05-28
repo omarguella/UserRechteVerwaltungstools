@@ -1,17 +1,14 @@
-package User.Recht.Tool.entity;
+package User.Recht.Tool.dtos.roleDtos;
 
-import javax.persistence.*;
+import javax.persistence.Column;
 import javax.validation.constraints.NotNull;
 
-@Entity
-public class Role {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class RoleDto {
+
     private Long id;
     @NotNull
-    @Column(unique = true, length = 50)
     private String name;
-    private Long sessionTimer=0L;
+    private Long sessionTimer;
     private boolean isMailToVerify;
     private boolean towFactorAuth;
 
@@ -43,11 +40,11 @@ public class Role {
         return isMailToVerify;
     }
 
-    public void setIsMailToVerify(boolean mailToVerify) {
-        isMailToVerify = mailToVerify;
+    public void setIsMailToVerify(boolean isMailToVerify) {
+        isMailToVerify = isMailToVerify;
     }
 
-    public boolean isTowFactorAuth() {
+    public boolean getTowFactorAuth() {
         return towFactorAuth;
     }
 
@@ -57,11 +54,11 @@ public class Role {
 
     @Override
     public String toString() {
-        return "Role{" +
+        return "RoleDto{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", sessionTimer=" + sessionTimer +
-                ", isMailToVerify=" + isMailToVerify +
+                ", mailToVerify=" + isMailToVerify+
                 ", towFactorAuth=" + towFactorAuth +
                 '}';
     }

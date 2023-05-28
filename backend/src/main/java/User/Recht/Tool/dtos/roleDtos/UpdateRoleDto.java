@@ -1,24 +1,14 @@
-package User.Recht.Tool.dtos;
+package User.Recht.Tool.dtos.roleDtos;
 
-import javax.persistence.Column;
 import javax.validation.constraints.NotNull;
 
-public class RoleDto {
+public class UpdateRoleDto {
 
-    private Long id;
     @NotNull
     private String name;
     private Long sessionTimer;
     private boolean isMailToVerify;
     private boolean towFactorAuth;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;
@@ -40,8 +30,8 @@ public class RoleDto {
         return isMailToVerify;
     }
 
-    public void setIsMailToVerify(boolean isMailToVerify) {
-        isMailToVerify = isMailToVerify;
+    public void setIsMailToVerify(boolean mailToVerify) {
+        isMailToVerify = mailToVerify;
     }
 
     public boolean getTowFactorAuth() {
@@ -54,11 +44,10 @@ public class RoleDto {
 
     @Override
     public String toString() {
-        return "RoleDto{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
+        return "UpdateRoleDto{" +
+                "name='" + name + '\'' +
                 ", sessionTimer=" + sessionTimer +
-                ", mailToVerify=" + isMailToVerify+
+                ", isMailToVerify=" + isMailToVerify +
                 ", towFactorAuth=" + towFactorAuth +
                 '}';
     }

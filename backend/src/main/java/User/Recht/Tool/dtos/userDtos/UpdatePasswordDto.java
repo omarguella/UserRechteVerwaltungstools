@@ -1,4 +1,4 @@
-package User.Recht.Tool.dtos;
+package User.Recht.Tool.dtos.userDtos;
 
 public class UpdatePasswordDto {
 

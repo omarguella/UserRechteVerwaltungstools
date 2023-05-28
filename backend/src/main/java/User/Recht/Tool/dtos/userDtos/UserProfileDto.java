@@ -1,4 +1,4 @@
-package User.Recht.Tool.dtos;
+package User.Recht.Tool.dtos.userDtos;
 
 import javax.validation.constraints.NotNull;
 

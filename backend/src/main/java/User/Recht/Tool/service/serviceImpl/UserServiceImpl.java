@@ -1,15 +1,17 @@
 package User.Recht.Tool.service.serviceImpl;
 
-import User.Recht.Tool.dtos.UpdatePasswordDto;
-import User.Recht.Tool.dtos.UserDto;
-import User.Recht.Tool.dtos.UserProfileDto;
+import User.Recht.Tool.dtos.userDtos.UpdatePasswordDto;
+import User.Recht.Tool.dtos.userDtos.UserDto;
+import User.Recht.Tool.dtos.userDtos.UserProfileDto;
+import User.Recht.Tool.entity.Role;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.DuplicateElementException;
+import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.user.UserNameDuplicateElementException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
-import User.Recht.Tool.factory.UserFactory;
-import User.Recht.Tool.factory.UserProfileFactory;
+import User.Recht.Tool.factory.userFactorys.UserFactory;
 import User.Recht.Tool.repository.UserRepository;
+import User.Recht.Tool.service.RoleService;
 import User.Recht.Tool.service.UserService;
 import User.Recht.Tool.util.Encoder;
 import org.slf4j.Logger;
@@ -19,6 +21,7 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.xml.bind.ValidationException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,7 +35,7 @@ public class UserServiceImpl implements UserService {
     @Inject
     UserFactory userFactory;
     @Inject
-    UserProfileFactory userProfileFactory;
+    RoleService roleService;
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
@@ -44,8 +47,9 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public User createUser(UserDto userDto) throws DuplicateElementException, Exception {
+    public User createUser(UserDto userDto, String roleName) throws DuplicateElementException, Exception, RoleNotFoundException {
 
+        userDto.setRoles(new ArrayList<>());
 
         if (userDto.getEmail().isBlank() || userDto.getPassword().isBlank() || userDto.getUsername().isBlank()
                 || userDto.getName().isBlank() || userDto.getLastname().isBlank()) {
@@ -63,20 +67,27 @@ public class UserServiceImpl implements UserService {
         try {
             User userCheckWithEmail = getUserByEmail(userDto.getEmail());
             throw new DuplicateElementException("User Email " + userDto.getEmail() + " existed");
-        } catch (UserNotFoundException e) {
+        } catch (UserNotFoundException ignored) {
         }
 
         try {
             User userCheckWithUsername = getUserByUsername(userDto.getUsername());
             throw new UserNameDuplicateElementException("Username " + userDto.getUsername() + " existed");
-        } catch (UserNotFoundException e) {
+        } catch (UserNotFoundException ignored) {
         }
+
 
         userDto.setPassword(passwordEncoder.encode((userDto.getPassword())));
 
+
+        try {
+            userDto=assignRoleToUser(userDto,roleName);
+        }catch (RoleNotFoundException e ){
+            throw new RoleNotFoundException("ROLE NOT FOUND");
+        }
+
+        LOGGER.info(String.valueOf(userDto));
         return saveUser(userDto);
-
-
     }
 
     @Transactional
@@ -84,7 +95,7 @@ public class UserServiceImpl implements UserService {
     public User saveUser(UserDto userDto) throws Exception {
         User user = new User();
         user = userFactory.userFactory(userDto);
-        userRepository.persistAndFlush(user);
+        userRepository.persist(user);
         return getUserByEmail(user.getEmail());
     }
 
@@ -203,7 +214,6 @@ public class UserServiceImpl implements UserService {
     public User updateProfilById(Long id, UserProfileDto userProfileDto) throws UserNotFoundException,ValidationException, DuplicateElementException {
 
         User userToUpdate;
-        userProfileDto.setUsername(userProfileDto.getUsername().toUpperCase());
 
         try {
             userToUpdate = getUserById(id);
@@ -213,6 +223,7 @@ public class UserServiceImpl implements UserService {
 
         if (userProfileDto.getUsername() != null) {
             try {
+                userProfileDto.setUsername(userProfileDto.getUsername().toUpperCase());
                 User checkUsername = getUserByUsername(userProfileDto.getUsername());
                 if (checkUsername.getId() != id) {
                     throw new DuplicateElementException("USERNAME ALREADY USED");
@@ -228,8 +239,7 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        userToUpdate = userProfileFactory.userProfileFactory(userToUpdate, userProfileDto);
-        LOGGER.info(String.valueOf(userToUpdate));
+        userToUpdate = userFactory.userUpdateProfileFactory(userToUpdate, userProfileDto);
         return saveUpdatedUser(userToUpdate);
     }
 
@@ -263,6 +273,14 @@ public class UserServiceImpl implements UserService {
         Matcher matcher = pattern.matcher(phoneNumber);
         return matcher.matches();
     }
+    @Transactional
+    public UserDto assignRoleToUser(UserDto userDto, String roleName) throws UserNotFoundException, RoleNotFoundException {
+        roleName=roleName.toUpperCase();
+        Role role = roleService.getRoleByName(roleName);
+            userDto.getRoles().add(role);
+            return userDto;
+        }
+
 
 }
 

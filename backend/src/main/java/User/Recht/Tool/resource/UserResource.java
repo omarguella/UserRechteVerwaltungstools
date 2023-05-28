@@ -1,12 +1,16 @@
 package User.Recht.Tool.resource;
 
-import User.Recht.Tool.dtos.UpdatePasswordDto;
-import User.Recht.Tool.dtos.UserDto;
-import User.Recht.Tool.dtos.UserProfileDto;
+import User.Recht.Tool.dtos.roleDtos.UpdateRoleDto;
+import User.Recht.Tool.dtos.userDtos.UpdatePasswordDto;
+import User.Recht.Tool.dtos.userDtos.UserDto;
+import User.Recht.Tool.dtos.userDtos.UserProfileDto;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.DuplicateElementException;
+import User.Recht.Tool.exception.role.RoleNameDuplicateElementException;
+import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.user.UserNameDuplicateElementException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
+import User.Recht.Tool.service.RoleService;
 import User.Recht.Tool.service.UserService;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.slf4j.Logger;
@@ -29,17 +33,20 @@ public class UserResource {
     @Inject
     UserService userService;
 
+    @Inject
+    RoleService roleService;
+
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserResource.class);
 
 
     @POST
     @PermitAll
-    @Path("registration/")
-    public Response createUser(@RequestBody UserDto userDto, @PathParam("type") String type)
-            throws UserNotFoundException, Exception {
+    @Path("registration/{roleName}")
+    public Response createUser(@RequestBody UserDto userDto, @PathParam("roleName") String roleName)
+            throws UserNotFoundException, Exception, RoleNotFoundException {
         try {
-            User user = userService.createUser(userDto);
+            User user = userService.createUser(userDto,roleName);
 
             return Response.ok(userService.getUserByEmail(userDto.getEmail())).header("Email", userDto.getEmail())
                     .build();
@@ -50,13 +57,13 @@ public class UserResource {
         } catch (DuplicateElementException e) {
             return Response.status(406, "EMAIL IS ALREADY USED")
                     .header("status", " EMAIL IS ALREADY USED").build();
-        } catch (NullPointerException a) {
-            return Response.status(406, "EMAIL, PASSWORD AND USERNAME ARE REQUIRED")
-                    .header("status", " EMAIL, PASSWORD, USERNAME, NAME AND LASTNAME ARE REQUIRED ").build();
-
-        }catch (ValidationException a) {
+        } catch (ValidationException a) {
             return Response.status(406, "EMAIL, PASSWORD OR PHONENUMBER IS NOT VALID")
                     .header("status", "EMAIL, PASSWORD OR PHONENUMBER IS NOT VALID").build();
+
+        }catch (RoleNotFoundException a) {
+            return Response.status(406, "ROLE NOT FOUND")
+                    .header("status", "ROLE NOT FOUND").build();
 
         }
     }
@@ -123,7 +130,7 @@ public class UserResource {
 
             List<User> users = userService.getAllUsers();
 
-            return Response.ok(users).header("status", "list of users")
+            return Response.ok(users).header("STATUS", "LIST OF USERS")
                     .build();
     }
 
@@ -221,5 +228,6 @@ public class UserResource {
         }
 
     }
+
 
 }

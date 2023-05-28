@@ -1,10 +1,17 @@
 package User.Recht.Tool.resource;
 
 
-import User.Recht.Tool.dtos.RoleDto;
+import User.Recht.Tool.dtos.roleDtos.RoleDto;
+import User.Recht.Tool.dtos.roleDtos.UpdateRoleDto;
+import User.Recht.Tool.dtos.userDtos.UpdatePasswordDto;
+import User.Recht.Tool.dtos.userDtos.UserProfileDto;
 import User.Recht.Tool.entity.Role;
+import User.Recht.Tool.entity.User;
+import User.Recht.Tool.exception.DuplicateElementException;
 import User.Recht.Tool.exception.role.RoleNameDuplicateElementException;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
+import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
+import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.service.RoleService;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.slf4j.Logger;
@@ -53,20 +60,74 @@ public class RoleResource {
     @GET
     @PermitAll
     @Path("/name/{roleName}/")
-    public Response getRoleWithName (@PathParam("roleName") String roleName, @Context SecurityContext securityContext)
+    public Response getRoleWithName(@PathParam("roleName") String roleName, @Context SecurityContext securityContext)
             throws RoleNotFoundException {
         try {
-
             Role role = roleService.getRoleByName(roleName);
-
             return Response.ok(role).header("ROLE", role.getName())
                     .build();
-
         } catch (RoleNotFoundException e) {
             return Response.status(406, "ROLE  DOSENT EXIST")
                     .header("status", "USER DOSENT EXIST").build();
         }
 
+    }
+
+
+    @GET
+    @PermitAll
+    public Response getAllRoles(@Context SecurityContext securityContext) {
+        List<Role> role = roleService.getAllRoles();
+        return Response.ok(role).header("STATUS", "LIST OF ROLES")
+                .build();
+    }
+
+    @DELETE
+    @PermitAll
+    @Path("/name/{roleName}/")
+    public Response deleteRole(@PathParam("roleName") String roleName, @Context SecurityContext securityContext)
+            throws RoleNotFoundException, CannotModifySuperAdminException {
+        try {
+            Role role = roleService.deleteRoleByName(roleName);
+
+            return Response.ok(role).header("ROLE", "IS DELETED")
+                    .build();
+
+        } catch (RoleNotFoundException e) {
+            return Response.status(406, "ROLE  DOSENT EXIST")
+                    .header("status", "USER DOSENT EXIST").build();
+        }catch (CannotModifySuperAdminException e) {
+            return Response.status(406, "CANNOT MODIFY A SUPERADMIN")
+                    .header("status", "CANNOT MODIFY A SUPERADMIN").build();
+        }
+    }
+
+    @PUT
+    @PermitAll
+    @Path("/name/{roleName}/")
+    public Response updateRole(@PathParam("roleName") String roleName, @RequestBody UpdateRoleDto updateRoleDto, @Context SecurityContext securityContext)
+            throws RoleNotFoundException, RoleNameDuplicateElementException, IllegalArgumentException {
+
+        try {
+
+            Role role = roleService.updateRoleByName(roleName, updateRoleDto);
+
+            return Response.ok(role).header("status", "ROLE IS UPDATED")
+                    .build();
+
+        } catch (RoleNotFoundException e) {
+            return Response.status(406, "ROLE DOSENT EXIST")
+                    .header("status", "ROLE DOSENT EXIST").build();
+        } catch (RoleNameDuplicateElementException e) {
+            return Response.status(406, "ROLE NAME IS ALREADY USED")
+                    .header("status", "ROLE NAME IS ALREADY USED").build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(406, "CANNOT CHANGE SUPERADMIN NAME")
+                    .header("status", "CANNOT CHANGE SUPERADMIN NAME").build();
+        }catch (CannotModifySuperAdminException e) {
+            return Response.status(406, "CANNOT MODIFY A SUPERADMIN")
+                    .header("status", "CANNOT MODIFY A SUPERADMIN").build();
+        }
     }
 
 
