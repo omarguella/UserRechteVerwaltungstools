@@ -112,7 +112,6 @@ public class RoleServiceImpl implements RoleService {
             }
         }
         roleToUpdate = roleFactory.updateRoleFactory(roleToUpdate, updateRoleDto);
-        LOGGER.info(String.valueOf(roleToUpdate));
         return saveUpdatedRole(roleToUpdate);
     }
 

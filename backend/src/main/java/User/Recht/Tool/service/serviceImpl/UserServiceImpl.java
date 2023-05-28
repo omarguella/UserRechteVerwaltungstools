@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
     EntityManager entityManager;
 
     @Inject
-  RoleToUserService roleToUserService;
+    RoleToUserService roleToUserService;
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
@@ -100,7 +100,6 @@ public class UserServiceImpl implements UserService {
         userDto=assignRoleToUser(userDto,roleName);
 
 
-        LOGGER.info(String.valueOf(userDto));
          saveUser(userDto);
          return getUserByEmail(userDto.getEmail());
 
@@ -120,7 +119,6 @@ public class UserServiceImpl implements UserService {
             return user;
         } else {
             throw new UserNotFoundException("USER DONT EXIST");
-
         }
 
     }
