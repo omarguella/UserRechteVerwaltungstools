@@ -7,18 +7,24 @@ import User.Recht.Tool.entity.Role;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.DuplicateElementException;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
+import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
 import User.Recht.Tool.exception.user.UserNameDuplicateElementException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.factory.userFactorys.UserFactory;
 import User.Recht.Tool.repository.UserRepository;
 import User.Recht.Tool.service.RoleService;
+import User.Recht.Tool.service.RoleToUserService;
 import User.Recht.Tool.service.UserService;
 import User.Recht.Tool.util.Encoder;
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
 import javax.xml.bind.ValidationException;
 import java.util.ArrayList;
@@ -36,6 +42,11 @@ public class UserServiceImpl implements UserService {
     UserFactory userFactory;
     @Inject
     RoleService roleService;
+    @PersistenceContext
+    EntityManager entityManager;
+
+    @Inject
+  RoleToUserService roleToUserService;
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
@@ -48,6 +59,11 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public User createUser(UserDto userDto, String roleName) throws DuplicateElementException, NullPointerException, ValidationException, RoleNotFoundException, UserNotFoundException {
+
+        /* after INIT
+        if(roleName.toUpperCase().equals("SUPERADMIN")){
+            throw new CannotModifySuperAdminException("CANNOT ADD A SUPERADMIN USER");
+        }*/
 
         userDto.setRoles(new ArrayList<>());
 
@@ -116,6 +132,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<User> getAllUsersByRole(String roleName) throws  RoleNotFoundException {
+        if (roleName==null){
+            throw new RoleNotFoundException("ROLE NOT FOUND");
+        }
+        roleName=roleName.toUpperCase();
+        roleService.getRoleByName(roleName);
+        TypedQuery<User> query = entityManager.createQuery(
+                "SELECT u FROM User u JOIN u.roles r WHERE r.name = :roleName", User.class);
+        query.setParameter("roleName", roleName);
+        return query.getResultList();
+    }
+
+    @Override
     public User getUserByEmail(String email) throws UserNotFoundException {
         User user = userRepository.find("email", email.toUpperCase()).firstResult();
         if (user != null) {
@@ -137,6 +166,8 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    /*getUsersByRole*/
+
     @Transactional
     @Override
     public User updateEmailUser(Long id, String newEmail) throws UserNotFoundException, ValidationException,DuplicateElementException {
@@ -155,29 +186,11 @@ public class UserServiceImpl implements UserService {
 
             }
         }
-
-
+        Hibernate.initialize(userToUpdate.getRoles());
         userToUpdate.setEmail(newEmail.toUpperCase());
-
         userToUpdate.setIsVerifiedEmail(false);
         return saveUpdatedUser(userToUpdate);
     }
-
-
-
-    @Transactional
-    @Override
-    public User deleteUserById(Long id) throws UserNotFoundException {
-        try {
-            User user = getUserById(id);
-            userRepository.delete(user);
-            //logout all
-            return user;
-        } catch (UserNotFoundException e) {
-            throw new UserNotFoundException("USER DONT EXIST");
-        }
-    }
-
 
     @Transactional
     @Override
@@ -193,17 +206,21 @@ public class UserServiceImpl implements UserService {
         }
 
         userToUpdate.setPassword(passwordEncoder.encode(updatePasswordDto.getNewPassword()));
+        Hibernate.initialize(userToUpdate.getRoles());
         return saveUpdatedUser(userToUpdate);
     }
 
     @Transactional
     @Override
-    public User updateProfilById(Long id, UserProfileDto userProfileDto) throws UserNotFoundException,ValidationException, DuplicateElementException {
+    public User updateProfilById(Long id, UserProfileDto userProfileDto) throws UserNotFoundException,CannotModifySuperAdminException,ValidationException, DuplicateElementException {
 
         User userToUpdate= getUserById(id);
 
 
         if (userProfileDto.getUsername() != null) {
+            if (getUserById(id).getUsername().equals("SUPERADMIN")){
+                throw new CannotModifySuperAdminException("CANNOT MODIFY A SUPERADMIN");
+            }
             try {
                 userProfileDto.setUsername(userProfileDto.getUsername().toUpperCase());
                 User checkUsername = getUserByUsername(userProfileDto.getUsername());
@@ -222,9 +239,26 @@ public class UserServiceImpl implements UserService {
         }
 
         userToUpdate = userFactory.userUpdateProfileFactory(userToUpdate, userProfileDto);
+        Hibernate.initialize(userToUpdate.getRoles());
         return saveUpdatedUser(userToUpdate);
     }
+    @Transactional
+    @Override
+    public User deleteUserById(Long id) throws UserNotFoundException,CannotModifySuperAdminException {
 
+        if (getUserById(id).getUsername().equals("SUPERADMIN")){
+            throw new CannotModifySuperAdminException("CANNOT MODIFY A SUPERADMIN");
+        }
+
+        try {
+            User user = getUserById(id);
+            deleteAllRolesFromUser(user);
+            //logout all
+            return user;
+        } catch (UserNotFoundException e) {
+            throw new UserNotFoundException("USER DONT EXIST");
+        }
+    }
 
     public Boolean verifyPasswordById(String password, Long id) throws UserNotFoundException {
         User user = getUserById(id);
@@ -263,6 +297,13 @@ public class UserServiceImpl implements UserService {
         return userDto;
         }
 
+
+    @Transactional
+    public void deleteAllRolesFromUser(User user)  {
+        user.setRoles(null);
+        user=saveUpdatedUser(user);
+        userRepository.delete(user);
+    }
 
 }
 

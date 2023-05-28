@@ -1,5 +1,6 @@
 package User.Recht.Tool.service;
 
+import User.Recht.Tool.dtos.userDtos.UpdateRoleForUsersList;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.role.RoleMovedToException;
 import User.Recht.Tool.exception.role.RoleNotAssignedToUserException;
@@ -13,6 +14,10 @@ public interface RoleToUserService {
     @Transactional
     User addRoleToUser(Long userId, String roleName)
             throws RoleNotFoundException, UserNotFoundException,CannotModifySuperAdminException;
+
+    @Transactional
+    void updateRolesForUsersWithAction(UpdateRoleForUsersList updateRoleForUsersList)
+            throws RoleNotFoundException, UserNotFoundException, NullPointerException,CannotModifySuperAdminException,IllegalArgumentException, IllegalAccessException, RoleMovedToException, RoleNotAssignedToUserException;
 
     @Transactional
     User deleteRoleFromUser(Long userId, String roleName, String userMovedTo)

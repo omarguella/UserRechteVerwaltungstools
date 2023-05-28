@@ -6,11 +6,11 @@ import User.Recht.Tool.dtos.userDtos.UserProfileDto;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.DuplicateElementException;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
+import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
 import User.Recht.Tool.exception.user.UserNameDuplicateElementException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.service.UserService;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
-
 
 import javax.annotation.security.PermitAll;
 import javax.inject.Inject;
@@ -22,7 +22,7 @@ import javax.ws.rs.core.SecurityContext;
 import javax.xml.bind.ValidationException;
 import java.util.List;
 
-@Path("/user")
+@Path("/users")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class UserResource {
@@ -115,20 +115,38 @@ public class UserResource {
         }
 
     }
+
     @GET
     @PermitAll
-    public Response getAllUsers (@Context SecurityContext securityContext) {
+    public Response getAllUsers(@Context SecurityContext securityContext) {
 
-            List<User> users = userService.getAllUsers();
+        List<User> users = userService.getAllUsers();
 
-            return Response.ok(users).header("STATUS", "LIST OF USERS")
+        return Response.ok(users).header("STATUS", "LIST OF USERS")
+                .build();
+    }
+
+    @GET
+    @PermitAll
+    @Path("/byRole/")
+    public Response getUsersByRole(@HeaderParam("roleName") String roleName, @Context SecurityContext securityContext) {
+
+        try {
+            List<User> users = userService.getAllUsersByRole(roleName);
+            return Response.ok(users).header("STATUS", "LIST OF USERS OF THIS ROLE " + roleName)
                     .build();
+        } catch (RoleNotFoundException e) {
+            return Response.status(406, "ROLE  DOSENT EXIST")
+                    .header("status", "ROLE DOSENT EXIST").build();
+        }
+
+
     }
 
     @DELETE
     @PermitAll
     @Path("/id/{userId}/")
-    public Response deleteUserWithId(@PathParam("userId") String id, @Context SecurityContext securityContext){
+    public Response deleteUserWithId(@PathParam("userId") String id, @Context SecurityContext securityContext) {
         try {
 
             User user = userService.deleteUserById(Long.parseLong(id));
@@ -139,6 +157,9 @@ public class UserResource {
         } catch (UserNotFoundException e) {
             return Response.status(406, "USER DOSENT EXIST")
                     .header("status", "USER NOT EXIST").build();
+        } catch (CannotModifySuperAdminException e) {
+            return Response.status(406, "CANNOT MODIFY A SUPERADMIN")
+                    .header("status", "CANNOT MODIFY A SUPERADMIN").build();
         }
 
     }
@@ -206,12 +227,15 @@ public class UserResource {
         } catch (UserNotFoundException e) {
             return Response.status(406, "USER DOSENT EXIST")
                     .header("status", "USER DOSENT EXIST").build();
-        } catch (DuplicateElementException e){
+        } catch (DuplicateElementException e) {
             return Response.status(406, "USERNAME IS ALREADY USED")
                     .header("status", "USERNAME IS ALREADY USED").build();
-        }catch (ValidationException e){
+        } catch (ValidationException e) {
             return Response.status(406, "PHONENUMBER IS NOT VALID")
                     .header("status", "PHONENUMBER IS NOT VALID").build();
+        } catch (CannotModifySuperAdminException e) {
+            return Response.status(406, "CANNOT MODIFY A SUPERADMIN")
+                    .header("status", "CANNOT MODIFY A SUPERADMIN").build();
         }
 
     }

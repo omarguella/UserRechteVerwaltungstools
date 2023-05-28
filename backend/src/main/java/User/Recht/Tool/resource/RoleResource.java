@@ -57,10 +57,9 @@ public class RoleResource {
             return Response.ok(role).header("ROLE", role.getName())
                     .build();
         } catch (RoleNotFoundException e) {
-            return Response.status(406, "ROLE  DOSENT EXIST")
-                    .header("status", "USER DOSENT EXIST").build();
+            return Response.status(406, "ROLE DOSENT EXIST")
+                    .header("status", "ROLE DOSENT EXIST").build();
         }
-
     }
 
 
