@@ -92,8 +92,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     public void saveUser(UserDto userDto)  {
-        User user = new User();
-        user = userFactory.userFactory(userDto);
+        User user = userFactory.userFactory(userDto);
         userRepository.persist(user);
     }
 
@@ -142,13 +141,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public User updateEmailUser(Long id, String newEmail) throws UserNotFoundException, ValidationException,DuplicateElementException {
 
-        User userToUpdate;
+        User userToUpdate = getUserById(id);
 
-        try {
-            userToUpdate = getUserById(id);
-        } catch (UserNotFoundException e) {
-            throw new UserNotFoundException("USER DONT EXIST");
-        }
         if (!isValidEmail(newEmail)) {
             throw new ValidationException("the New Mail is not valid");
         } else {
@@ -189,7 +183,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User updatePasswordById(Long id, UpdatePasswordDto updatePasswordDto) throws UserNotFoundException, ValidationException ,IllegalArgumentException{
 
-        User userToUpdate = getUserById(id);;
+        User userToUpdate = getUserById(id);
 
 
         if (!verifyPasswordById(updatePasswordDto.getOldPassword(), id)) {
@@ -206,7 +200,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User updateProfilById(Long id, UserProfileDto userProfileDto) throws UserNotFoundException,ValidationException, DuplicateElementException {
 
-        User userToUpdate= getUserById(id);;
+        User userToUpdate= getUserById(id);
 
 
         if (userProfileDto.getUsername() != null) {

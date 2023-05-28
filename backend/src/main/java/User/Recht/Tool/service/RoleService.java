@@ -3,11 +3,9 @@ package User.Recht.Tool.service;
 import User.Recht.Tool.dtos.roleDtos.RoleDto;
 import User.Recht.Tool.dtos.roleDtos.UpdateRoleDto;
 import User.Recht.Tool.entity.Role;
-import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.role.RoleNameDuplicateElementException;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
-import User.Recht.Tool.exception.user.UserNotFoundException;
 
 import javax.transaction.Transactional;
 import java.util.List;

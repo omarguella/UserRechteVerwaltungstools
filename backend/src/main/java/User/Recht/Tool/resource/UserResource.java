@@ -8,11 +8,9 @@ import User.Recht.Tool.exception.DuplicateElementException;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.user.UserNameDuplicateElementException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
-import User.Recht.Tool.service.RoleService;
 import User.Recht.Tool.service.UserService;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 import javax.annotation.security.PermitAll;
 import javax.inject.Inject;
@@ -31,11 +29,7 @@ public class UserResource {
     @Inject
     UserService userService;
 
-    @Inject
-    RoleService roleService;
 
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserResource.class);
 
 
     @POST
@@ -45,7 +39,7 @@ public class UserResource {
         try {
 
             User user = userService.createUser(userDto,roleName);
-            return Response.ok(userService.getUserByEmail(userDto.getEmail())).header("Email", userDto.getEmail())
+            return Response.ok(user).header("Email", userDto.getEmail())
                     .build();
 
         } catch (UserNameDuplicateElementException e) {

@@ -47,7 +47,7 @@ public class RoleToUserServiceImpl implements RoleToUserService {
         return userService.getUserById(userId);
     }
 
-   /*
+    /*
     @Transactional
     @Override
     public User updateRolesToUser(Long userId, String roleName)
@@ -80,12 +80,9 @@ public class RoleToUserServiceImpl implements RoleToUserService {
                 if(userMovedTo==null){
                     throw new RoleMovedToException("ROLE TO MOVE NOT FOUND");
                 } else {
-                    try {
+
                         Role movedTo= roleService.getRoleByName(userMovedTo);
                         roles.add(roleService.getRoleByName(userMovedTo));
-                    }catch (RoleNotFoundException e){
-                        throw new RoleMovedToException("ROLE TO MOVE NOT FOUND");
-                    }
                 }
             }
         }
@@ -96,15 +93,9 @@ public class RoleToUserServiceImpl implements RoleToUserService {
 
     public void verifyExistUserAndRole(Long userId, String roleName)
             throws RoleNotFoundException, UserNotFoundException {
-        try {
-            User user = userService.getUserById(userId);
-        } catch (UserNotFoundException e) {
-            throw new UserNotFoundException("USER NOT FOUND");
-        }
-        try {
-            Role role = roleService.getRoleByName(roleName);
-        } catch (RoleNotFoundException e) {
-            throw new RoleNotFoundException("ROLE NOT FOUND");
-        }
+
+        User user = userService.getUserById(userId);
+        Role role = roleService.getRoleByName(roleName);
+
     }
 }

@@ -10,8 +10,6 @@ import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
 import User.Recht.Tool.service.RoleService;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.security.PermitAll;
 import javax.inject.Inject;
@@ -30,16 +28,15 @@ public class RoleResource {
     RoleService roleService;
 
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RoleResource.class);
 
 
     @POST
     @PermitAll
     public Response createRole(@RequestBody RoleDto roleDto, @Context SecurityContext securityContext) {
         try {
-            Role role = roleService.createRole(roleDto);
 
-            return Response.ok(roleService.getRoleByName(roleDto.getName())).header(roleDto.getName(), "IS CREATED")
+            Role role = roleService.createRole(roleDto);
+            return Response.ok(role).header(roleDto.getName(), "IS CREATED")
                     .build();
 
         } catch (RoleNameDuplicateElementException e) {
@@ -54,8 +51,7 @@ public class RoleResource {
     @GET
     @PermitAll
     @Path("/name/{roleName}/")
-    public Response getRoleWithName(@PathParam("roleName") String roleName, @Context SecurityContext securityContext)
-            throws RoleNotFoundException {
+    public Response getRoleWithName(@PathParam("roleName") String roleName, @Context SecurityContext securityContext) {
         try {
             Role role = roleService.getRoleByName(roleName);
             return Response.ok(role).header("ROLE", role.getName())

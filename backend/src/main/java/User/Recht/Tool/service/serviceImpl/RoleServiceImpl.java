@@ -70,7 +70,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public Role deleteRoleByName(String name) throws RoleNotFoundException,CannotModifySuperAdminException {
 
-        if (name.toUpperCase().equals("SUPERADMIN")){
+        if (name.equalsIgnoreCase("SUPERADMIN")){
             throw new CannotModifySuperAdminException("CANNOT MODIFY A SUPERADMIN");
         }
 
@@ -90,7 +90,7 @@ public class RoleServiceImpl implements RoleService {
     public Role updateRoleByName(String name, UpdateRoleDto updateRoleDto)
             throws RoleNotFoundException, RoleNameDuplicateElementException, IllegalArgumentException,CannotModifySuperAdminException {
 
-        if (name.toUpperCase().equals("SUPERADMIN")){
+        if (name.equalsIgnoreCase("SUPERADMIN")){
             throw new CannotModifySuperAdminException("CANNOT MODIFY A SUPERADMIN");
         }
 
