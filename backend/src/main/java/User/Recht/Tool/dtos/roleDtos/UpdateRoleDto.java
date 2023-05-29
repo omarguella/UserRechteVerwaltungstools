@@ -9,6 +9,7 @@ public class UpdateRoleDto {
     private Long sessionTimer;
     private boolean isMailToVerify;
     private boolean towFactorAuth;
+    private boolean isPrivate;
 
     public String getName() {
         return name;
@@ -42,6 +43,15 @@ public class UpdateRoleDto {
         this.towFactorAuth = towFactorAuth;
     }
 
+    public boolean getIsPrivate() {
+        return isPrivate;
+    }
+
+    public void setIsPrivate(boolean isPrivate) {
+        this.isPrivate = isPrivate;
+    }
+
+
     @Override
     public String toString() {
         return "UpdateRoleDto{" +
@@ -49,6 +59,7 @@ public class UpdateRoleDto {
                 ", sessionTimer=" + sessionTimer +
                 ", isMailToVerify=" + isMailToVerify +
                 ", towFactorAuth=" + towFactorAuth +
+                ", isPrivate=" + isPrivate +
                 '}';
     }
 }

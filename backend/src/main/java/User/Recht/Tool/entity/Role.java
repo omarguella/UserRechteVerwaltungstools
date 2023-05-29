@@ -14,6 +14,7 @@ public class Role {
     private Long sessionTimer=0L;
     private boolean isMailToVerify;
     private boolean towFactorAuth;
+    private boolean isPrivate;
 
     public Long getId() {
         return id;
@@ -47,13 +48,22 @@ public class Role {
         isMailToVerify = mailToVerify;
     }
 
-    public boolean isTowFactorAuth() {
+    public boolean getIsTowFactorAuth() {
         return towFactorAuth;
     }
 
     public void setTowFactorAuth(boolean towFactorAuth) {
         this.towFactorAuth = towFactorAuth;
     }
+
+    public boolean getIsPrivate() {
+        return isPrivate;
+    }
+
+    public void setIsPrivate(boolean isPrivate) {
+        this.isPrivate = isPrivate;
+    }
+
 
     @Override
     public String toString() {
@@ -63,6 +73,7 @@ public class Role {
                 ", sessionTimer=" + sessionTimer +
                 ", isMailToVerify=" + isMailToVerify +
                 ", towFactorAuth=" + towFactorAuth +
+                ", isPrivate=" + isPrivate +
                 '}';
     }
 }

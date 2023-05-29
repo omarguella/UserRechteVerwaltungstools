@@ -16,6 +16,7 @@ public class RoleFactory {
             role.setIsMailToVerify(roleDto.getIsMailToVerify());
             role.setSessionTimer(roleDto.getSessionTimer());
             role.setTowFactorAuth(roleDto.getTowFactorAuth());
+            role.setIsPrivate(roleDto.getIsPrivate());
             return role;
         }
 
@@ -29,6 +30,7 @@ public class RoleFactory {
         }
         role.setIsMailToVerify(updateRoleDto.getIsMailToVerify());
         role.setTowFactorAuth(updateRoleDto.getTowFactorAuth());
+        role.setIsPrivate(updateRoleDto.getIsPrivate());
         return role;
     }
 }
