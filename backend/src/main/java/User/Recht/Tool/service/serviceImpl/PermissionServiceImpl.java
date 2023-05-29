@@ -35,9 +35,7 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Transactional
     @Override
-    public List<Permission> createPermission(PermissionDto permissionDto) throws IllegalArgumentException, IllegalAccessException,
-            GetPermissionDuplicateElement, CreatePermissionDuplicateElement, UpdatePermissionDuplicateElement,
-            DeletePermissionDuplicateElement {
+    public List<Permission> createPermission(PermissionDto permissionDto) throws IllegalArgumentException, IllegalAccessException{
 
 
         permissionDto=permissionFactory.createPermissionKey(permissionDto);
@@ -62,6 +60,8 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     public Permission getPermissionByKey(String key) throws PermissionNotFound {
 
+        key=key.toUpperCase();
+
         Permission permission = permissionRepository.find("key", key.toUpperCase()).firstResult();
 
         if (permission != null) {
@@ -73,6 +73,8 @@ public class PermissionServiceImpl implements PermissionService {
     }
     @Override
     public List<Permission> getPermissionsByName(String name)  {
+
+        name=name.toUpperCase();
 
         List<Permission> permissions = entityManager
                 .createQuery("SELECT p FROM Permission p WHERE UPPER(p.name) = :name", Permission.class)
@@ -90,14 +92,13 @@ public class PermissionServiceImpl implements PermissionService {
 
 
 
-    public void checkDuplicatePermissions(PermissionDto permissionDto) throws CreatePermissionDuplicateElement,
-            GetPermissionDuplicateElement, DeletePermissionDuplicateElement, UpdatePermissionDuplicateElement {
+    public void checkDuplicatePermissions(PermissionDto permissionDto) {
 
             if (permissionDto.getListOfAction().contains("DELETE")){
                 try {
                     String keyPermission=generateKey(permissionDto.getName(),"DELETE");
                     Permission delete= getPermissionByKey(keyPermission);
-                    throw new DeletePermissionDuplicateElement("THIS PERMISSION "+keyPermission+" is Already EXIST");
+                    permissionDto.getListOfAction().remove("DELETE");
                 } catch (PermissionNotFound ignored){
                 }
             }
@@ -105,7 +106,7 @@ public class PermissionServiceImpl implements PermissionService {
             try {
                 String keyPermission=generateKey(permissionDto.getName(),"GET");
                 Permission get= getPermissionByKey(keyPermission);
-                throw new GetPermissionDuplicateElement("THIS PERMISSION "+keyPermission+" is Already EXIST");
+                permissionDto.getListOfAction().remove("GET");
             } catch (PermissionNotFound ignored){
             }
         }
@@ -113,7 +114,7 @@ public class PermissionServiceImpl implements PermissionService {
             try {
                 String keyPermission=generateKey(permissionDto.getName(),"POST");
                 Permission post= getPermissionByKey(keyPermission);
-                throw new CreatePermissionDuplicateElement("THIS PERMISSION "+keyPermission+" is Already EXIST");
+                permissionDto.getListOfAction().remove("POST");
             } catch (PermissionNotFound ignored){
             }
         }
@@ -121,7 +122,7 @@ public class PermissionServiceImpl implements PermissionService {
             try {
                 String keyPermission=generateKey(permissionDto.getName(),"PUT");
                 Permission put= getPermissionByKey(keyPermission);
-                throw new UpdatePermissionDuplicateElement("THIS PERMISSION "+keyPermission+" is Already EXIST");
+                permissionDto.getListOfAction().remove("PUT");
             } catch (PermissionNotFound ignored){
             }
         }

@@ -40,40 +40,22 @@ public class PermissionResource {
             return Response.ok(permissions).header("status", "NEW PERMISSIONS ARE ADDED")
                     .build();
 
-        } catch (GetPermissionDuplicateElement e) {
-
-            return Response.status(406, "THIS PERMISSION GET_"+permissionDto.getName()+" is Already EXIST")
-                    .header("status", "THIS PERMISSION GET_"+permissionDto.getName()+" is Already EXIST").build();
-
-
-        } catch (CreatePermissionDuplicateElement e) {
-
-            return Response.status(406, "THIS PERMISSION PUT_"+permissionDto.getName()+" is Already EXIST")
-                    .header("status", "THIS PERMISSION PUT_"+permissionDto.getName()+" is Already EXIST").build();
-
-        } catch (UpdatePermissionDuplicateElement e) {
-
-            return Response.status(406, "THIS PERMISSION PUT_"+permissionDto.getName()+" is Already EXIST")
-                    .header("status", "THIS PERMISSION DELETE_"+permissionDto.getName()+" is Already EXIST").build();
-
-        } catch (DeletePermissionDuplicateElement e) {
-
-            return Response.status(406, "THIS PERMISSION DELETE_"+permissionDto.getName()+" is Already EXIST")
-                    .header("status", "THIS PERMISSION DELETE_"+permissionDto.getName()+" is Already EXIST").build();
-
-        } catch (IllegalAccessException e) {
+        }  catch (IllegalAccessException e) {
 
             return Response.status(406, "THE ACTION SHOULD APPEAR ONCE TIME ONE OF THE FOLLOWING ELEMENTS: GET, POST, PUT, DELETE")
-                    .header("status", "THE ACTION SHOULD APPEAR ONCE TIME AND ONE OF THE FOLLOWING ELEMENTS: GET, POST, PUT, DELETE").build();
+                    .header("status", "THE ACTION SHOULD APPEAR ONCE TIME AND ONE OF THE FOLLOWING ELEMENTS: GET, POST, PUT, DELETE")
+                    .build();
 
         }catch (IllegalArgumentException  e) {
 
             return Response.status(406, "PERMISSION NAME SHOULD BE ONLY CHARACTER")
-                    .header("status", "PERMISSION NAME SHOULD BE ONLY CHARACTER").build();
+                    .header("status", "PERMISSION NAME SHOULD BE ONLY CHARACTER")
+                    .build();
 
         } catch (PermissionNotFound e) {
-            return Response.status(406, "PERMISSION NAME SHOULD BE ONLY CHARACTER")
-                    .header("status", "PERMISSION NAME SHOULD BE ONLY CHARACTER").build();
+            return Response.status(406, "xxx")
+                    .header("status", "xxx")
+                    .build();
 
         }
     }

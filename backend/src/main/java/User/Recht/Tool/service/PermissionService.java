@@ -9,9 +9,7 @@ import java.util.List;
 
 public interface PermissionService {
     @Transactional
-    List<Permission> createPermission(PermissionDto permissionDto) throws IllegalArgumentException, IllegalAccessException,
-            GetPermissionDuplicateElement, CreatePermissionDuplicateElement, UpdatePermissionDuplicateElement,
-            DeletePermissionDuplicateElement, PermissionNotFound;
+    List<Permission> createPermission(PermissionDto permissionDto) throws IllegalArgumentException, IllegalAccessException, PermissionNotFound;
 
     Permission getPermissionByKey(String key) throws PermissionNotFound;
 
