@@ -18,6 +18,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @RequestScoped
 public class RoleServiceImpl implements RoleService {
@@ -60,6 +61,15 @@ public class RoleServiceImpl implements RoleService {
         } else {
             throw new RoleNotFoundException("ROLE DONT EXIST");
         }
+
+    }
+
+    @Override
+    public List<Role>  getPublicRoles ()  {
+        List<Role>  roles =getAllRoles();
+
+       return roles=roles.stream().filter(role-> !role.getIsPrivate()).collect(Collectors.toList());
+
 
     }
 

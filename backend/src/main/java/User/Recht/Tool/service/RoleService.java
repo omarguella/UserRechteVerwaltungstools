@@ -19,6 +19,8 @@ public interface RoleService {
 
     Role getRoleByName(String name) throws RoleNotFoundException;
 
+    List<Role>  getPublicRoles();
+
     List<Role> getAllRoles();
 
     @Transactional

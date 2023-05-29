@@ -71,6 +71,15 @@ public class RoleResource {
                 .build();
     }
 
+    @GET
+    @PermitAll
+    @Path("/public/")
+    public Response getPublicRoles(@Context SecurityContext securityContext) {
+        List<Role> roles = roleService.getPublicRoles();
+        return Response.ok(roles).header("STATUS", "LIST OF PUBLIC ROLES")
+                .build();
+    }
+
     @DELETE
     @PermitAll
     @Path("/name/{roleName}/")
