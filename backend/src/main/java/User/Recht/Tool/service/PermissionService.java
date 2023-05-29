@@ -17,5 +17,8 @@ public interface PermissionService {
 
     List<Permission> getAllPermissions();
 
+    @Transactional
+    Permission deletePermission(String key) throws  PermissionNotFound;
+
     boolean isValidName(String name);
 }

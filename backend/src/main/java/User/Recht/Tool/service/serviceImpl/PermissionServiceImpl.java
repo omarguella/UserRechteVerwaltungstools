@@ -90,9 +90,27 @@ public class PermissionServiceImpl implements PermissionService {
         return permissionRepository.listAll();
     }
 
+    @Transactional
+    @Override
+    public Permission deletePermission(String key) throws  PermissionNotFound {
 
+        try {
+            Permission permission = getPermissionByKey(key);
+           // deletePermissionFromRoles(user);
+            //logout all
+            return permission;
+        } catch (PermissionNotFound e) {
+            throw new PermissionNotFound("PERMISSION DONT EXIST");
+        }
+    }
+        /*@Transactional
+        public void deletePermissionFromRoles(User user)  {
+            user.setRoles(null);
+            user=saveUpdatedUser(user);
+            userRepository.delete(user);
+        }*/
 
-    public void checkDuplicatePermissions(PermissionDto permissionDto) {
+        public void checkDuplicatePermissions(PermissionDto permissionDto) {
 
             if (permissionDto.getListOfAction().contains("DELETE")){
                 try {
