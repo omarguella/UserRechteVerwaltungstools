@@ -104,8 +104,8 @@ public class PermissionToRoleResource {
 
     @GET
     @PermitAll
-    @Path("byRole")
-    public Response getAllPermissionsOfRole(@HeaderParam("roleName") String roleName
+    @Path("/role/{roleName}")
+    public Response getAllPermissionsOfRole(@PathParam("roleName") String roleName
             , @Context SecurityContext securityContext) {
         try {
             List<String> permissionKeys = permissionToRoleService.getAllPermissionsOfRole(roleName);

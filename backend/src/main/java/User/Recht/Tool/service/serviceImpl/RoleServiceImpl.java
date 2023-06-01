@@ -102,7 +102,6 @@ public class RoleServiceImpl implements RoleService {
         }
 
             Role role = getRoleByName(roleName);
-            LOGGER.info(String.valueOf(role));
 
             //Delete Permissions of the Role
             permissionToRoleService.deleteALLPermissionsOfRole(roleName);
