@@ -20,5 +20,8 @@ public interface PermissionService {
     @Transactional
     Permission deletePermission(String key) throws  PermissionNotFound;
 
+    @Transactional
+    Permission saveUpdatedPermission(Permission permission);
+
     boolean isValidName(String name);
 }

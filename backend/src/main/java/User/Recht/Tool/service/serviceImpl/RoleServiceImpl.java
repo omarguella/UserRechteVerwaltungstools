@@ -90,7 +90,7 @@ public class RoleServiceImpl implements RoleService {
             Role role = getRoleByName(name);
             roleRepository.delete(role);
             //Delete alle Berechtigungen, die zur Role gehören
-            //users, die zur diese Rolle gehören
+            //users, die zur diese Rolle gehören ändern
             return role;
         } catch (RoleNotFoundException e) {
             throw new RoleNotFoundException("ROLE DOSENT EXIST");

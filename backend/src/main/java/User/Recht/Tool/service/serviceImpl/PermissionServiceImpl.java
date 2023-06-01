@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -46,6 +47,7 @@ public class PermissionServiceImpl implements PermissionService {
             toSavePermission.setName(permissionDto.getName());
             String keyPermission=generateKey(permissionDto.getName(),action);
             toSavePermission.setKey(keyPermission);
+            toSavePermission.setRoles(new ArrayList<>());
             savePermission(toSavePermission);
         }
         return getPermissionsByName(permissionDto.getName());
@@ -97,7 +99,6 @@ public class PermissionServiceImpl implements PermissionService {
         try {
             Permission permission = getPermissionByKey(key);
            // deletePermissionFromRoles(user);
-            //logout all
             return permission;
         } catch (PermissionNotFound e) {
             throw new PermissionNotFound("PERMISSION DONT EXIST");
@@ -146,6 +147,12 @@ public class PermissionServiceImpl implements PermissionService {
         }
     }
 
+    @Transactional
+    @Override
+    public Permission saveUpdatedPermission(Permission permission) {
+        permissionRepository.getEntityManager().merge(permission);
+        return permission;
+    }
     public String generateKey(String name, String key){
         return name+"_"+key;
     }

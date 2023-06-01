@@ -31,7 +31,7 @@ public class RoleToUserResource {
     public Response addRole(@HeaderParam("userId") Long userId, @HeaderParam("roleName") String roleName, @Context SecurityContext securityContext) {
         try {
             User user = roleToUserService.addRoleToUser(userId, roleName);
-            return Response.ok(user).header("status", "NEW ROLE IS ADDED")
+            return Response.ok(user).header("status", "THE ROLE "+roleName+" IS ADDED TO THE USERID "+user.getUsername())
                     .build();
         } catch (UserNotFoundException e) {
             return Response.status(406, "USER DOSENT EXIST")

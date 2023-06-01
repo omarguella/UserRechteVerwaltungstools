@@ -2,6 +2,8 @@ package User.Recht.Tool.factory.permissionFactory;
 
 
 import User.Recht.Tool.dtos.PermissionDtos.PermissionDto;
+import User.Recht.Tool.dtos.PermissionDtos.PermissionRoleDto;
+import User.Recht.Tool.entity.Permission;
 import User.Recht.Tool.service.PermissionService;
 import User.Recht.Tool.service.serviceImpl.PermissionServiceImpl;
 import org.slf4j.Logger;
@@ -35,8 +37,6 @@ public class PermissionFactory {
                 }
                 for(String action: permissionDto.getListOfAction()){
 
-                    LOGGER.info(action);
-
                     if (!(action.equals("DELETE") || action.equals("GET") || action.equals("POST") || action.equals("PUT"))) {
                         throw new IllegalAccessException("The Action should be one of the following elements: GET, POST, PUT, DELETE");
                     }
@@ -49,5 +49,8 @@ public class PermissionFactory {
 
             return permissionDto;
         }
+
+
+
 
 }

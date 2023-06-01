@@ -1,5 +1,7 @@
 package User.Recht.Tool.dtos.PermissionDtos;
 
+import User.Recht.Tool.entity.Role;
+
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -9,6 +11,7 @@ public class PermissionDto {
     private String name;
 
     private List<String> listOfAction;
+    private List<Role> roles;
 
     public String getName() {
         return name;
@@ -25,6 +28,15 @@ public class PermissionDto {
     public void setListOfAction(List<String> listOfAction) {
         this.listOfAction = listOfAction;
     }
+
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
+    }
+
 
     @Override
     public String toString() {

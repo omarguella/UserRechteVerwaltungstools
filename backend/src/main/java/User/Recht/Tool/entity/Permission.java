@@ -2,6 +2,7 @@ package User.Recht.Tool.entity;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @Entity
 public class Permission {
@@ -13,6 +14,12 @@ public class Permission {
     private String key;
     @NotNull
     private String name;
+
+    @ManyToMany
+    @JoinTable(name = "permission_role",
+            joinColumns = @JoinColumn(name = "permission_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private List<Role> roles;
 
     public Long getId() {
         return id;
@@ -38,12 +45,21 @@ public class Permission {
         this.name = name;
     }
 
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
+    }
+
     @Override
     public String toString() {
         return "Permission{" +
                 "id=" + id +
                 ", key='" + key + '\'' +
                 ", name='" + name + '\'' +
+                ", roles=" + roles +
                 '}';
     }
 }
