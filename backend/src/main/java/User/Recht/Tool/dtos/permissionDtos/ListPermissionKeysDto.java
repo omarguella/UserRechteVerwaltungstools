@@ -1,4 +1,4 @@
-package User.Recht.Tool.dtos.PermissionDtos;
+package User.Recht.Tool.dtos.permissionDtos;
 
 
 import java.util.List;

@@ -1,7 +1,7 @@
 package User.Recht.Tool.factory.permissionFactory;
 
 
-import User.Recht.Tool.dtos.PermissionDtos.PermissionRoleDto;
+import User.Recht.Tool.dtos.permissionDtos.PermissionRoleDto;
 import User.Recht.Tool.entity.PermissionRole;
 import User.Recht.Tool.exception.Permission.PermissionNotFound;
 import User.Recht.Tool.exception.role.RoleNotFoundException;

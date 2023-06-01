@@ -1,8 +1,8 @@
 package User.Recht.Tool.service.serviceImpl;
 
 
-import User.Recht.Tool.dtos.PermissionDtos.ListPermissionKeysDto;
-import User.Recht.Tool.dtos.PermissionDtos.PermissionRoleDto;
+import User.Recht.Tool.dtos.permissionDtos.ListPermissionKeysDto;
+import User.Recht.Tool.dtos.permissionDtos.PermissionRoleDto;
 import User.Recht.Tool.entity.Permission;
 import User.Recht.Tool.entity.PermissionRole;
 import User.Recht.Tool.entity.Role;

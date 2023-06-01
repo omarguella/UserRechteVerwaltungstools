@@ -1,6 +1,6 @@
 package User.Recht.Tool.resource;
 
-import User.Recht.Tool.dtos.PermissionDtos.PermissionDto;
+import User.Recht.Tool.dtos.permissionDtos.PermissionDto;
 import User.Recht.Tool.entity.Permission;
 import User.Recht.Tool.exception.Permission.PermissionNotFound;
 import User.Recht.Tool.exception.Permission.PermissionToRoleNotFound;

@@ -19,7 +19,7 @@ public class Encoder {
     @ConfigProperty(name = "User.Recht.Tool.password.length")
     private Integer length;
 
-    public String encode(CharSequence cs) {
+    public String passwordCoder(CharSequence cs) {
         try {
             //BCrypt anstatt PBKDF2
             byte[] result = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA384")

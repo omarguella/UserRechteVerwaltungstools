@@ -1,7 +1,7 @@
 package User.Recht.Tool.service;
 
-import User.Recht.Tool.dtos.PermissionDtos.ListPermissionKeysDto;
-import User.Recht.Tool.dtos.PermissionDtos.PermissionRoleDto;
+import User.Recht.Tool.dtos.permissionDtos.ListPermissionKeysDto;
+import User.Recht.Tool.dtos.permissionDtos.PermissionRoleDto;
 import User.Recht.Tool.exception.Permission.PermissionNotFound;
 import User.Recht.Tool.exception.Permission.PermissionToRoleNotFound;
 import User.Recht.Tool.exception.role.RoleNotFoundException;

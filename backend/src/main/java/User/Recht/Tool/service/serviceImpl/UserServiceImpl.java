@@ -93,7 +93,7 @@ public class UserServiceImpl implements UserService {
         }
 
 
-        userDto.setPassword(passwordEncoder.encode((userDto.getPassword())));
+        userDto.setPassword(passwordEncoder.passwordCoder((userDto.getPassword())));
 
 
 
@@ -203,7 +203,7 @@ public class UserServiceImpl implements UserService {
             throw new ValidationException(" NEW PASSWORD IS NOT VALID");
         }
 
-        userToUpdate.setPassword(passwordEncoder.encode(updatePasswordDto.getNewPassword()));
+        userToUpdate.setPassword(passwordEncoder.passwordCoder(updatePasswordDto.getNewPassword()));
         Hibernate.initialize(userToUpdate.getRoles());
         return saveUpdatedUser(userToUpdate);
     }
@@ -260,7 +260,7 @@ public class UserServiceImpl implements UserService {
 
     public Boolean verifyPasswordById(String password, Long id) throws UserNotFoundException {
         User user = getUserById(id);
-        return passwordEncoder.encode(password).equals(user.getPassword());
+        return passwordEncoder.passwordCoder(password).equals(user.getPassword());
 
     }
 
