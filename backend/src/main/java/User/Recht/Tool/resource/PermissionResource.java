@@ -1,17 +1,12 @@
 package User.Recht.Tool.resource;
 
 import User.Recht.Tool.dtos.PermissionDtos.PermissionDto;
-import User.Recht.Tool.dtos.userDtos.UpdateRoleForUsersList;
 import User.Recht.Tool.entity.Permission;
-import User.Recht.Tool.entity.User;
-import User.Recht.Tool.exception.Permission.*;
-import User.Recht.Tool.exception.role.RoleMovedToException;
-import User.Recht.Tool.exception.role.RoleNotAssignedToUserException;
+import User.Recht.Tool.exception.Permission.PermissionNotFound;
+import User.Recht.Tool.exception.Permission.PermissionToRoleNotFound;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
-import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.service.PermissionService;
-import User.Recht.Tool.service.RoleToUserService;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 
 import javax.annotation.security.PermitAll;
@@ -71,7 +66,7 @@ public class PermissionResource {
     }
     @GET
     @PermitAll
-    @Path("byName/{name}")
+    @Path("name/{name}")
     public Response getPermissionsByName(@PathParam("name") String name,@Context SecurityContext securityContext) {
 
         List<Permission> permissions = permissionService.getPermissionsByName(name);
@@ -82,22 +77,73 @@ public class PermissionResource {
 
     @GET
     @PermitAll
-    @Path("byKey/{key}")
+    @Path("key/{key}")
     public Response getPermissionByKey(@PathParam("key") String key,@Context SecurityContext securityContext) {
-
 
 
         try {
             Permission permission = permissionService.getPermissionByKey(key);
 
-            return Response.ok(permission).header("KEY", key)
+            return Response.ok(permission).header("PERMISSION_KEY", key)
                     .build();
-        }
-        catch (PermissionNotFound e) {
+        } catch (PermissionNotFound e) {
 
             return Response.status(406, "PERMISSION DONT EXIST")
                     .header("status", "PERMISSION DONT EXIST").build();
         }
     }
 
+    @DELETE
+    @PermitAll
+    @Path("key/{key}")
+    public Response deletePermission(@PathParam("key") String key, @Context SecurityContext securityContext) {
+
+        try {
+            Permission permissionToDelete = permissionService.deletePermissionByKey(key);
+
+            return Response.ok(permissionToDelete).header("STATUS", "THE PERMISSION_KEY " + key + " IS DELETED")
+                    .build();
+        } catch (RoleNotFoundException e) {
+            return Response.status(406, "ROLE NOT FOUND")
+                    .header("status", "ROLE NOT FOUND").build();
+        } catch (CannotModifySuperAdminException e) {
+            return Response.status(406, "CANNOT MODIFY A SUPERADMIN")
+                    .header("status", "CANNOT MODIFY A SUPERADMIN").build();
+        } catch (PermissionNotFound e) {
+            return Response.status(406, "PERMISSION NOT FOUND")
+                    .header("status", "PERMISSION NOT FOUND").build();
+        } catch (PermissionToRoleNotFound e) {
+            return Response.status(406, "PERMISSION TO ROLE NOT SAVE")
+                    .header("status", "PERMISSION TO ROLE NOT SAVE").build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(406, "TYPE SHOULD BE ALL OR ONE")
+                    .header("status", "TYPE SHOULD BE ALL OR ONE").build();
+        }
+    }
+    @DELETE
+    @PermitAll
+    @Path("name/{name}")
+    public Response deletePermissionsByName(@PathParam("name") String name, @Context SecurityContext securityContext) {
+        try {
+            List<Permission> permissionToDelete = permissionService.deletePermissionsByName(name);
+
+            return Response.ok(permissionToDelete).header("STATUS", "THE PERMISSIONS WITH THE NAME  " + name + " are DELETED")
+                    .build();
+        } catch (RoleNotFoundException e) {
+            return Response.status(406, "ROLE NOT FOUND")
+                    .header("status", "ROLE NOT FOUND").build();
+        } catch (CannotModifySuperAdminException e) {
+            return Response.status(406, "CANNOT MODIFY A SUPERADMIN")
+                    .header("status", "CANNOT MODIFY A SUPERADMIN").build();
+        } catch (PermissionNotFound e) {
+            return Response.status(406, "PERMISSION NAME NOT FOUND")
+                    .header("status", "PERMISSION NAME NOT FOUND").build();
+        } catch (PermissionToRoleNotFound e) {
+            return Response.status(406, "PERMISSION TO ROLE NOT SAVE")
+                    .header("status", "PERMISSION TO ROLE NOT SAVE").build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(406, "TYPE SHOULD BE ALL OR ONE")
+                    .header("status", "TYPE SHOULD BE ALL OR ONE").build();
+        }
+    }
 }

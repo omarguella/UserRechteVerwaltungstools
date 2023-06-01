@@ -1,6 +1,7 @@
 package User.Recht.Tool.service.serviceImpl;
 
 
+import User.Recht.Tool.dtos.PermissionDtos.ListPermissionKeysDto;
 import User.Recht.Tool.dtos.PermissionDtos.PermissionRoleDto;
 import User.Recht.Tool.entity.Permission;
 import User.Recht.Tool.entity.PermissionRole;
@@ -61,6 +62,11 @@ public class PermissionToRoleServiceImpl implements PermissionToRoleService {
             throw new IllegalArgumentException("TYPE SHOULD BE ALL OR ONE");
         }
 
+        try {
+          PermissionRoleDto existedPermission= getPermissionByRole(permissionKey,roleName);
+          return existedPermission;
+        }catch (PermissionToRoleNotFound ignored){}
+
         Permission permission = permissionService.getPermissionByKey(permissionKey);
         Role role = roleService.getRoleByName(roleName);
 
@@ -76,8 +82,25 @@ public class PermissionToRoleServiceImpl implements PermissionToRoleService {
 
             }
 
+    @Transactional
+    @Override
+    public List<String> addPermissionsListToRole(ListPermissionKeysDto listPermissionKeysDto, String roleName)
+            throws RoleNotFoundException, PermissionNotFound, CannotModifySuperAdminException, ArrayIndexOutOfBoundsException,PermissionToRoleNotFound,IllegalArgumentException {
 
-@Override
+        for(String permissionKey: listPermissionKeysDto.getPermissionsList()){
+
+            PermissionRoleDto permissionRoleDto=new PermissionRoleDto();
+            permissionRoleDto.setRoleName(roleName);
+            String[] substrings = permissionKey.split("_");
+            permissionRoleDto.setPermissionKey(substrings[0]+"_"+substrings[1]);
+            permissionRoleDto.setType(substrings[2]);
+
+            PermissionRoleDto savedPermission=addPermissionToRole(permissionRoleDto);
+        }
+        return getAllPermissionsOfRole(roleName.toUpperCase());
+    }
+
+        @Override
 public PermissionRoleDto getPermissionByRole(String permissionKey, String roleName)
         throws PermissionToRoleNotFound, PermissionNotFound, RoleNotFoundException {
 
@@ -89,7 +112,7 @@ public PermissionRoleDto getPermissionByRole(String permissionKey, String roleNa
     PermissionRole permissionRole = permissionRoleRepository.findByPermissionIdAndRoleId(permissionId, roleId);
 
     if (permissionRole != null) {
-        return permissionRoleFactory.permissionRoleFactory(permissionRole);
+        return permissionRoleFactory.permissionRoleDtoFactory(permissionRole);
     } else {
         throw new PermissionToRoleNotFound("THIS PERMISSION ASSIGNED TO THIS ROLE NOT FOUND");
     }
@@ -148,8 +171,53 @@ public PermissionRoleDto getPermissionByRole(String permissionKey, String roleNa
 
     }
 
+    @Transactional
+    @Override
+    public PermissionRoleDto deletePermissionRole(String permissionKey, String roleName) throws PermissionNotFound,
+            RoleNotFoundException, PermissionToRoleNotFound,CannotModifySuperAdminException {
 
-    public void verifyExistPermissionAndRole(String permissionKey, String roleName)
+        permissionKey= permissionKey.toUpperCase();
+        roleName= roleName.toUpperCase();
+
+         /*  if (roleService.getRoleByName(roleName).getName().equalsIgnoreCase("SUPERADMIN")){
+            throw new CannotModifySuperAdminException("CANNOT MODIFY A SUPERADMIN");
+        }*/
+
+
+        PermissionRoleDto toDeletePermissionDto= getPermissionByRole(permissionKey,roleName);
+        PermissionRole toDeletePermission =permissionRoleFactory.permissionRoleFactory(toDeletePermissionDto);
+        permissionRoleRepository.delete(toDeletePermission);
+        return toDeletePermissionDto;
+    }
+
+    @Transactional
+    @Override
+    public List<String> deleteListePermissionsOfRole(ListPermissionKeysDto listPermissionKeysDto, String roleName) throws PermissionNotFound,
+            RoleNotFoundException, PermissionToRoleNotFound ,CannotModifySuperAdminException{
+
+        for(String permissionKey: listPermissionKeysDto.getPermissionsList()){
+
+
+            String[] substrings = permissionKey.split("_");
+
+            deletePermissionRole(substrings[0]+"_"+substrings[1],roleName);
+        }
+        return getAllPermissionsOfRole(roleName.toUpperCase());
+    }
+
+    @Transactional
+    @Override
+    public List<String> deleteALLPermissionsOfRole(String roleName) throws PermissionNotFound,
+            RoleNotFoundException, PermissionToRoleNotFound ,CannotModifySuperAdminException {
+
+        List<String> allPermissionsToDelete = getAllPermissionsOfRole(roleName);
+
+        ListPermissionKeysDto listPermissionKeysDto = new ListPermissionKeysDto();
+        listPermissionKeysDto.setPermissionsList(allPermissionsToDelete);
+        List<String> deletePermissions = deleteListePermissionsOfRole(listPermissionKeysDto, roleName);
+        return allPermissionsToDelete;
+    }
+        public void verifyExistPermissionAndRole(String permissionKey, String roleName)
             throws RoleNotFoundException, PermissionNotFound {
 
         Permission permission = permissionService.getPermissionByKey(permissionKey);

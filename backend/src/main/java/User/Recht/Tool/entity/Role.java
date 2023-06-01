@@ -1,10 +1,14 @@
 package User.Recht.Tool.entity;
 
+import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbTransient;
+import javax.json.bind.annotation.JsonbTypeAdapter;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Entity
 public class Role {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -15,6 +19,18 @@ public class Role {
     private boolean isMailToVerify;
     private boolean towFactorAuth;
     private boolean isPrivate;
+
+    public Role(Long id, String name, Long sessionTimer, boolean isMailToVerify, boolean towFactorAuth, boolean isPrivate) {
+        this.id = id;
+        this.name = name;
+        this.sessionTimer = sessionTimer;
+        this.isMailToVerify = isMailToVerify;
+        this.towFactorAuth = towFactorAuth;
+        this.isPrivate = isPrivate;
+    }
+
+    public Role() {
+    }
 
     public Long getId() {
         return id;
