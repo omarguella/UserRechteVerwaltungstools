@@ -107,8 +107,9 @@ public class RoleToUserServiceImpl implements RoleToUserService {
         verifyExistUserAndRole(userId, roleName);
 
         roleName = roleName.toUpperCase();
+        userMovedTo = userMovedTo.toUpperCase();
 
-        if (userService.getUserById(userId).getUsername().equals("SUPERADMIN")|| userMovedTo.equalsIgnoreCase("SUPERADMIN")){
+        if (userService.getUserById(userId).getUsername().equals("SUPERADMIN")|| userMovedTo.equals("SUPERADMIN")){
                 throw new CannotModifySuperAdminException("CANNOT MODIFY A SUPERADMIN");
             }
 

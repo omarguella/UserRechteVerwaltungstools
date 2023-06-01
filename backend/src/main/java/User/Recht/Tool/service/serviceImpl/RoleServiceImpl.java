@@ -3,12 +3,19 @@ package User.Recht.Tool.service.serviceImpl;
 import User.Recht.Tool.dtos.roleDtos.RoleDto;
 import User.Recht.Tool.dtos.roleDtos.UpdateRoleDto;
 import User.Recht.Tool.entity.Role;
+import User.Recht.Tool.entity.User;
+import User.Recht.Tool.exception.Permission.PermissionNotFound;
+import User.Recht.Tool.exception.Permission.PermissionToRoleNotFound;
+import User.Recht.Tool.exception.role.RoleMovedToException;
 import User.Recht.Tool.exception.role.RoleNameDuplicateElementException;
+import User.Recht.Tool.exception.role.RoleNotAssignedToUserException;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
+import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.factory.roleFactorys.RoleFactory;
 import User.Recht.Tool.repository.RoleRepository;
 import User.Recht.Tool.service.RoleService;
+import User.Recht.Tool.service.RoleToUserService;
 import User.Recht.Tool.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +34,10 @@ public class RoleServiceImpl implements RoleService {
     RoleRepository roleRepository;
     @Inject
     RoleFactory roleFactory;
+    @Inject
+    RoleToUserService roleToUserService;
+    @Inject
+    PermissionToRoleServiceImpl permissionToRoleService;
     @Inject
     UserService userService;
     private static final Logger LOGGER = LoggerFactory.getLogger(RoleServiceImpl.class);
@@ -80,21 +91,34 @@ public class RoleServiceImpl implements RoleService {
 
     @Transactional
     @Override
-    public Role deleteRoleByName(String name) throws RoleNotFoundException,CannotModifySuperAdminException {
+    public Role deleteRoleByName(String roleName, String moveTo) throws RoleNotFoundException, CannotModifySuperAdminException,
+            PermissionNotFound, PermissionToRoleNotFound, UserNotFoundException, RoleMovedToException, RoleNotAssignedToUserException,CannotModifySuperAdminException {
 
-        if (name.equalsIgnoreCase("SUPERADMIN")){
+        roleName=roleName.toUpperCase();
+        moveTo=moveTo.toUpperCase();
+
+        if (roleName.equals("SUPERADMIN")|| moveTo.equals("SUPERADMIN")){
             throw new CannotModifySuperAdminException("CANNOT MODIFY A SUPERADMIN");
         }
 
-        try {
-            Role role = getRoleByName(name);
-            roleRepository.delete(role);
-            //Delete alle Berechtigungen, die zur Role gehören
-            //users, die zur diese Rolle gehören ändern
+            Role role = getRoleByName(roleName);
+            LOGGER.info(String.valueOf(role));
+
+            //Delete Permissions of the Role
+            permissionToRoleService.deleteALLPermissionsOfRole(roleName);
+
+            //Delete Role from Users und move to another Role
+            List<User> users=userService.getAllUsersByRole(roleName);
+
+            for (User user:users){
+                roleToUserService.deleteRoleFromUser(user.getId(),roleName,moveTo);
+            }
+
+        roleRepository.delete(role);
+
+
             return role;
-        } catch (RoleNotFoundException e) {
-            throw new RoleNotFoundException("ROLE DOSENT EXIST");
-        }
+
     }
 
     @Transactional

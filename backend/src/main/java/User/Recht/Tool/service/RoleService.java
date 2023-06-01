@@ -3,9 +3,14 @@ package User.Recht.Tool.service;
 import User.Recht.Tool.dtos.roleDtos.RoleDto;
 import User.Recht.Tool.dtos.roleDtos.UpdateRoleDto;
 import User.Recht.Tool.entity.Role;
+import User.Recht.Tool.exception.Permission.PermissionNotFound;
+import User.Recht.Tool.exception.Permission.PermissionToRoleNotFound;
+import User.Recht.Tool.exception.role.RoleMovedToException;
 import User.Recht.Tool.exception.role.RoleNameDuplicateElementException;
+import User.Recht.Tool.exception.role.RoleNotAssignedToUserException;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
+import User.Recht.Tool.exception.user.UserNotFoundException;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -23,8 +28,10 @@ public interface RoleService {
 
     List<Role> getAllRoles();
 
+
     @Transactional
-    Role deleteRoleByName(String name) throws RoleNotFoundException, CannotModifySuperAdminException;
+    Role deleteRoleByName(String roleName, String moveTo) throws RoleNotFoundException, CannotModifySuperAdminException,
+            PermissionNotFound, PermissionToRoleNotFound, UserNotFoundException, RoleMovedToException, RoleNotAssignedToUserException;
 
     @Transactional
     Role updateRoleByName (String name, UpdateRoleDto updateRoleDto)

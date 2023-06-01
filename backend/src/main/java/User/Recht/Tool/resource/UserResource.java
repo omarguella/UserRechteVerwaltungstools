@@ -128,8 +128,8 @@ public class UserResource {
 
     @GET
     @PermitAll
-    @Path("/byRole/")
-    public Response getUsersByRole(@HeaderParam("roleName") String roleName, @Context SecurityContext securityContext) {
+    @Path("/role/{roleName}")
+    public Response getUsersByRole(@PathParam("roleName") String roleName, @Context SecurityContext securityContext) {
 
         try {
             List<User> users = userService.getAllUsersByRole(roleName);
