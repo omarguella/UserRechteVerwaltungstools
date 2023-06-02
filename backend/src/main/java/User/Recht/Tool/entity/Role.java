@@ -17,15 +17,15 @@ public class Role {
     private String name;
     private Long sessionTimer=0L;
     private boolean isMailToVerify;
-    private boolean towFactorAuth;
+    private int level;
     private boolean isPrivate;
 
-    public Role(Long id, String name, Long sessionTimer, boolean isMailToVerify, boolean towFactorAuth, boolean isPrivate) {
+    public Role(Long id, String name, Long sessionTimer, boolean isMailToVerify, int level, boolean isPrivate) {
         this.id = id;
         this.name = name;
         this.sessionTimer = sessionTimer;
         this.isMailToVerify = isMailToVerify;
-        this.towFactorAuth = towFactorAuth;
+        this.level = level;
         this.isPrivate = isPrivate;
     }
 
@@ -64,12 +64,12 @@ public class Role {
         isMailToVerify = mailToVerify;
     }
 
-    public boolean getIsTowFactorAuth() {
-        return towFactorAuth;
+    public int getLevel() {
+        return level;
     }
 
-    public void setTowFactorAuth(boolean towFactorAuth) {
-        this.towFactorAuth = towFactorAuth;
+    public void setLevel(int level) {
+        this.level = level;
     }
 
     public boolean getIsPrivate() {
@@ -88,7 +88,7 @@ public class Role {
                 ", name='" + name + '\'' +
                 ", sessionTimer=" + sessionTimer +
                 ", isMailToVerify=" + isMailToVerify +
-                ", towFactorAuth=" + towFactorAuth +
+                ", level=" + level +
                 ", isPrivate=" + isPrivate +
                 '}';
     }

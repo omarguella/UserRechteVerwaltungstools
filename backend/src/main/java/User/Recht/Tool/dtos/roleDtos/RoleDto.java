@@ -10,7 +10,7 @@ public class RoleDto {
     private String name;
     private Long sessionTimer;
     private boolean isMailToVerify;
-    private boolean towFactorAuth;
+    private int level;
     private boolean isPrivate;
 
     public Long getId() {
@@ -45,13 +45,14 @@ public class RoleDto {
         isMailToVerify = isMailToVerify;
     }
 
-    public boolean getTowFactorAuth() {
-        return towFactorAuth;
+    public int getLevel() {
+        return level;
     }
 
-    public void setTowFactorAuth(boolean towFactorAuth) {
-        this.towFactorAuth = towFactorAuth;
+    public void setLevel(int level) {
+        this.level = level;
     }
+
     public boolean getIsPrivate() {
         return isPrivate;
     }
@@ -67,7 +68,7 @@ public class RoleDto {
                 ", name='" + name + '\'' +
                 ", sessionTimer=" + sessionTimer +
                 ", mailToVerify=" + isMailToVerify+
-                ", towFactorAuth=" + towFactorAuth +
+                ", level=" + level +
                 ", isPrivate=" + isPrivate +
                 '}';
     }

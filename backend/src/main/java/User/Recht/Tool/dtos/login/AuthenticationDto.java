@@ -31,6 +31,9 @@ public class AuthenticationDto {
         this.password = password;
     }
 
+    public AuthenticationDto() {
+    }
+
     @Override
     public String toString() {
         return "AuthenticationDto{" +

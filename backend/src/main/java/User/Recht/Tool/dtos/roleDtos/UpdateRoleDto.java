@@ -8,7 +8,7 @@ public class UpdateRoleDto {
     private String name;
     private Long sessionTimer;
     private boolean isMailToVerify;
-    private boolean towFactorAuth;
+    private int level;
     private boolean isPrivate;
 
     public String getName() {
@@ -35,12 +35,12 @@ public class UpdateRoleDto {
         isMailToVerify = mailToVerify;
     }
 
-    public boolean getTowFactorAuth() {
-        return towFactorAuth;
+    public int getLevel() {
+        return level;
     }
 
-    public void setTowFactorAuth(boolean towFactorAuth) {
-        this.towFactorAuth = towFactorAuth;
+    public void setLevel(int level) {
+        this.level = level;
     }
 
     public boolean getIsPrivate() {
@@ -58,7 +58,7 @@ public class UpdateRoleDto {
                 "name='" + name + '\'' +
                 ", sessionTimer=" + sessionTimer +
                 ", isMailToVerify=" + isMailToVerify +
-                ", towFactorAuth=" + towFactorAuth +
+                ", level=" + level +
                 ", isPrivate=" + isPrivate +
                 '}';
     }

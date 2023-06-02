@@ -28,7 +28,8 @@ public class RoleToUserResource {
 
     @POST
     @PermitAll
-    public Response addRole(@HeaderParam("userId") Long userId, @HeaderParam("roleName") String roleName, @Context SecurityContext securityContext) {
+    public Response addRole(@HeaderParam("userId") Long userId, @HeaderParam("roleName") String roleName
+            , @Context SecurityContext securityContext) {
         try {
             User user = roleToUserService.addRoleToUser(userId, roleName);
             return Response.ok(user).header("status", "THE ROLE "+roleName+" IS ADDED TO THE USERID "+user.getUsername())

@@ -13,6 +13,7 @@ import User.Recht.Tool.service.UserService;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 
 import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -63,8 +64,8 @@ public class UserResource {
     }
 
     @GET
-    @PermitAll
     @Path("/id/{userId}/")
+    @RolesAllowed({ "USER" })
     public Response getUserWithId(@PathParam("userId") String id, @Context SecurityContext securityContext) {
         try {
 
@@ -81,8 +82,8 @@ public class UserResource {
     }
 
     @GET
-    @PermitAll
     @Path("/email/{userEmail}/")
+    @RolesAllowed({ "USER" })
     public Response getUserWithEmail(@PathParam("userEmail") String userEmail, @Context SecurityContext securityContext){
         try {
 
