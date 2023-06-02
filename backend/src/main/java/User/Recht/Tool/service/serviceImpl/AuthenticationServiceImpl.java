@@ -12,6 +12,10 @@ import User.Recht.Tool.service.JwtTokenService;
 import User.Recht.Tool.service.RefreshTokenService;
 import User.Recht.Tool.service.UserService;
 import User.Recht.Tool.util.Encoder;
+import org.jose4j.jwt.JwtClaims;
+import org.jose4j.jwt.MalformedClaimException;
+import org.jose4j.jwt.NumericDate;
+import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,12 +70,39 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String refreshToken=jwtTokenService.createToken(user, ipAddress, deviceName);
 
         RefreshToken saveRefreshToken = refreshTokenService.addRefreshToken(user,refreshToken);
+
         TokenDto tokenDto = new TokenDto(saveRefreshToken.getToken(),accessToken);
 
         return tokenDto;
 
     }
 
+    @Transactional
+    @Override
+    public TokenDto getNewAccessToken(User user, String refreshToken, String ipAddress, String deviceName)
+            throws TokenNotFoundException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidJwtException, MalformedClaimException {
+
+        RefreshToken savedRefreshTOken = refreshTokenService.getRefreshTokenByToken(refreshToken);
+        TokenDto tokenDto= new TokenDto(refreshToken,jwtTokenService.createToken(user,  ipAddress,  deviceName));
+        verifySessionTimer(tokenDto);
+        return tokenDto;
+    }
+
+
+
+    public static void verifySessionTimer(TokenDto tokenDto) throws InvalidJwtException, MalformedClaimException {
+        JwtClaims jwtClaims = JwtClaims.parse(tokenDto.getAccessToken());
+        NumericDate createdAt = jwtClaims.getIssuedAt();
+        LOGGER.info(String.valueOf(createdAt));
+
+    }
+
+    @Transactional
+    @Override
+    public void logout(String refreshToken) throws TokenNotFoundException {
+
+        refreshTokenService.deleteRefreshTokenByToken(refreshToken);
+    }
     public static boolean isValidEmail(String email) {
         Pattern pattern = Pattern.compile(EMAIL_REGEX);
         Matcher matcher = pattern.matcher(email);

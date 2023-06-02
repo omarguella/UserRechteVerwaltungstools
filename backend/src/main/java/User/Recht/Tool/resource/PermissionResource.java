@@ -10,6 +10,7 @@ import User.Recht.Tool.service.PermissionService;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 
 import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -27,7 +28,7 @@ public class PermissionResource {
     PermissionService permissionService;
 
     @POST
-    @PermitAll
+    @RolesAllowed({ "USER" })
     public Response addPermissions(@RequestBody PermissionDto permissionDto, @Context SecurityContext securityContext) {
 
         try {
@@ -56,7 +57,7 @@ public class PermissionResource {
     }
 
     @GET
-    @PermitAll
+    @RolesAllowed({ "USER" })
     public Response getAllPermissions(@Context SecurityContext securityContext) {
 
         List<Permission> permissions = permissionService.getAllPermissions();
@@ -65,7 +66,7 @@ public class PermissionResource {
                 .build();
     }
     @GET
-    @PermitAll
+    @RolesAllowed({ "USER" })
     @Path("name/{name}")
     public Response getPermissionsByName(@PathParam("name") String name,@Context SecurityContext securityContext) {
 
@@ -76,7 +77,7 @@ public class PermissionResource {
     }
 
     @GET
-    @PermitAll
+    @RolesAllowed({ "USER" })
     @Path("key/{key}")
     public Response getPermissionByKey(@PathParam("key") String key,@Context SecurityContext securityContext) {
 
@@ -94,7 +95,7 @@ public class PermissionResource {
     }
 
     @DELETE
-    @PermitAll
+    @RolesAllowed({ "USER" })
     @Path("key/{key}")
     public Response deletePermission(@PathParam("key") String key, @Context SecurityContext securityContext) {
 
@@ -121,7 +122,7 @@ public class PermissionResource {
         }
     }
     @DELETE
-    @PermitAll
+    @RolesAllowed({ "USER" })
     @Path("name/{name}")
     public Response deletePermissionsByName(@PathParam("name") String name, @Context SecurityContext securityContext) {
         try {

@@ -31,38 +31,6 @@ public class UserResource {
     UserService userService;
 
 
-
-
-    @POST
-    @PermitAll
-    @Path("registration/{roleName}")
-    public Response createUser(@RequestBody UserDto userDto, @PathParam("roleName") String roleName){
-        try {
-
-            User user = userService.createUser(userDto,roleName);
-            return Response.ok(user).header("Email", userDto.getEmail())
-                    .build();
-
-        } catch (UserNameDuplicateElementException e) {
-            return Response.status(406, "USERNAME IS ALREADY USED")
-                    .header("status", " USERNAME IS ALREADY USED ").build();
-        } catch (DuplicateElementException e) {
-            return Response.status(406, "EMAIL IS ALREADY USED")
-                    .header("status", " EMAIL IS ALREADY USED").build();
-        } catch (ValidationException a) {
-            return Response.status(406, "EMAIL, PASSWORD OR PHONENUMBER IS NOT VALID")
-                    .header("status", "EMAIL, PASSWORD OR PHONENUMBER IS NOT VALID").build();
-
-        }catch (RoleNotFoundException a) {
-            return Response.status(406, "ROLE NOT FOUND")
-                    .header("status", "ROLE NOT FOUND").build();
-
-        } catch (UserNotFoundException e) {
-            return Response.status(406, "USER NOT SAVED")
-                    .header("status", "USER NOT SAVED").build();
-        }
-    }
-
     @GET
     @Path("/id/{userId}/")
     @RolesAllowed({ "USER" })
@@ -100,7 +68,7 @@ public class UserResource {
     }
 
     @GET
-    @PermitAll
+    @RolesAllowed({ "USER" })
     @Path("/username/{username}/")
     public Response getUserWithUsername(@PathParam("username") String username, @Context SecurityContext securityContext) {
         try {
@@ -118,7 +86,7 @@ public class UserResource {
     }
 
     @GET
-    @PermitAll
+    @RolesAllowed({ "USER" })
     public Response getAllUsers(@Context SecurityContext securityContext) {
 
         List<User> users = userService.getAllUsers();
@@ -128,7 +96,7 @@ public class UserResource {
     }
 
     @GET
-    @PermitAll
+    @RolesAllowed({ "USER" })
     @Path("/role/{roleName}")
     public Response getUsersByRole(@PathParam("roleName") String roleName, @Context SecurityContext securityContext) {
 
@@ -145,7 +113,7 @@ public class UserResource {
     }
 
     @DELETE
-    @PermitAll
+    @RolesAllowed({ "USER" })
     @Path("/id/{userId}/")
     public Response deleteUserWithId(@PathParam("userId") String id, @Context SecurityContext securityContext) {
         try {
@@ -166,7 +134,7 @@ public class UserResource {
     }
 
     @PUT
-    @PermitAll
+    @RolesAllowed({ "USER" })
     @Path("/email/")
     public Response updateEmailUser (@HeaderParam("userId") String id, @HeaderParam("newEmail") String newEmail, @Context SecurityContext securityContext) {
         try {
@@ -190,7 +158,7 @@ public class UserResource {
     }
 
     @PUT
-    @PermitAll
+    @RolesAllowed({ "USER" })
     @Path("/password/")
     public Response updatePasswordUser (@HeaderParam("userId") String id, @RequestBody UpdatePasswordDto updatePasswordDto, @Context SecurityContext securityContext) {
         try {
@@ -214,7 +182,7 @@ public class UserResource {
     }
 
     @PUT
-    @PermitAll
+    @RolesAllowed({ "USER" })
     @Path("/profile/")
     public Response updateProfileUser (@HeaderParam("userId") String id, @RequestBody UserProfileDto userProfileDto, @Context SecurityContext securityContext) {
 

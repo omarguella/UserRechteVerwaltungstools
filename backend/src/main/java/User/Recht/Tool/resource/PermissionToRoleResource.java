@@ -10,6 +10,7 @@ import User.Recht.Tool.service.PermissionToRoleService;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 
 import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -27,7 +28,7 @@ public class PermissionToRoleResource {
     PermissionToRoleService permissionToRoleService;
 
     @POST
-    @PermitAll
+    @RolesAllowed({ "USER" })
     public Response addPermissionToUser(@RequestBody PermissionRoleDto permissionRoleDto, @Context SecurityContext securityContext) {
         try {
             PermissionRoleDto permissionRole = permissionToRoleService.addPermissionToRole(permissionRoleDto);
@@ -52,7 +53,7 @@ public class PermissionToRoleResource {
     }
 
     @POST
-    @PermitAll
+    @RolesAllowed({ "USER" })
     @Path("/list/")
     public Response addPermissionsListToRole(@RequestBody ListPermissionKeysDto listPermissionKeysDto, @HeaderParam("roleName") String roleName
             , @Context SecurityContext securityContext) {
@@ -83,7 +84,7 @@ public class PermissionToRoleResource {
     }
 
     @GET
-    @PermitAll
+    @RolesAllowed({ "USER" })
     public Response getPermissionRole(@HeaderParam("permissionKey") String permissionKey, @HeaderParam("roleName") String roleName
             , @Context SecurityContext securityContext) {
         try {
@@ -103,7 +104,7 @@ public class PermissionToRoleResource {
     }
 
     @GET
-    @PermitAll
+    @RolesAllowed({ "USER" })
     @Path("/role/{roleName}")
     public Response getAllPermissionsOfRole(@PathParam("roleName") String roleName
             , @Context SecurityContext securityContext) {
@@ -118,7 +119,7 @@ public class PermissionToRoleResource {
     }
 
     @PUT
-    @PermitAll
+    @RolesAllowed({ "USER" })
     public Response updatePermissionRole(@RequestBody PermissionRoleDto permissionRoleDto, @Context SecurityContext securityContext) {
         try {
             PermissionRoleDto permissionRole = permissionToRoleService.updatePermissionRole(permissionRoleDto);
@@ -163,7 +164,7 @@ public class PermissionToRoleResource {
     }
 
     @DELETE
-    @PermitAll
+    @RolesAllowed({ "USER" })
     @Path("/list/")
     public Response deleteListePermissionsOfRole(@RequestBody ListPermissionKeysDto listPermissionKeysDto, @HeaderParam("roleName") String roleName
             , @Context SecurityContext securityContext) {
@@ -190,7 +191,7 @@ public class PermissionToRoleResource {
     }
 
     @DELETE
-    @PermitAll
+    @RolesAllowed({ "USER" })
     @Path("/all/")
     public Response deleteALLPermissionsOfRole(@HeaderParam("roleName") String roleName
             , @Context SecurityContext securityContext) {

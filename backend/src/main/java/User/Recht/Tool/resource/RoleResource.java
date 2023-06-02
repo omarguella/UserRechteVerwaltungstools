@@ -3,7 +3,6 @@ package User.Recht.Tool.resource;
 
 import User.Recht.Tool.dtos.roleDtos.RoleDto;
 import User.Recht.Tool.dtos.roleDtos.UpdateRoleDto;
-
 import User.Recht.Tool.entity.Role;
 import User.Recht.Tool.exception.Permission.PermissionNotFound;
 import User.Recht.Tool.exception.Permission.PermissionToRoleNotFound;
@@ -17,6 +16,7 @@ import User.Recht.Tool.service.RoleService;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 
 import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -33,10 +33,8 @@ public class RoleResource {
     RoleService roleService;
 
 
-
-
     @POST
-    @PermitAll
+    @RolesAllowed({"USER"})
     public Response createRole(@RequestBody RoleDto roleDto, @Context SecurityContext securityContext) {
         try {
 
@@ -54,7 +52,7 @@ public class RoleResource {
     }
 
     @GET
-    @PermitAll
+    @RolesAllowed({"USER"})
     @Path("/name/{roleName}/")
     public Response getRoleWithName(@PathParam("roleName") String roleName, @Context SecurityContext securityContext) {
         try {
@@ -69,24 +67,17 @@ public class RoleResource {
 
 
     @GET
-    @PermitAll
+    @RolesAllowed({"USER"})
     public Response getAllRoles(@Context SecurityContext securityContext) {
         List<Role> role = roleService.getAllRoles();
         return Response.ok(role).header("STATUS", "LIST OF ROLES")
                 .build();
     }
 
-    @GET
-    @PermitAll
-    @Path("/public/")
-    public Response getPublicRoles(@Context SecurityContext securityContext) {
-        List<Role> roles = roleService.getPublicRoles();
-        return Response.ok(roles).header("STATUS", "LIST OF PUBLIC ROLES")
-                .build();
-    }
+
 
     @DELETE
-    @PermitAll
+    @RolesAllowed({"USER"})
     @Path("/name/{roleName}/")
     public Response deleteRole(@PathParam("roleName") String roleName,@HeaderParam("usersMovedTo") String userMovedTo,
                                @Context SecurityContext securityContext) {
@@ -122,7 +113,7 @@ public class RoleResource {
     }
 
     @PUT
-    @PermitAll
+    @RolesAllowed({"USER"})
     @Path("/name/{roleName}/")
     public Response updateRole(@PathParam("roleName") String roleName, @RequestBody UpdateRoleDto updateRoleDto, @Context SecurityContext securityContext) {
 

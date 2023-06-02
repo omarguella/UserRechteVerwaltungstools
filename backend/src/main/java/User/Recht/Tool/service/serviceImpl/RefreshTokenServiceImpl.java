@@ -6,6 +6,8 @@ import User.Recht.Tool.repository.RefreshTokenRepository;
 import User.Recht.Tool.service.RefreshTokenService;
 import User.Recht.Tool.util.Encoder;
 import User.Recht.Tool.entity.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -21,6 +23,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Inject
     Encoder encoder;
+    private static final Logger LOGGER = LoggerFactory.getLogger(RoleToUserServiceImpl.class);
 
 
     @Transactional
@@ -38,11 +41,12 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Override
     public RefreshToken getRefreshTokenByToken(String refreshToken) throws TokenNotFoundException {
-        try {
-            return refreshTokenRepository.find("token", refreshToken).firstResult();
-        } catch (NotFoundException e) {
-            throw new TokenNotFoundException("TOKEN NOT FOUND");
-        }
+
+            RefreshToken savedRefreshToken= refreshTokenRepository.find("token", refreshToken).firstResult();
+            if(savedRefreshToken==null) {
+                throw new TokenNotFoundException("TOKEN NOT FOUND");
+            }
+            return savedRefreshToken;
     }
 
     @Override
@@ -56,5 +60,14 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         }
     }
 
+    @Transactional
+    @Override
+    public void deleteRefreshTokenByToken(String token) throws TokenNotFoundException {
+
+        RefreshToken refreshToken = getRefreshTokenByToken(token);
+        LOGGER.info(String.valueOf(refreshToken));
+        refreshTokenRepository.delete(refreshToken);
+
+    }
 
 }

@@ -1,6 +1,5 @@
 package User.Recht.Tool.service.serviceImpl;
 
-import User.Recht.Tool.entity.Role;
 import User.Recht.Tool.service.JwtTokenService;
 import User.Recht.Tool.entity.User;
 
@@ -20,13 +19,10 @@ import java.security.PrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
-import java.util.HashSet;
-import java.util.Set;
+
 
 @RequestScoped
 public class JwtTokenServiceImpl implements JwtTokenService {
-    private static final long TOKEN_EXPIRE_IN = 243200;
-    private static final String ISSUER = "USER_RECHT_TOOL";
 
     @Inject
     ClaimsOfUserImpl claimsOfUser;
@@ -42,12 +38,6 @@ public class JwtTokenServiceImpl implements JwtTokenService {
         String privateKeyLocation = "/privatekey.pem";
         PrivateKey privateKey = readPrivateKey(privateKeyLocation);
 
-        long currentTimeInSecs = currentTimeInSecs();
-        claims.issuer(ISSUER);
-        claims.issuedAt(currentTimeInSecs);
-        claims.claim(Claims.auth_time.name(), currentTimeInSecs);
-        claims.expiresAt(currentTimeInSecs + TOKEN_EXPIRE_IN);
-        claims.groups("USER");
 
         return claims.jws().signatureKeyId(privateKeyLocation).sign(privateKey);
     }
@@ -81,8 +71,5 @@ public class JwtTokenServiceImpl implements JwtTokenService {
         }
 
 
-        private static int currentTimeInSecs() {
-            long currentTimeMS = System.currentTimeMillis();
-            return (int) (currentTimeMS / 1000);
-        }
+
 }

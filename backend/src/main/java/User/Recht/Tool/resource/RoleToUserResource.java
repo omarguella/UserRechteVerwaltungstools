@@ -11,6 +11,7 @@ import User.Recht.Tool.service.RoleToUserService;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 
 import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -27,7 +28,7 @@ public class RoleToUserResource {
     RoleToUserService roleToUserService;
 
     @POST
-    @PermitAll
+    @RolesAllowed({ "USER" })
     public Response addRole(@HeaderParam("userId") Long userId, @HeaderParam("roleName") String roleName
             , @Context SecurityContext securityContext) {
         try {
@@ -47,7 +48,7 @@ public class RoleToUserResource {
     }
 
     @DELETE
-    @PermitAll
+    @RolesAllowed({ "USER" })
     public Response deleteRoleFromUser(@HeaderParam("userId") Long userId, @HeaderParam("roleName") String roleName, @HeaderParam("userMovedTo") String userMovedTo, @Context SecurityContext securityContext) {
         try {
             User user = roleToUserService.deleteRoleFromUser(userId, roleName, userMovedTo);
@@ -88,7 +89,7 @@ public class RoleToUserResource {
     }
 
     @PUT
-    @PermitAll
+    @RolesAllowed({ "USER" })
     public Response updateRolesForUsersWithAction(@RequestBody UpdateRoleForUsersList updateRoleForUsersList, @Context SecurityContext securityContext) {
         try {
             roleToUserService.updateRolesForUsersWithAction(updateRoleForUsersList);

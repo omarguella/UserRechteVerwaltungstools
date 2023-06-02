@@ -16,4 +16,7 @@ public interface RefreshTokenService {
     RefreshToken getRefreshTokenByToken(String refreshToken) throws TokenNotFoundException;
 
     List<RefreshToken> getRefreshTokenByUserId(long id) throws TokenNotFoundException;
+
+    @Transactional
+    void deleteRefreshTokenByToken(String token) throws TokenNotFoundException;
 }

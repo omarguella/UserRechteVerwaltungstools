@@ -5,6 +5,7 @@ import User.Recht.Tool.entity.User;
 import User.Recht.Tool.service.ClaimsOfUser;
 import io.smallrye.jwt.build.Jwt;
 import io.smallrye.jwt.build.JwtClaimsBuilder;
+import org.eclipse.microprofile.jwt.Claims;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +14,8 @@ import java.util.List;
 
 @RequestScoped
 public class ClaimsOfUserImpl implements ClaimsOfUser {
-
+    private static final String ISSUER = "USER_RECHT_TOOL";
+    private static final long TOKEN_EXPIRE_IN = 4L;
     private static final Logger LOGGER = LoggerFactory.getLogger(ClaimsOfUserImpl.class);
 
     @Override
@@ -52,7 +54,19 @@ public class ClaimsOfUserImpl implements ClaimsOfUser {
         claims.claim("ipAddress",ipAddress);
         claims.claim("deviceName",deviceName);
 
+        claims.issuer(ISSUER);
+        long currentTimeInSecs = currentTimeInSecs();
+        LOGGER.info(String.valueOf(currentTimeInSecs));
+        claims.issuedAt(currentTimeInSecs);
+        claims.expiresIn(TOKEN_EXPIRE_IN);
+        claims.groups("USER");
+
         return claims;
+    }
+
+    private static long currentTimeInSecs() {
+        long currentTimeMS = System.currentTimeMillis();
+        return  (currentTimeMS / 1000);
     }
 
 }
