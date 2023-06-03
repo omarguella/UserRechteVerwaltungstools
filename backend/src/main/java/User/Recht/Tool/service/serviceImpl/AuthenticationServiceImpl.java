@@ -12,16 +12,10 @@ import User.Recht.Tool.service.*;
 import User.Recht.Tool.util.Encoder;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import io.smallrye.jwt.build.JwtSignatureBuilder;
-import org.eclipse.microprofile.jwt.JsonWebToken;
-import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.MalformedClaimException;
-import org.jose4j.jwt.NumericDate;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.smallrye.jwt.build.Jwt;
-
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -72,7 +66,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new WrongPasswordException("PASSWORD IS WRONG");
         }
 
-
         String accessToken=jwtTokenService.createToken(user, ipAddress, deviceName);
         String refreshToken=jwtTokenService.createToken(user, ipAddress, deviceName);
 
@@ -96,8 +89,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return tokenDto;
     }
 
+    // issuedAt in database
     public static void verifySessionTimer(TokenDto tokenDto) throws InvalidJwtException, MalformedClaimException, SessionTimeoutException {
         Map<String, Object> map= listClaimUsingJWT(tokenDto.getAccessToken());
+
         Long issuedAt = (Long) map.get("issuedAt");
         Long maxSessionTimer = (Long) map.get("maxSessionTimer");
 
