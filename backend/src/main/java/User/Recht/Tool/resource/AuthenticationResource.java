@@ -8,6 +8,7 @@ import User.Recht.Tool.entity.Role;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.Authentification.WrongPasswordException;
 import User.Recht.Tool.exception.DuplicateElementException;
+import User.Recht.Tool.exception.Permission.SessionTimeoutException;
 import User.Recht.Tool.exception.Token.TokenNotFoundException;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.user.UserNameDuplicateElementException;
@@ -15,7 +16,10 @@ import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.service.AuthenticationService;
 import User.Recht.Tool.service.RoleService;
 import User.Recht.Tool.service.UserService;
+import User.Recht.Tool.service.serviceImpl.AuthenticationServiceImpl;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
@@ -39,6 +43,9 @@ public class AuthenticationResource {
     UserService userService;
     @Inject
     RoleService roleService;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationResource.class);
+
 
     @POST
     @PermitAll
@@ -120,6 +127,9 @@ public class AuthenticationResource {
         } catch (UserNotFoundException e) {
             return Response.status(406, "USER NOT FOUND")
                     .header("status", "USER NOT FOUND").build();
+        } catch (SessionTimeoutException e) {
+            return Response.status(419, "SESSION TIMEOUT")
+                    .header("status", "SESSION TIMEOUT").build();
         }
     }
 

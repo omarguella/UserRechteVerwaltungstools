@@ -217,7 +217,7 @@ public class UserServiceImpl implements UserService {
 
         if (userProfileDto.getUsername() != null) {
             if (getUserById(id).getUsername().equals("SUPERADMIN")){
-                throw new CannotModifySuperAdminException("CANNOT MODIFY A SUPERADMIN");
+               // throw new CannotModifySuperAdminException("CANNOT MODIFY A SUPERADMIN");
             }
             try {
                 userProfileDto.setUsername(userProfileDto.getUsername().toUpperCase());

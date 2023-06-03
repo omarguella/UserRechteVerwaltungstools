@@ -4,6 +4,7 @@ import User.Recht.Tool.dtos.login.AuthenticationDto;
 import User.Recht.Tool.dtos.token.TokenDto;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.Authentification.WrongPasswordException;
+import User.Recht.Tool.exception.Permission.SessionTimeoutException;
 import User.Recht.Tool.exception.Token.TokenNotFoundException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
 import org.jose4j.jwt.MalformedClaimException;
@@ -21,7 +22,8 @@ public interface AuthenticationService {
 
     @Transactional
     TokenDto getNewAccessToken (User user, String refreshtoken, String ipAddress, String deviceName)
-            throws TokenNotFoundException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidJwtException, MalformedClaimException;
+            throws TokenNotFoundException, IOException, NoSuchAlgorithmException,SessionTimeoutException,
+            InvalidKeySpecException, InvalidJwtException, MalformedClaimException, SessionTimeoutException;
 
     @Transactional
     void logout(String refreshToken) throws TokenNotFoundException;

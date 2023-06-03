@@ -10,17 +10,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 
 @RequestScoped
 public class ClaimsOfUserImpl implements ClaimsOfUser {
+    @Inject
+    JwtTokenServiceImpl jwtTokenService;
     private static final String ISSUER = "USER_RECHT_TOOL";
-    private static final long TOKEN_EXPIRE_IN = 4L;
+    private static final long TOKEN_EXPIRE_IN = 4300L;
     private static final Logger LOGGER = LoggerFactory.getLogger(ClaimsOfUserImpl.class);
 
     @Override
-    public JwtClaimsBuilder createUserClaims(User user, String ipAddress, String deviceName){
-        JwtClaimsBuilder claims = Jwt.claims();
+    public String  createUserClaims(User user, String ipAddress, String deviceName)
+            throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
 
         // Role Name
         List<String> rolesNames=user.getRoles().stream().map(Role::getName).toList();
@@ -44,24 +51,27 @@ public class ClaimsOfUserImpl implements ClaimsOfUser {
                 .min()
                 .orElse(1);
 
-        claims.subject(user.getEmail());
-        claims.claim("roleNames",rolesNames);
-        claims.claim("maxSessionTimer",maxSessionTimer);
-        if(isMailToVerify) {
-            claims.claim("verifiedMail", user.getIsVerifiedEmail());
-        }
-        claims.claim("minRoleLevel",minRoleLevel);
-        claims.claim("ipAddress",ipAddress);
-        claims.claim("deviceName",deviceName);
-
-        claims.issuer(ISSUER);
         long currentTimeInSecs = currentTimeInSecs();
-        LOGGER.info(String.valueOf(currentTimeInSecs));
-        claims.issuedAt(currentTimeInSecs);
-        claims.expiresIn(TOKEN_EXPIRE_IN);
-        claims.groups("USER");
 
-        return claims;
+        String privateKeyLocation = "/privatekey.pem";
+        PrivateKey privateKey = jwtTokenService.readPrivateKey(privateKeyLocation);
+
+        return Jwt.issuer(ISSUER)
+                .upn(user.getEmail())
+                .groups("USER")
+                .subject(user.getEmail())
+                .claim("roleNames",rolesNames)
+                .claim("maxSessionTimer",maxSessionTimer)
+                .claim("minRoleLevel",minRoleLevel)
+                .claim("ipAddress",ipAddress)
+                .claim("deviceName",deviceName)
+                .claim("isMailToVerify",isMailToVerify)
+                .claim("isVerifiedEmail",user.getIsVerifiedEmail())
+                .claim("issuedAt",currentTimeInSecs)
+                .issuedAt(currentTimeInSecs)
+                .expiresIn(TOKEN_EXPIRE_IN)
+                .sign(privateKey);
+
     }
 
     private static long currentTimeInSecs() {

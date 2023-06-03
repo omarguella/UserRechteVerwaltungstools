@@ -3,8 +3,6 @@ package User.Recht.Tool.service.serviceImpl;
 import User.Recht.Tool.service.JwtTokenService;
 import User.Recht.Tool.entity.User;
 
-import io.smallrye.jwt.build.JwtClaimsBuilder;
-import org.eclipse.microprofile.jwt.Claims;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,21 +26,19 @@ public class JwtTokenServiceImpl implements JwtTokenService {
     ClaimsOfUserImpl claimsOfUser;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JwtTokenServiceImpl.class);
+    private static final String ISSUER = "USER_RECHT_TOOL";
 
     @Override
     public String createToken(User user, String ipAddress, String deviceName)
             throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
 
-        JwtClaimsBuilder claims= claimsOfUser.createUserClaims( user, ipAddress, deviceName);
-
-        String privateKeyLocation = "/privatekey.pem";
-        PrivateKey privateKey = readPrivateKey(privateKeyLocation);
+      return claimsOfUser.createUserClaims( user, ipAddress, deviceName);
 
 
-        return claims.jws().signatureKeyId(privateKeyLocation).sign(privateKey);
     }
 
-    private static PrivateKey readPrivateKey(final String pemResName) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+    @Override
+    public PrivateKey readPrivateKey(final String pemResName) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         try (InputStream contentIS = JwtTokenServiceImpl.class.getResourceAsStream(pemResName)) {
             byte[] tmp = new byte[4096];
             int length = contentIS.read(tmp);
