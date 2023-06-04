@@ -10,7 +10,11 @@ import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
 import User.Recht.Tool.exception.user.UserNameDuplicateElementException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.service.UserService;
+import User.Recht.Tool.service.serviceImpl.AuthenticationServiceImpl;
+import io.vertx.ext.web.RoutingContext;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
@@ -30,13 +34,18 @@ public class UserResource {
     @Inject
     UserService userService;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserResource.class);
 
     @GET
     @Path("/id/{userId}/")
     @RolesAllowed({ "USER" })
-    public Response getUserWithId(@PathParam("userId") String id, @Context SecurityContext securityContext) {
-        try {
+    public Response getUserWithId(@Context RoutingContext routingContext,
+                                  @PathParam("userId") String id, @Context SecurityContext securityContext) {
 
+     //   checkAllowedPermission (routingContext,"PERMISSION_KEY",assignedTo);
+
+        try {
+            String token = routingContext.request().getHeader("Authorization");
             User user = userService.getUserById(Long.parseLong(id));
 
             return Response.ok(user).header("Email", user.getEmail())

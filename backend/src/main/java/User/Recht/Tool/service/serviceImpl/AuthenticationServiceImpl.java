@@ -1,7 +1,8 @@
 package User.Recht.Tool.service.serviceImpl;
 
+import User.Recht.Tool.dtos.DeviceInfosDto;
 import User.Recht.Tool.dtos.login.AuthenticationDto;
-import User.Recht.Tool.dtos.token.TokenDto;
+import User.Recht.Tool.dtos.tokenDtos.TokenDto;
 import User.Recht.Tool.entity.RefreshToken;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.Authentification.WrongPasswordException;
@@ -12,6 +13,7 @@ import User.Recht.Tool.service.*;
 import User.Recht.Tool.util.Encoder;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import io.vertx.ext.web.RoutingContext;
 import org.jose4j.jwt.MalformedClaimException;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.slf4j.Logger;
@@ -19,10 +21,12 @@ import org.slf4j.LoggerFactory;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.ws.rs.core.HttpHeaders;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,7 +52,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Transactional
     @Override
-    public TokenDto login(AuthenticationDto authenticationDto, String ipAddress, String deviceName)
+    public TokenDto login(AuthenticationDto authenticationDto,DeviceInfosDto deviceInfos)
             throws UserNotFoundException, WrongPasswordException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, TokenNotFoundException {
 
         String person=authenticationDto.getEmailOrUsername().toUpperCase();;
@@ -66,8 +70,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new WrongPasswordException("PASSWORD IS WRONG");
         }
 
-        String accessToken=jwtTokenService.createToken(user, ipAddress, deviceName);
-        String refreshToken=jwtTokenService.createToken(user, ipAddress, deviceName);
+        String accessToken=jwtTokenService.createToken(user, deviceInfos);
+        String refreshToken=jwtTokenService.createToken(user, deviceInfos);
 
         RefreshToken saveRefreshToken = refreshTokenService.addRefreshToken(user,refreshToken);
 
@@ -79,29 +83,31 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Transactional
     @Override
-    public TokenDto getNewAccessToken(User user, String refreshToken, String ipAddress, String deviceName)
+    public TokenDto getNewAccessToken(User user, String refreshToken, DeviceInfosDto deviceInfosDto)
             throws TokenNotFoundException, IOException, NoSuchAlgorithmException,
             InvalidKeySpecException, InvalidJwtException, MalformedClaimException, SessionTimeoutException {
 
         RefreshToken savedRefreshTOken = refreshTokenService.getRefreshTokenByToken(refreshToken);
-        TokenDto tokenDto= new TokenDto(refreshToken,jwtTokenService.createToken(user,  ipAddress,  deviceName));
-        verifySessionTimer(tokenDto);
+        TokenDto tokenDto= new TokenDto(refreshToken,jwtTokenService.createToken(user,deviceInfosDto));
+        verifySessionTimer(refreshToken,tokenDto);
+
         return tokenDto;
     }
 
     // issuedAt in database
-    public static void verifySessionTimer(TokenDto tokenDto) throws InvalidJwtException, MalformedClaimException, SessionTimeoutException {
-        Map<String, Object> map= listClaimUsingJWT(tokenDto.getAccessToken());
+    public void verifySessionTimer(String refreshToken,TokenDto tokenDto) throws SessionTimeoutException, TokenNotFoundException {
 
-        Long issuedAt = (Long) map.get("issuedAt");
+        Long issuedAt= refreshTokenService.getRefreshTokenByToken(refreshToken).getIssuedAt();
+
+        Map<String, Object> map= listClaimUsingJWT(tokenDto.getAccessToken());
         Long maxSessionTimer = (Long) map.get("maxSessionTimer");
 
-        if (issuedAt+maxSessionTimer < currentTimeInSecs()){
-            throw new SessionTimeoutException("SESSION TIMEOUT");
+        if (maxSessionTimer!= 0 && issuedAt+maxSessionTimer <= currentTimeInMins()){
+          throw new SessionTimeoutException("SESSION TIMEOUT");
         }
     }
 
-    /**  listClaimUsingJWT IS COPY FROM https://stackoverflow.com/a/71676546 **/
+    /**  listClaimUsingJWT IS COPIED FROM https://stackoverflow.com/a/71676546 **/
     private static Map<String, Object> listClaimUsingJWT(String accessToken) {
         Map<String, Object> map = new HashMap<>();
 
@@ -128,13 +134,36 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         refreshTokenService.deleteRefreshTokenByToken(refreshToken);
     }
+
+    @Transactional
+    @Override
+    public void logoutAll(long id) throws TokenNotFoundException {
+         refreshTokenService.deleteAllRefreshToken(id);
+    }
+
     public static boolean isValidEmail(String email) {
         Pattern pattern = Pattern.compile(EMAIL_REGEX);
         Matcher matcher = pattern.matcher(email);
         return matcher.matches();
     }
-    private static long currentTimeInSecs() {
+    private static long currentTimeInMins() {
         long currentTimeMS = System.currentTimeMillis();
-        return  (currentTimeMS / 1000);
+        return currentTimeMS / 60000;
+    }
+    @Override
+    public DeviceInfosDto setDeviceInfos(HttpHeaders headers, RoutingContext routingContext, Boolean proxyAddressForwarding){
+        String osName = System.getProperty("os.name");
+        String osVersion = System.getProperty("os.version");
+        String userAgent = headers.getHeaderString("User-Agent");
+        String ipAddress;
+
+        if (proxyAddressForwarding) {
+            ipAddress = routingContext.request().getHeader("X-Forwarded-For");
+        } else {
+            ipAddress = routingContext.request().remoteAddress().host();
+        }
+
+        return new DeviceInfosDto(osName,osVersion,userAgent,ipAddress);
+
     }
 }

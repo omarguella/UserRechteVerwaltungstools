@@ -1,4 +1,4 @@
-package User.Recht.Tool.dtos.token;
+package User.Recht.Tool.dtos.tokenDtos;
 
 import javax.validation.constraints.NotNull;
 

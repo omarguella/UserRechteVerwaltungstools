@@ -1,8 +1,8 @@
 package User.Recht.Tool.resource;
 
-
+import User.Recht.Tool.dtos.DeviceInfosDto;
 import User.Recht.Tool.dtos.login.AuthenticationDto;
-import User.Recht.Tool.dtos.token.TokenDto;
+import User.Recht.Tool.dtos.tokenDtos.TokenDto;
 import User.Recht.Tool.dtos.userDtos.UserDto;
 import User.Recht.Tool.entity.Role;
 import User.Recht.Tool.entity.User;
@@ -16,7 +16,8 @@ import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.service.AuthenticationService;
 import User.Recht.Tool.service.RoleService;
 import User.Recht.Tool.service.UserService;
-import User.Recht.Tool.service.serviceImpl.AuthenticationServiceImpl;
+import io.vertx.ext.web.RoutingContext;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,10 +26,7 @@ import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.*;
 import javax.xml.bind.ValidationException;
 import java.util.List;
 
@@ -44,6 +42,9 @@ public class AuthenticationResource {
     @Inject
     RoleService roleService;
 
+    @ConfigProperty(name = "quarkus.http.proxy.proxy-address-forwarding", defaultValue = "false")
+    boolean proxyAddressForwarding;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationResource.class);
 
 
@@ -51,8 +52,8 @@ public class AuthenticationResource {
     @PermitAll
     @Path("registration/{roleName}")
     public Response createUser(@RequestBody UserDto userDto, @PathParam("roleName") String roleName) {
-        try {
 
+        try {
             User user = userService.createUser(userDto, roleName);
             return Response.ok(user).header("Email", userDto.getEmail())
                     .build();
@@ -89,11 +90,12 @@ public class AuthenticationResource {
     @PermitAll
     @POST
     @Path("/login")
-    public Response login(@RequestBody AuthenticationDto authenticationDto
-            , @Context SecurityContext securityContext) throws Exception {
+    public Response login(@Context HttpHeaders headers, RoutingContext routingContext,
+                          @RequestBody AuthenticationDto authenticationDto, @Context SecurityContext securityContext) throws Exception {
 
         try {
-            TokenDto tokenDto = authenticationService.login(authenticationDto, "ipadress", "devicename");
+            DeviceInfosDto deviceInfos = authenticationService.setDeviceInfos(headers, routingContext, proxyAddressForwarding);
+            TokenDto tokenDto = authenticationService.login(authenticationDto, deviceInfos);
             return Response.ok(tokenDto).header("ACCESS_TOKEN", tokenDto.getAccessToken())
                     .header("REFRESH_TOKEN", tokenDto.getRefreshToken())
                     .build();
@@ -112,17 +114,19 @@ public class AuthenticationResource {
     @RolesAllowed({"USER"})
     @GET
     @Path("/getAccessToken/")
-    public Response getNewAccessToken(@Context SecurityContext securityContext,
+    public Response getNewAccessToken(@Context HttpHeaders headers, RoutingContext routingContext,
+                                      @Context SecurityContext securityContext,
                                       @HeaderParam("refreshToken") String refreshToken) throws Exception {
 
         try {
+            DeviceInfosDto deviceInfos = authenticationService.setDeviceInfos(headers, routingContext, proxyAddressForwarding);
             User user = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
-            TokenDto tokenDto = authenticationService.getNewAccessToken(user, refreshToken, "ipAdress", "Device");
+            TokenDto tokenDto = authenticationService.getNewAccessToken(user, refreshToken, deviceInfos);
             return Response.ok(tokenDto).header("ACCESS_TOKEN", tokenDto.getAccessToken())
                     .header("REFRESH_TOKEN", tokenDto.getRefreshToken())
                     .build();
         } catch (TokenNotFoundException e) {
-            return Response.status(406, "USER IS LOGGED OUT")
+            return Response.status(401, "USER IS LOGGED OUT")
                     .header("status", "USER IS LOGGED OUT").build();
         } catch (UserNotFoundException e) {
             return Response.status(406, "USER NOT FOUND")
@@ -146,4 +150,27 @@ public class AuthenticationResource {
                     .header("status", "TOKEN NOT CREATED").build();
         }
     }
+
+    @PermitAll
+    @POST
+    @Path("logoutAll")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response logoutAll(@Context SecurityContext securityContext) {
+
+        try {
+            User user = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
+
+            authenticationService.logoutAll(user.getId());
+            return Response.ok().header("STATUS", "ALL DEVICES ARE LOGGED OUT").build();
+        } catch (TokenNotFoundException e) {
+            return Response.status(406, "TOKEN NOT CREATED")
+                    .header("status", "TOKEN NOT CREATED").build();
+        } catch (UserNotFoundException e) {
+            return Response.status(406, "USER NOT FOUND")
+                    .header("status", "USER NOT FOUND").build();
+        }
+
+    }
+
+
 }

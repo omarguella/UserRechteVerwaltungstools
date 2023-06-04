@@ -65,6 +65,8 @@ public class UserServiceImpl implements UserService {
             throw new CannotModifySuperAdminException("CANNOT ADD A SUPERADMIN USER");
         }*/
 
+
+
         userDto.setRoles(new ArrayList<>());
 
         if (userDto.getEmail().isBlank() || userDto.getPassword().isBlank() || userDto.getUsername().isBlank()
@@ -92,13 +94,9 @@ public class UserServiceImpl implements UserService {
         } catch (UserNotFoundException ignored) {
         }
 
+         userDto.setPassword(passwordEncoder.passwordCoder((userDto.getPassword())));
 
-        userDto.setPassword(passwordEncoder.passwordCoder((userDto.getPassword())));
-
-
-
-        userDto=assignRoleToUser(userDto,roleName);
-
+         userDto=assignRoleToUser(userDto,roleName);
 
          saveUser(userDto);
          return getUserByEmail(userDto.getEmail());

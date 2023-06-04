@@ -10,6 +10,7 @@ public class RefreshToken {
     private long id;
     private String userId;
     private String token;
+    private Long issuedAt;
 
     public long getId() {
         return id;
@@ -35,12 +36,21 @@ public class RefreshToken {
         this.token = token;
     }
 
+    public Long getIssuedAt() {
+        return issuedAt;
+    }
+
+    public void setIssuedAt(Long issuedAt) {
+        this.issuedAt = issuedAt;
+    }
+
     @Override
     public String toString() {
         return "RefreshToken{" +
                 "id=" + id +
                 ", userId='" + userId + '\'' +
                 ", token='" + token + '\'' +
+                ", issuedAt='" + issuedAt + '\'' +
                 '}';
     }
 }

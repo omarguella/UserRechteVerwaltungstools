@@ -33,6 +33,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setUserId(encoder.passwordCoder(String.valueOf(user.getId())));
         refreshToken.setToken(encoder.passwordCoder(token));
+        refreshToken.setIssuedAt(currentTimeInMins());
         refreshTokenRepository.persistAndFlush(refreshToken);
         return getRefreshTokenByToken(refreshToken.getToken());
     }
@@ -63,11 +64,20 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Transactional
     @Override
     public void deleteRefreshTokenByToken(String token) throws TokenNotFoundException {
-
         RefreshToken refreshToken = getRefreshTokenByToken(token);
-        LOGGER.info(String.valueOf(refreshToken));
         refreshTokenRepository.delete(refreshToken);
-
     }
 
-}
+    @Override
+    public void deleteAllRefreshToken(long id) throws TokenNotFoundException {
+        List<RefreshToken> refreshTokenByUserId = getRefreshTokenByUserId(id);
+        for (RefreshToken refreshToken : refreshTokenByUserId) {
+            refreshTokenRepository.delete(refreshToken);
+        }
+    }
+    private static long currentTimeInMins() {
+        long currentTimeMS = System.currentTimeMillis();
+        return currentTimeMS / 60000;
+    }
+
+    }

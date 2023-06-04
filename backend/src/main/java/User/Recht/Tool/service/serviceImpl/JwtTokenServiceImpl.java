@@ -1,5 +1,6 @@
 package User.Recht.Tool.service.serviceImpl;
 
+import User.Recht.Tool.dtos.DeviceInfosDto;
 import User.Recht.Tool.service.JwtTokenService;
 import User.Recht.Tool.entity.User;
 
@@ -29,10 +30,10 @@ public class JwtTokenServiceImpl implements JwtTokenService {
     private static final String ISSUER = "USER_RECHT_TOOL";
 
     @Override
-    public String createToken(User user, String ipAddress, String deviceName)
+    public String createToken(User user, DeviceInfosDto deviceInfos)
             throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
 
-      return claimsOfUser.createUserClaims( user, ipAddress, deviceName);
+      return claimsOfUser.createUserClaims( user, deviceInfos);
 
 
     }
