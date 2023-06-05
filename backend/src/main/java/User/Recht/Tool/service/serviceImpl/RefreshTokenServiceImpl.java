@@ -1,11 +1,11 @@
 package User.Recht.Tool.service.serviceImpl;
 
 import User.Recht.Tool.entity.RefreshToken;
+import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.Token.TokenNotFoundException;
 import User.Recht.Tool.repository.RefreshTokenRepository;
 import User.Recht.Tool.service.RefreshTokenService;
 import User.Recht.Tool.util.Encoder;
-import User.Recht.Tool.entity.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +14,8 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.NotFoundException;
 import java.util.List;
+
+import static User.Recht.Tool.service.serviceImpl.JwtTokenServiceImpl.currentTimeInMins;
 
 @RequestScoped
 public class RefreshTokenServiceImpl implements RefreshTokenService {
@@ -75,9 +77,6 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
             refreshTokenRepository.delete(refreshToken);
         }
     }
-    private static long currentTimeInMins() {
-        long currentTimeMS = System.currentTimeMillis();
-        return currentTimeMS / 60000;
-    }
 
-    }
+
+}

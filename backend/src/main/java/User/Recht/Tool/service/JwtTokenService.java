@@ -9,7 +9,7 @@ import java.security.PrivateKey;
 import java.security.spec.InvalidKeySpecException;
 
 public interface JwtTokenService {
-    String createToken (User user, DeviceInfosDto deviceInfos)
+    String createToken (User user, DeviceInfosDto deviceInfos,Boolean withClaims)
             throws IOException, NoSuchAlgorithmException, InvalidKeySpecException;
 
     PrivateKey readPrivateKey(String pemResName) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException;

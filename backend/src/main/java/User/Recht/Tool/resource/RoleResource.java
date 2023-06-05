@@ -4,6 +4,7 @@ package User.Recht.Tool.resource;
 import User.Recht.Tool.dtos.roleDtos.RoleDto;
 import User.Recht.Tool.dtos.roleDtos.UpdateRoleDto;
 import User.Recht.Tool.entity.Role;
+import User.Recht.Tool.exception.Permission.LevelRoleException;
 import User.Recht.Tool.exception.Permission.PermissionNotFound;
 import User.Recht.Tool.exception.Permission.PermissionToRoleNotFound;
 import User.Recht.Tool.exception.role.RoleMovedToException;
@@ -48,6 +49,9 @@ public class RoleResource {
         } catch (RoleNotFoundException e) {
             return Response.status(406, "ROLE IS NOT SAFE CREATED")
                     .header("status", " ROLE IS NOT SAFE CREATED ").build();
+        } catch (LevelRoleException e) {
+            return Response.status(406, "LEVEL SHOULD BE BIGGER THAN 0")
+                    .header("status", " LEVEL SHOULD BE BIGGER THAN 0 ").build();
         }
     }
 
@@ -139,5 +143,21 @@ public class RoleResource {
         }
     }
 
+    @GET
+    @PermitAll
+    @Path("/publicRoles/")
+    public Response getPublicRoles() {
+        List<Role> roles = roleService.getPublicRoles();
+        return Response.ok(roles).header("STATUS", "LIST OF PUBLIC ROLES")
+                .build();
+    }
+    @GET
+    @PermitAll
+    @Path("/privatRoles/")
+    public Response getPrivateRoles(@Context SecurityContext securityContext) {
+        List<Role> roles = roleService.getPrivatRoles();
+        return Response.ok(roles).header("STATUS", "LIST OF PRIVATE ROLES")
+                .build();
+    }
 
 }

@@ -4,10 +4,10 @@ import User.Recht.Tool.dtos.DeviceInfosDto;
 import User.Recht.Tool.dtos.login.AuthenticationDto;
 import User.Recht.Tool.dtos.tokenDtos.TokenDto;
 import User.Recht.Tool.dtos.userDtos.UserDto;
-import User.Recht.Tool.entity.Role;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.Authentification.WrongPasswordException;
 import User.Recht.Tool.exception.DuplicateElementException;
+import User.Recht.Tool.exception.Permission.PublicRoleNotFound;
 import User.Recht.Tool.exception.Permission.SessionTimeoutException;
 import User.Recht.Tool.exception.Token.TokenNotFoundException;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
@@ -16,6 +16,8 @@ import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.service.AuthenticationService;
 import User.Recht.Tool.service.RoleService;
 import User.Recht.Tool.service.UserService;
+import io.quarkus.mailer.Mail;
+import io.quarkus.mailer.Mailer;
 import io.vertx.ext.web.RoutingContext;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
@@ -28,7 +30,6 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import javax.xml.bind.ValidationException;
-import java.util.List;
 
 @Path("/auth")
 @Produces(MediaType.APPLICATION_JSON)
@@ -39,9 +40,6 @@ public class AuthenticationResource {
     AuthenticationService authenticationService;
     @Inject
     UserService userService;
-    @Inject
-    RoleService roleService;
-
     @ConfigProperty(name = "quarkus.http.proxy.proxy-address-forwarding", defaultValue = "false")
     boolean proxyAddressForwarding;
 
@@ -54,38 +52,25 @@ public class AuthenticationResource {
     public Response createUser(@RequestBody UserDto userDto, @PathParam("roleName") String roleName) {
 
         try {
-            User user = userService.createUser(userDto, roleName);
+            User user = authenticationService.createPublicUser(userDto, roleName);
             return Response.ok(user).header("Email", userDto.getEmail())
                     .build();
 
         } catch (UserNameDuplicateElementException e) {
-            return Response.status(406, "USERNAME IS ALREADY USED")
-                    .header("status", " USERNAME IS ALREADY USED ").build();
+            return Response.status(406, "USERNAME IS ALREADY USED").header("status", " USERNAME IS ALREADY USED ").build();
         } catch (DuplicateElementException e) {
-            return Response.status(406, "EMAIL IS ALREADY USED")
-                    .header("status", " EMAIL IS ALREADY USED").build();
+            return Response.status(406, "EMAIL IS ALREADY USED").header("status", " EMAIL IS ALREADY USED").build();
         } catch (ValidationException a) {
-            return Response.status(406, "EMAIL, PASSWORD OR PHONENUMBER IS NOT VALID")
-                    .header("status", "EMAIL, PASSWORD OR PHONENUMBER IS NOT VALID").build();
-
+            return Response.status(406, "EMAIL, PASSWORD OR PHONENUMBER IS NOT VALID").header("status", "EMAIL, PASSWORD OR PHONENUMBER IS NOT VALID").build();
         } catch (RoleNotFoundException a) {
-            return Response.status(406, "ROLE NOT FOUND")
-                    .header("status", "ROLE NOT FOUND").build();
-
+            return Response.status(406, "ROLE NOT FOUND").header("status", "ROLE NOT FOUND").build();
         } catch (UserNotFoundException e) {
-            return Response.status(406, "USER NOT SAVED")
-                    .header("status", "USER NOT SAVED").build();
+            return Response.status(406, "USER NOT SAVED").header("status", "USER NOT SAVED").build();
+        } catch (PublicRoleNotFound e) {
+            return Response.status(406, "THE ROLE IS NOT PUBLIC").header("status", "THE ROLE IS NOT PUBLIC").build();
         }
     }
 
-    @GET
-    @PermitAll
-    @Path("/publicRole/")
-    public Response getPublicRoles(@Context SecurityContext securityContext) {
-        List<Role> roles = roleService.getPublicRoles();
-        return Response.ok(roles).header("STATUS", "LIST OF PUBLIC ROLES")
-                .build();
-    }
 
     @PermitAll
     @POST
@@ -107,6 +92,20 @@ public class AuthenticationResource {
                     .header("status", "WRONG PASSWORD").build();
         } catch (UserNotFoundException e) {
             return Response.status(406, "USER NOT FOUND")
+                    .header("status", "USER NOT FOUND").build();
+        }
+    }
+
+    @RolesAllowed({"USER"})
+    @GET
+    @Path("/me/")
+    public Response getMe(@Context SecurityContext securityContext) {
+        try {
+            User user = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
+            return Response.ok(user).header("EMAIL", user.getEmail())
+                    .build();
+        } catch (UserNotFoundException e) {
+            return Response.status(401, "USER NOT FOUND")
                     .header("status", "USER NOT FOUND").build();
         }
     }

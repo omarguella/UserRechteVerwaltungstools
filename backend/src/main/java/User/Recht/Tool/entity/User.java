@@ -36,6 +36,8 @@ public class User {
     private String phoneNumber;
     private boolean isVerifiedEmail = false;
 
+    private  String pinEmail;
+
     @ManyToMany
     @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -98,6 +100,15 @@ public class User {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+
+    public String getPinEmail() {
+        return pinEmail;
+    }
+
+    public void setPinEmail(String pinEmail) {
+        this.pinEmail = pinEmail;
     }
 
     public User() {

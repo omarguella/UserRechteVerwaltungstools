@@ -3,10 +3,14 @@ package User.Recht.Tool.service;
 import User.Recht.Tool.dtos.DeviceInfosDto;
 import User.Recht.Tool.dtos.login.AuthenticationDto;
 import User.Recht.Tool.dtos.tokenDtos.TokenDto;
+import User.Recht.Tool.dtos.userDtos.UserDto;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.Authentification.WrongPasswordException;
+import User.Recht.Tool.exception.DuplicateElementException;
+import User.Recht.Tool.exception.Permission.PublicRoleNotFound;
 import User.Recht.Tool.exception.Permission.SessionTimeoutException;
 import User.Recht.Tool.exception.Token.TokenNotFoundException;
+import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
 import io.vertx.ext.web.RoutingContext;
 import org.jose4j.jwt.MalformedClaimException;
@@ -14,11 +18,16 @@ import org.jose4j.jwt.consumer.InvalidJwtException;
 
 import javax.transaction.Transactional;
 import javax.ws.rs.core.HttpHeaders;
+import javax.xml.bind.ValidationException;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
 public interface AuthenticationService {
+    @Transactional
+    User createPublicUser(UserDto userDto, String roleName)
+            throws DuplicateElementException, NullPointerException, ValidationException, RoleNotFoundException, UserNotFoundException, PublicRoleNotFound;
+
     @Transactional
     TokenDto login(AuthenticationDto authenticationDto,DeviceInfosDto deviceInfos)
             throws UserNotFoundException, WrongPasswordException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, TokenNotFoundException;

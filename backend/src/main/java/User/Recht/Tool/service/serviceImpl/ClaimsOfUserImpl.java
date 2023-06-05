@@ -88,8 +88,8 @@ public class ClaimsOfUserImpl implements ClaimsOfUser {
                 .claim("allPermissionsOfUser",allPermissionsOfUser)
                 .claim("osName",deviceInfos.getOsName())
                 .claim("osVersion",deviceInfos.getOsVersion())
-                .claim("userAgent=",deviceInfos.getUserAgent())
-                .claim("clientIpAddress==",deviceInfos.getClientIpAddress())
+                .claim("userAgent",deviceInfos.getUserAgent())
+                .claim("clientIpAddress",deviceInfos.getClientIpAddress())
                 .claim("isMailToVerify",isMailToVerify)
                 .claim("isVerifiedEmail",user.getIsVerifiedEmail())
                 .claim("issuedAt",currentTimeInSecs)
@@ -99,7 +99,7 @@ public class ClaimsOfUserImpl implements ClaimsOfUser {
 
     }
 
-    private static long currentTimeInSecs() {
+    static long currentTimeInSecs() {
         long currentTimeMS = System.currentTimeMillis();
         return  (currentTimeMS / 1000);
     }

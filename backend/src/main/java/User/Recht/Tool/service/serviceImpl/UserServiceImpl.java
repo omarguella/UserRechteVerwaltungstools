@@ -6,6 +6,9 @@ import User.Recht.Tool.dtos.userDtos.UserProfileDto;
 import User.Recht.Tool.entity.Role;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.DuplicateElementException;
+import User.Recht.Tool.exception.Permission.CannotCreateUserFromLowerLevel;
+import User.Recht.Tool.exception.Permission.EmailAlreadyVerified;
+import User.Recht.Tool.exception.Permission.PinNotFound;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
 import User.Recht.Tool.exception.user.UserNameDuplicateElementException;
@@ -13,9 +16,10 @@ import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.factory.userFactorys.UserFactory;
 import User.Recht.Tool.repository.UserRepository;
 import User.Recht.Tool.service.RoleService;
-import User.Recht.Tool.service.RoleToUserService;
 import User.Recht.Tool.service.UserService;
 import User.Recht.Tool.util.Encoder;
+import io.quarkus.mailer.Mail;
+import io.quarkus.mailer.Mailer;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +33,7 @@ import javax.transaction.Transactional;
 import javax.xml.bind.ValidationException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,7 +51,7 @@ public class UserServiceImpl implements UserService {
     EntityManager entityManager;
 
     @Inject
-    RoleToUserService roleToUserService;
+    Mailer mailer;
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
@@ -58,14 +63,34 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
+    public User createPrivateUser(UserDto userDto, String roleName, User user)
+            throws DuplicateElementException, NullPointerException, ValidationException,
+            RoleNotFoundException, UserNotFoundException, CannotCreateUserFromLowerLevel {
+
+        int minRoleLevel;
+        List<Role> roles = roleService.getPrivatRoles();
+        Role role = roleService.getRoleByName(roleName);
+        if (roles.contains(role)) {
+            minRoleLevel = user.getRoles()
+                    .stream()
+                    .mapToInt(Role::getLevel)
+                    .min()
+                    .orElse(1);
+            if (minRoleLevel > role.getLevel()) {
+                throw new CannotCreateUserFromLowerLevel("CANNOT CREATE A USER FROM A HIGHER ROLE LEVEL");
+            }
+        }
+        return createUser(userDto, roleName);
+    }
+
+    @Transactional
+    @Override
     public User createUser(UserDto userDto, String roleName) throws DuplicateElementException, NullPointerException, ValidationException, RoleNotFoundException, UserNotFoundException {
 
         /* after INIT
         if(roleName.toUpperCase().equals("SUPERADMIN")){
             throw new CannotModifySuperAdminException("CANNOT ADD A SUPERADMIN USER");
         }*/
-
-
 
         userDto.setRoles(new ArrayList<>());
 
@@ -94,17 +119,17 @@ public class UserServiceImpl implements UserService {
         } catch (UserNotFoundException ignored) {
         }
 
-         userDto.setPassword(passwordEncoder.passwordCoder((userDto.getPassword())));
+        userDto.setPassword(passwordEncoder.passwordCoder((userDto.getPassword())));
 
-         userDto=assignRoleToUser(userDto,roleName);
+        userDto = assignRoleToUser(userDto, roleName);
 
-         saveUser(userDto);
-         return getUserByEmail(userDto.getEmail());
+        saveUser(userDto);
+        return getUserByEmail(userDto.getEmail());
 
     }
 
     @Transactional
-    public void saveUser(UserDto userDto)  {
+    public void saveUser(UserDto userDto) {
         User user = userFactory.userFactory(userDto);
         userRepository.persist(user);
     }
@@ -128,11 +153,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getAllUsersByRole(String roleName) throws  RoleNotFoundException {
-        if (roleName==null){
+    public List<User> getAllUsersByRole(String roleName) throws RoleNotFoundException {
+        if (roleName == null) {
             throw new RoleNotFoundException("ROLE NOT FOUND");
         }
-        roleName=roleName.toUpperCase();
+        roleName = roleName.toUpperCase();
         roleService.getRoleByName(roleName);
         TypedQuery<User> query = entityManager.createQuery(
                 "SELECT u FROM User u JOIN u.roles r WHERE r.name = :roleName", User.class);
@@ -166,7 +191,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public User updateEmailUser(Long id, String newEmail) throws UserNotFoundException, ValidationException,DuplicateElementException {
+    public User updateEmailUser(Long id, String newEmail) throws UserNotFoundException, ValidationException, DuplicateElementException {
 
         User userToUpdate = getUserById(id);
 
@@ -175,7 +200,7 @@ public class UserServiceImpl implements UserService {
         } else {
             try {
                 User checkUserEmail = getUserByEmail(newEmail.toUpperCase());
-                if(checkUserEmail.getId()!=id){
+                if (checkUserEmail.getId() != id) {
                     throw new DuplicateElementException("USER EMAIL ALREADY USED");
                 }
             } catch (UserNotFoundException e) {
@@ -190,7 +215,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public User updatePasswordById(Long id, UpdatePasswordDto updatePasswordDto) throws UserNotFoundException, ValidationException ,IllegalArgumentException{
+    public User updatePasswordById(Long id, UpdatePasswordDto updatePasswordDto) throws UserNotFoundException, ValidationException, IllegalArgumentException {
 
         User userToUpdate = getUserById(id);
 
@@ -208,14 +233,14 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public User updateProfilById(Long id, UserProfileDto userProfileDto) throws UserNotFoundException,CannotModifySuperAdminException,ValidationException, DuplicateElementException {
+    public User updateProfilById(Long id, UserProfileDto userProfileDto) throws UserNotFoundException, CannotModifySuperAdminException, ValidationException, DuplicateElementException {
 
-        User userToUpdate= getUserById(id);
+        User userToUpdate = getUserById(id);
 
 
         if (userProfileDto.getUsername() != null) {
-            if (getUserById(id).getUsername().equals("SUPERADMIN")){
-               // throw new CannotModifySuperAdminException("CANNOT MODIFY A SUPERADMIN");
+            if (getUserById(id).getUsername().equals("SUPERADMIN")) {
+                // throw new CannotModifySuperAdminException("CANNOT MODIFY A SUPERADMIN");
             }
             try {
                 userProfileDto.setUsername(userProfileDto.getUsername().toUpperCase());
@@ -238,11 +263,12 @@ public class UserServiceImpl implements UserService {
         Hibernate.initialize(userToUpdate.getRoles());
         return saveUpdatedUser(userToUpdate);
     }
+
     @Transactional
     @Override
-    public User deleteUserById(Long id) throws UserNotFoundException,CannotModifySuperAdminException {
+    public User deleteUserById(Long id) throws UserNotFoundException, CannotModifySuperAdminException {
 
-        if (getUserById(id).getUsername().equals("SUPERADMIN")){
+        if (getUserById(id).getUsername().equals("SUPERADMIN")) {
             throw new CannotModifySuperAdminException("CANNOT MODIFY A SUPERADMIN");
         }
 
@@ -255,6 +281,45 @@ public class UserServiceImpl implements UserService {
             throw new UserNotFoundException("USER DONT EXIST");
         }
     }
+
+    @Transactional
+    @Override
+    public void sendPinForEmailVerify(User user){
+        String userMail= user.getEmail();
+        String pin=generateRandomDigits(5);
+        user.setPinEmail(passwordEncoder.passwordCoder(pin));
+        user= saveUpdatedUser(user);
+
+        String body = "<!DOCTYPE html>\n" +
+                "<html>\n" +
+                "<body>\n" +
+                "\n" +
+                "<h1><strong>EMAIL VERIFICATION </strong></h1>\n" +
+                "<p>This is your PIN to verify your Email\n </p>" +
+                " <div>"+pin+" </div>  \n" +
+                "<div> Thanks! </div>  \n" +
+                " \n" +
+                " \n" +
+                "</body>\n" +
+                "</html>\n";
+        mailer.send(Mail.withHtml(userMail, "EMAIL VERIFICATION FOR YOUR APP", body));
+    }
+
+    @Transactional
+    @Override
+    public User emailVerifyByPin(User user, String pin) throws PinNotFound, EmailAlreadyVerified {
+        if(user.getIsVerifiedEmail()){
+            throw new EmailAlreadyVerified("EMAIL IS ALREADY VERIFIED");
+        }
+        pin=passwordEncoder.passwordCoder(pin);
+        if(!pin.equals(user.getPinEmail())){
+            throw new PinNotFound("PIN IS WRONG");
+        } else {
+            user.setIsVerifiedEmail(true);
+            return saveUpdatedUser(user);
+        }
+    }
+
 
     public Boolean verifyPasswordById(String password, Long id) throws UserNotFoundException {
         User user = getUserById(id);
@@ -301,5 +366,18 @@ public class UserServiceImpl implements UserService {
         userRepository.delete(user);
     }
 
-}
+    public static String generateRandomDigits(int length) {
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder(length);
+
+        for (int i = 0; i < length; i++) {
+            int digit = random.nextInt(10); // Generates a random digit between 0 and 9
+            sb.append(digit);
+        }
+
+        return sb.toString();
+    }
+
+
+    }
 

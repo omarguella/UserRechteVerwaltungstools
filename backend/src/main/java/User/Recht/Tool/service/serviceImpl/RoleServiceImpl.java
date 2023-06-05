@@ -4,6 +4,7 @@ import User.Recht.Tool.dtos.roleDtos.RoleDto;
 import User.Recht.Tool.dtos.roleDtos.UpdateRoleDto;
 import User.Recht.Tool.entity.Role;
 import User.Recht.Tool.entity.User;
+import User.Recht.Tool.exception.Permission.LevelRoleException;
 import User.Recht.Tool.exception.Permission.PermissionNotFound;
 import User.Recht.Tool.exception.Permission.PermissionToRoleNotFound;
 import User.Recht.Tool.exception.role.RoleMovedToException;
@@ -44,8 +45,11 @@ public class RoleServiceImpl implements RoleService {
 
     @Transactional
     @Override
-    public Role createRole(RoleDto roleDto) throws RoleNameDuplicateElementException, RoleNotFoundException {
+    public Role createRole(RoleDto roleDto) throws RoleNameDuplicateElementException, RoleNotFoundException, LevelRoleException {
         roleDto.setName(roleDto.getName().toUpperCase());
+        if(roleDto.getLevel()<=0){
+            throw  new LevelRoleException("LEVEL SHOULD BE BIGGER THAN 0");
+        }
         try {
             Role roleCheckWithName = getRoleByName(roleDto.getName());
             throw new RoleNameDuplicateElementException("ROLE NAME " + roleDto.getName() + " EXISTED");
@@ -81,7 +85,12 @@ public class RoleServiceImpl implements RoleService {
 
        return roles=roles.stream().filter(role-> !role.getIsPrivate()).collect(Collectors.toList());
 
+    }
 
+    @Override
+    public List<Role>  getPrivatRoles ()  {
+        List<Role>  roles =getAllRoles();
+        return roles=roles.stream().filter(Role::getIsPrivate).collect(Collectors.toList());
     }
 
     @Override
@@ -125,9 +134,9 @@ public class RoleServiceImpl implements RoleService {
     public Role updateRoleByName(String name, UpdateRoleDto updateRoleDto)
             throws RoleNotFoundException, RoleNameDuplicateElementException, IllegalArgumentException,CannotModifySuperAdminException {
 
-        if (name.equalsIgnoreCase("SUPERADMIN")){
+      /*  if (name.equalsIgnoreCase("SUPERADMIN")){
             throw new CannotModifySuperAdminException("CANNOT MODIFY A SUPERADMIN");
-        }
+        }*/
 
         Role roleToUpdate = getRoleByName(name);
 

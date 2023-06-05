@@ -3,6 +3,7 @@ package User.Recht.Tool.service;
 import User.Recht.Tool.dtos.roleDtos.RoleDto;
 import User.Recht.Tool.dtos.roleDtos.UpdateRoleDto;
 import User.Recht.Tool.entity.Role;
+import User.Recht.Tool.exception.Permission.LevelRoleException;
 import User.Recht.Tool.exception.Permission.PermissionNotFound;
 import User.Recht.Tool.exception.Permission.PermissionToRoleNotFound;
 import User.Recht.Tool.exception.role.RoleMovedToException;
@@ -17,7 +18,7 @@ import java.util.List;
 
 public interface RoleService {
     @Transactional
-    Role createRole(RoleDto roleDto) throws RoleNameDuplicateElementException, RoleNotFoundException;
+    Role createRole(RoleDto roleDto) throws RoleNameDuplicateElementException, RoleNotFoundException, LevelRoleException;
 
     @Transactional
     Role saveRole(RoleDto roleDto) throws RoleNotFoundException;
@@ -25,6 +26,8 @@ public interface RoleService {
     Role getRoleByName(String name) throws RoleNotFoundException;
 
     List<Role>  getPublicRoles();
+
+    List<Role>  getPrivatRoles();
 
     List<Role> getAllRoles();
 
