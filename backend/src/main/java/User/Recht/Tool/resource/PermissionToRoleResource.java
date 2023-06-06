@@ -78,8 +78,8 @@ public class PermissionToRoleResource {
                     .header("status", "TYPE SHOULD BE ALL OR ONE").build();
         }
         catch (ArrayIndexOutOfBoundsException e) {
-            return Response.status(406, "TYPE PERMISSION_KEY SHOULD BE IN THIS FORM KEY_GET_TYPE")
-                    .header("status", "TYPE SHOULD BE ALL OR ONE").build();
+            return Response.status(406, "TYPE PERMISSION_KEY SHOULD BE IN THIS FORM KEY_TYPE")
+                    .header("status", "TYPE PERMISSION_KEY SHOULD BE IN THIS FORM KEY_TYPE").build();
         }
     }
 

@@ -11,9 +11,9 @@ import User.Recht.Tool.exception.Permission.PermissionToRoleNotFound;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
 import User.Recht.Tool.factory.permissionFactory.PermissionRoleFactory;
+import User.Recht.Tool.repository.PermissionRoleRepository;
 import User.Recht.Tool.service.PermissionService;
 import User.Recht.Tool.service.PermissionToRoleService;
-import User.Recht.Tool.repository.PermissionRoleRepository;
 import User.Recht.Tool.service.RoleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,15 +87,26 @@ public class PermissionToRoleServiceImpl implements PermissionToRoleService {
     public List<String> addPermissionsListToRole(ListPermissionKeysDto listPermissionKeysDto, String roleName)
             throws RoleNotFoundException, PermissionNotFound, CannotModifySuperAdminException, ArrayIndexOutOfBoundsException,PermissionToRoleNotFound,IllegalArgumentException {
 
-        for(String permissionKey: listPermissionKeysDto.getPermissionsList()){
+        for(String permissionKey: listPermissionKeysDto.getPermissionsList()) {
+            permissionKey=permissionKey.toUpperCase();
+            String type;
 
-            PermissionRoleDto permissionRoleDto=new PermissionRoleDto();
+            if (permissionKey.contains("ALL")) {
+                type = "ALL";
+            } else {
+                type = "ONE";
+            }
+
+            PermissionRoleDto permissionRoleDto = new PermissionRoleDto();
             permissionRoleDto.setRoleName(roleName);
-            String[] substrings = permissionKey.split("_");
-            permissionRoleDto.setPermissionKey(substrings[0]+"_"+substrings[1]);
-            permissionRoleDto.setType(substrings[2]);
 
-            PermissionRoleDto savedPermission=addPermissionToRole(permissionRoleDto);
+            permissionRoleDto.setPermissionKey(permissionKey.substring(0, permissionKey.indexOf(type) - 1));
+            permissionRoleDto.setType(permissionKey.substring(permissionKey.indexOf(type), permissionKey.length()));
+
+            LOGGER.info(permissionRoleDto.getPermissionKey());
+            LOGGER.info(permissionRoleDto.getType());
+
+            PermissionRoleDto savedPermission = addPermissionToRole(permissionRoleDto);
         }
         return getAllPermissionsOfRole(roleName.toUpperCase());
     }
