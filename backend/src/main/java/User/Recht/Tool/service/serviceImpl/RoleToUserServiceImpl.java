@@ -107,31 +107,42 @@ public class RoleToUserServiceImpl implements RoleToUserService {
         verifyExistUserAndRole(userId, roleName);
 
         roleName = roleName.toUpperCase();
-        userMovedTo = userMovedTo.toUpperCase();
 
-        if (userService.getUserById(userId).getUsername().equals("SUPERADMIN")|| userMovedTo.equals("SUPERADMIN")){
-                throw new CannotModifySuperAdminException("CANNOT MODIFY A SUPERADMIN");
-            }
+        if (userMovedTo == null || userMovedTo.isEmpty()) {
+            userMovedTo = "?";
+        }
+
+
+        if (userService.getUserById(userId).getUsername().equals("SUPERADMIN") || userMovedTo.equals("SUPERADMIN")) {
+            throw new CannotModifySuperAdminException("CANNOT MODIFY A SUPERADMIN");
+        }
 
 
         User user = userService.getUserById(userId);
         Role role = roleService.getRoleByName(roleName);
         List<Role> roles = user.getRoles();
 
+
         if (!roles.contains(role)) {
             throw new RoleNotAssignedToUserException("ROLE NOT AVAILIBALE TO THE USER");
-        } else{
-            roles.remove(role);
-            if(roles.size()==0){
-                if(userMovedTo==null){
-                    throw new RoleMovedToException("ROLE TO MOVE NOT FOUND");
-                } else {
+        } else {
 
-                        Role movedTo= roleService.getRoleByName(userMovedTo);
-                        roles.add(roleService.getRoleByName(userMovedTo));
+
+            if (roles.size() == 1) {
+                userMovedTo = userMovedTo.toUpperCase();
+                try {
+                    Role movedTo = roleService.getRoleByName(userMovedTo);
+                } catch (RoleNotFoundException e) {
+                    throw new RoleMovedToException("ROLE TO MOVE NOT FOUND");
                 }
+
+                roles.add(roleService.getRoleByName(userMovedTo));
+                roles.remove(role);
+            } else {
+                roles.remove(role);
             }
         }
+
         user.setRoles(roles);
         userService.saveUpdatedUser(user);
         return userService.getUserById(userId);

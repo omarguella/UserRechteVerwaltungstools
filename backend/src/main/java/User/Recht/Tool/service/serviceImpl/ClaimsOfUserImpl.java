@@ -6,9 +6,9 @@ import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.service.ClaimsOfUser;
 import User.Recht.Tool.service.PermissionToRoleService;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import io.smallrye.jwt.build.Jwt;
-import io.smallrye.jwt.build.JwtClaimsBuilder;
-import org.eclipse.microprofile.jwt.Claims;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,8 +18,9 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.spec.InvalidKeySpecException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -74,6 +75,7 @@ public class ClaimsOfUserImpl implements ClaimsOfUser {
                 .collect(Collectors.toList());
 
 
+
         String privateKeyLocation = "/privatekey.pem";
         PrivateKey privateKey = jwtTokenService.readPrivateKey(privateKeyLocation);
         long currentTimeInSecs = currentTimeInSecs();
@@ -96,6 +98,32 @@ public class ClaimsOfUserImpl implements ClaimsOfUser {
                 .issuedAt(currentTimeInSecs)
                 .expiresIn(TOKEN_EXPIRE_IN)
                 .sign(privateKey);
+
+    }
+
+
+    /**
+     * listClaimUsingJWT IS COPIED FROM
+     * https://stackoverflow.com/a/71676546
+     **/
+   @Override
+   public Map<String, Object> listClaimUsingJWT(String accessToken){
+        Map<String, Object> map = new HashMap<>();
+
+        try {
+            SignedJWT signedJWT = SignedJWT.parse(accessToken);
+            JWTClaimsSet claimsSet = signedJWT.getJWTClaimsSet();
+            Map<String, Object> myClaim = claimsSet.getClaims();
+
+            String[] keySet = myClaim.keySet().toArray(new String[0]);
+
+            for (String s : keySet) {
+                map.put(s, myClaim.get(s));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return map;
 
     }
 

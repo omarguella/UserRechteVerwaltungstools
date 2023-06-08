@@ -55,11 +55,11 @@ public class PermissionToRoleResource {
     @POST
     @RolesAllowed({ "USER" })
     @Path("/list/")
-    public Response addPermissionsListToRole(@RequestBody ListPermissionKeysDto listPermissionKeysDto, @HeaderParam("roleName") String roleName
+    public Response addPermissionsListToRole(@RequestBody ListPermissionKeysDto listPermissionKeysDto
             , @Context SecurityContext securityContext) {
         try {
-            List<String> addedPermissions = permissionToRoleService.addPermissionsListToRole(listPermissionKeysDto, roleName);
-            return Response.ok(addedPermissions).header("status", "THE  LIST OF PERMISSIONS  IS ADDED TO THE ROLE " + roleName.toUpperCase())
+            List<String> addedPermissions = permissionToRoleService.addPermissionsListToRole(listPermissionKeysDto);
+            return Response.ok(addedPermissions).header("status", "THE  LIST OF PERMISSIONS  IS ADDED TO THE ROLE " + listPermissionKeysDto.getRoleName().toUpperCase())
                     .build();
         } catch (RoleNotFoundException e) {
             return Response.status(406, "ROLE NOT FOUND")
@@ -74,8 +74,8 @@ public class PermissionToRoleResource {
             return Response.status(406, "PERMISSION TO ROLE NOT SAVE")
                     .header("status", "PERMISSION TO ROLE NOT SAVE").build();
         } catch (IllegalArgumentException e) {
-            return Response.status(406, "TYPE SHOULD BE ALL OR ONE")
-                    .header("status", "TYPE SHOULD BE ALL OR ONE").build();
+            return Response.status(406, "TYPE SHOULD BE ALL OR ME")
+                    .header("status", "TYPE SHOULD BE ALL OR ME").build();
         }
         catch (ArrayIndexOutOfBoundsException e) {
             return Response.status(406, "TYPE PERMISSION_KEY SHOULD BE IN THIS FORM KEY_TYPE")
@@ -135,8 +135,8 @@ public class PermissionToRoleResource {
             return Response.status(406, "PERMISSION TO ROLE NOT SAVE")
                     .header("status", "PERMISSION TO ROLE NOT SAVE").build();
         } catch (IllegalArgumentException e) {
-            return Response.status(406, "TYPE SHOULD BE ALL OR ONE")
-                    .header("status", "TYPE SHOULD BE ALL OR ONE").build();
+            return Response.status(406, "TYPE SHOULD BE ALL OR ME")
+                    .header("status", "TYPE SHOULD BE ALL OR ME").build();
         }
     }
 
@@ -166,11 +166,11 @@ public class PermissionToRoleResource {
     @DELETE
     @RolesAllowed({ "USER" })
     @Path("/list/")
-    public Response deleteListePermissionsOfRole(@RequestBody ListPermissionKeysDto listPermissionKeysDto, @HeaderParam("roleName") String roleName
+    public Response deleteListePermissionsOfRole(@RequestBody ListPermissionKeysDto listPermissionKeysDto
             , @Context SecurityContext securityContext) {
         try {
-            List<String> toDeletePermissions = permissionToRoleService.deleteListePermissionsOfRole(listPermissionKeysDto, roleName);
-            return Response.ok(toDeletePermissions).header("status", "THE LIST OF PERMISSIONS OF THE ROLE IS DELETED" + roleName.toUpperCase())
+            List<String> toDeletePermissions = permissionToRoleService.deleteListePermissionsOfRole(listPermissionKeysDto);
+            return Response.ok(toDeletePermissions).header("status", "THE LIST OF PERMISSIONS OF THE ROLE IS DELETED" + listPermissionKeysDto.getRoleName().toUpperCase())
                     .build();
         } catch (RoleNotFoundException e) {
             return Response.status(406, "ROLE NOT FOUND")
@@ -185,15 +185,15 @@ public class PermissionToRoleResource {
             return Response.status(406, "PERMISSION TO ROLE NOT SAVE")
                     .header("status", "PERMISSION TO ROLE NOT SAVE").build();
         } catch (IllegalArgumentException e) {
-            return Response.status(406, "TYPE SHOULD BE ALL OR ONE")
-                    .header("status", "TYPE SHOULD BE ALL OR ONE").build();
+            return Response.status(406, "TYPE SHOULD BE ALL OR ME")
+                    .header("status", "TYPE SHOULD BE ALL OR ME").build();
         }
     }
 
     @DELETE
     @RolesAllowed({ "USER" })
-    @Path("/all/")
-    public Response deleteALLPermissionsOfRole(@HeaderParam("roleName") String roleName
+    @Path("all/{roleName}")
+    public Response deleteALLPermissionsOfRole(@PathParam("roleName") String roleName
             , @Context SecurityContext securityContext) {
         try {
             List<String> toDeletePermissions = permissionToRoleService.deleteALLPermissionsOfRole(roleName);
@@ -212,8 +212,8 @@ public class PermissionToRoleResource {
             return Response.status(406, "PERMISSION TO ROLE NOT SAVE")
                     .header("status", "PERMISSION TO ROLE NOT SAVE").build();
         } catch (IllegalArgumentException e) {
-            return Response.status(406, "TYPE SHOULD BE ALL OR ONE")
-                    .header("status", "TYPE SHOULD BE ALL OR ONE").build();
+            return Response.status(406, "TYPE SHOULD BE ALL OR ME")
+                    .header("status", "TYPE SHOULD BE ALL OR ME").build();
         }
     }
 

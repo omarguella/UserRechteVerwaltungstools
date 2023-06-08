@@ -37,7 +37,7 @@ public class PermissionServiceImpl implements PermissionService {
     @PersistenceContext
     EntityManager entityManager;
 
-    private static final String NAME_REGEX = "^[a-zA-Z]+$";
+    private static final String NAME_REGEX = "[A-Za-z_]+";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PermissionServiceImpl.class);
 

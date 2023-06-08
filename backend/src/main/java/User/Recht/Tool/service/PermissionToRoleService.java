@@ -18,7 +18,7 @@ public interface PermissionToRoleService {
             throws RoleNotFoundException, PermissionNotFound, CannotModifySuperAdminException, PermissionToRoleNotFound,IllegalArgumentException;
 
     @Transactional
-    List<String> addPermissionsListToRole(ListPermissionKeysDto listPermissionKeysDto, String roleName)
+    List<String> addPermissionsListToRole(ListPermissionKeysDto listPermissionKeysDto)
             throws RoleNotFoundException, PermissionNotFound, CannotModifySuperAdminException,ArrayIndexOutOfBoundsException, PermissionToRoleNotFound,IllegalArgumentException;
 
     PermissionRoleDto getPermissionByRole(String permissionKey, String roleName)
@@ -35,7 +35,7 @@ public interface PermissionToRoleService {
             RoleNotFoundException, PermissionToRoleNotFound,CannotModifySuperAdminException;
 
     @Transactional
-    List<String> deleteListePermissionsOfRole(ListPermissionKeysDto listPermissionKeysDto, String roleName) throws PermissionNotFound,
+    List<String> deleteListePermissionsOfRole(ListPermissionKeysDto listPermissionKeysDto) throws PermissionNotFound,
             RoleNotFoundException, PermissionToRoleNotFound,CannotModifySuperAdminException;
 
     @Transactional

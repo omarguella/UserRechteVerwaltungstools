@@ -4,16 +4,18 @@ package User.Recht.Tool.resource;
 import User.Recht.Tool.dtos.roleDtos.RoleDto;
 import User.Recht.Tool.dtos.roleDtos.UpdateRoleDto;
 import User.Recht.Tool.entity.Role;
-import User.Recht.Tool.exception.Permission.LevelRoleException;
-import User.Recht.Tool.exception.Permission.PermissionNotFound;
-import User.Recht.Tool.exception.Permission.PermissionToRoleNotFound;
+import User.Recht.Tool.entity.User;
+import User.Recht.Tool.exception.Permission.*;
 import User.Recht.Tool.exception.role.RoleMovedToException;
 import User.Recht.Tool.exception.role.RoleNameDuplicateElementException;
 import User.Recht.Tool.exception.role.RoleNotAssignedToUserException;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
+import User.Recht.Tool.service.AutorisationService;
 import User.Recht.Tool.service.RoleService;
+import User.Recht.Tool.service.UserService;
+import io.vertx.ext.web.RoutingContext;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 
 import javax.annotation.security.PermitAll;
@@ -32,12 +34,23 @@ import java.util.List;
 public class RoleResource {
     @Inject
     RoleService roleService;
+    @Inject
+    UserService userService;
+    @Inject
+    AutorisationService autorisationService;
 
 
     @POST
     @RolesAllowed({"USER"})
-    public Response createRole(@RequestBody RoleDto roleDto, @Context SecurityContext securityContext) {
+    public Response createRole(@RequestBody RoleDto roleDto
+            , @Context RoutingContext routingContext, @Context SecurityContext securityContext) {
+
         try {
+            User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+
+            // CHECK PERMISSIONS
+            autorisationService.checkExistedUserPermission("ROLE_MANAGER_POST", token);
 
             Role role = roleService.createRole(roleDto);
             return Response.ok(role).header(roleDto.getName(), "IS CREATED")
@@ -52,20 +65,43 @@ public class RoleResource {
         } catch (LevelRoleException e) {
             return Response.status(406, "LEVEL SHOULD BE BIGGER THAN 0")
                     .header("status", " LEVEL SHOULD BE BIGGER THAN 0 ").build();
+        } catch (UserNotFoundException e) {
+            return Response.status(406, "USER DOSENT EXIST")
+                    .header("status", "USER DOSENT EXIST").build();
+        } catch (UserNotAuthorized e) {
+            return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
+                    .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
         }
     }
 
     @GET
     @RolesAllowed({"USER"})
     @Path("/name/{roleName}/")
-    public Response getRoleWithName(@PathParam("roleName") String roleName, @Context SecurityContext securityContext) {
+    public Response getRoleWithName(@PathParam("roleName") String roleName
+            , @Context RoutingContext routingContext, @Context SecurityContext securityContext) {
+
         try {
+
+            User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+            // CHECK PERMISSIONS
+            autorisationService.checkRoleManagerAutorisations(connectedUser, roleName, "ROLE_MANAGER_GET", token, null);
+
             Role role = roleService.getRoleByName(roleName);
             return Response.ok(role).header("ROLE", role.getName())
                     .build();
         } catch (RoleNotFoundException e) {
             return Response.status(406, "ROLE DOSENT EXIST")
                     .header("status", "ROLE DOSENT EXIST").build();
+        } catch (UserNotFoundException e) {
+            return Response.status(406, "USER DOSENT EXIST")
+                    .header("status", "USER DOSENT EXIST").build();
+        } catch (UserNotAuthorized e) {
+            return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
+                    .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
+        } catch (DeniedRoleLevel e) {
+            return Response.status(406, "CANNOT GET A ROLE OF A HIGHER ROLE LEVEL")
+                    .header("STATUS", " CANNOT GET A ROLE A ROLE OF A HIGHER ROLE LEVEL").build();
         }
     }
 
@@ -79,14 +115,20 @@ public class RoleResource {
     }
 
 
-
     @DELETE
     @RolesAllowed({"USER"})
     @Path("/name/{roleName}/")
-    public Response deleteRole(@PathParam("roleName") String roleName,@HeaderParam("usersMovedTo") String userMovedTo,
-                               @Context SecurityContext securityContext) {
+    public Response deleteRole(@PathParam("roleName") String roleName, @HeaderParam("usersMovedTo") String userMovedTo,
+                               @Context RoutingContext routingContext, @Context SecurityContext securityContext) {
         try {
-            Role role = roleService.deleteRoleByName(roleName,userMovedTo);
+
+            User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+
+            // CHECK PERMISSIONS
+            autorisationService.checkRoleManagerAutorisations(connectedUser, roleName, "ROLE_MANAGER_DELETE", token, userMovedTo);
+
+            Role role = roleService.deleteRoleByName(roleName, userMovedTo);
 
             return Response.ok(role).header("ROLE", "IS DELETED")
                     .build();
@@ -107,12 +149,20 @@ public class RoleResource {
             return Response.status(406, "ROLE TO MOVE NOT FOUND")
                     .header("status", "ROLE TO MOVE NOT FOUND").build();
 
-        }  catch (PermissionToRoleNotFound e) {
+        } catch (PermissionToRoleNotFound e) {
+
             return Response.status(406, "PERMISSION TO ROLE NOT SAVE")
                     .header("status", "PERMISSION TO ROLE NOT SAVE").build();
+
         } catch (RoleNotAssignedToUserException e) {
             return Response.status(406, "ROLE NOT AVAILIBALE TO ALL USERS")
                     .header("status", "ROLE NOT AVAILIBALE TO ALL USERS").build();
+        } catch (UserNotAuthorized e) {
+            return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
+                    .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
+        } catch (DeniedRoleLevel e) {
+            return Response.status(406, "CANNOT DELETE A ROLE OF A HIGHER OR SAME ROLE LEVEL")
+                    .header("STATUS", " CANNOT DELETE A ROLE  OF A HIGHER OR SAME ROLE LEVEL").build();
         }
     }
 

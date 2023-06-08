@@ -44,7 +44,7 @@ public class PermissionResource {
 
         }catch (IllegalArgumentException  e) {
 
-            return Response.status(406, "PERMISSION NAME SHOULD BE ONLY CHARACTER")
+            return Response.status(406, "PERMISSION NAME SHOULD BE ONLY CHARACTER AND _")
                     .header("status", "PERMISSION NAME SHOULD BE ONLY CHARACTER")
                     .build();
 

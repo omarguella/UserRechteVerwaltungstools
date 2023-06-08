@@ -58,8 +58,8 @@ public class PermissionToRoleServiceImpl implements PermissionToRoleService {
             throw new CannotModifySuperAdminException("CANNOT MODIFY A SUPERADMIN");
         }*/
 
-        if(!(type.equals("ALL") || type.equals("ONE"))){
-            throw new IllegalArgumentException("TYPE SHOULD BE ALL OR ONE");
+        if(!(type.equals("ALL") || type.equals("ME"))){
+            throw new IllegalArgumentException("TYPE SHOULD BE ALL OR ME");
         }
 
         try {
@@ -84,7 +84,7 @@ public class PermissionToRoleServiceImpl implements PermissionToRoleService {
 
     @Transactional
     @Override
-    public List<String> addPermissionsListToRole(ListPermissionKeysDto listPermissionKeysDto, String roleName)
+    public List<String> addPermissionsListToRole(ListPermissionKeysDto listPermissionKeysDto)
             throws RoleNotFoundException, PermissionNotFound, CannotModifySuperAdminException, ArrayIndexOutOfBoundsException,PermissionToRoleNotFound,IllegalArgumentException {
 
         for(String permissionKey: listPermissionKeysDto.getPermissionsList()) {
@@ -94,21 +94,18 @@ public class PermissionToRoleServiceImpl implements PermissionToRoleService {
             if (permissionKey.contains("ALL")) {
                 type = "ALL";
             } else {
-                type = "ONE";
+                type = "ME";
             }
 
             PermissionRoleDto permissionRoleDto = new PermissionRoleDto();
-            permissionRoleDto.setRoleName(roleName);
+            permissionRoleDto.setRoleName(listPermissionKeysDto.getRoleName());
 
             permissionRoleDto.setPermissionKey(permissionKey.substring(0, permissionKey.indexOf(type) - 1));
             permissionRoleDto.setType(permissionKey.substring(permissionKey.indexOf(type), permissionKey.length()));
 
-            LOGGER.info(permissionRoleDto.getPermissionKey());
-            LOGGER.info(permissionRoleDto.getType());
-
             PermissionRoleDto savedPermission = addPermissionToRole(permissionRoleDto);
         }
-        return getAllPermissionsOfRole(roleName.toUpperCase());
+        return getAllPermissionsOfRole(listPermissionKeysDto.getRoleName().toUpperCase());
     }
 
         @Override
@@ -161,8 +158,8 @@ public PermissionRoleDto getPermissionByRole(String permissionKey, String roleNa
             throw new CannotModifySuperAdminException("CANNOT MODIFY A SUPERADMIN");
         }*/
 
-        if(!(type.equals("ALL") || type.equals("ONE"))){
-            throw new IllegalArgumentException("TYPE SHOULD BE ALL OR ONE");
+        if(!(type.equals("ALL") || type.equals("ME"))){
+            throw new IllegalArgumentException("TYPE SHOULD BE ALL OR ME");
         }
 
         Permission permission = permissionService.getPermissionByKey(permissionKey);
@@ -203,17 +200,23 @@ public PermissionRoleDto getPermissionByRole(String permissionKey, String roleNa
 
     @Transactional
     @Override
-    public List<String> deleteListePermissionsOfRole(ListPermissionKeysDto listPermissionKeysDto, String roleName) throws PermissionNotFound,
+    public List<String> deleteListePermissionsOfRole(ListPermissionKeysDto listPermissionKeysDto) throws PermissionNotFound,
             RoleNotFoundException, PermissionToRoleNotFound ,CannotModifySuperAdminException{
 
         for(String permissionKey: listPermissionKeysDto.getPermissionsList()){
 
+            String type;
 
-            String[] substrings = permissionKey.split("_");
+            if (permissionKey.contains("ALL")) {
+                type = "ALL";
+            } else {
+                type = "ME";
+            }
+             permissionKey= permissionKey.substring(0, permissionKey.indexOf(type) - 1);
 
-            deletePermissionRole(substrings[0]+"_"+substrings[1],roleName);
+            deletePermissionRole(permissionKey,listPermissionKeysDto.getRoleName());
         }
-        return getAllPermissionsOfRole(roleName.toUpperCase());
+        return getAllPermissionsOfRole(listPermissionKeysDto.getRoleName().toUpperCase());
     }
 
     @Transactional
@@ -225,7 +228,8 @@ public PermissionRoleDto getPermissionByRole(String permissionKey, String roleNa
 
         ListPermissionKeysDto listPermissionKeysDto = new ListPermissionKeysDto();
         listPermissionKeysDto.setPermissionsList(allPermissionsToDelete);
-        List<String> deletePermissions = deleteListePermissionsOfRole(listPermissionKeysDto, roleName);
+        listPermissionKeysDto.setRoleName(roleName);
+        List<String> deletePermissions = deleteListePermissionsOfRole(listPermissionKeysDto);
         return allPermissionsToDelete;
     }
         public void verifyExistPermissionAndRole(String permissionKey, String roleName)

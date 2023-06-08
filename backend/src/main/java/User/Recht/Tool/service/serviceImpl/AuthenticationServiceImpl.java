@@ -53,6 +53,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     RefreshTokenService refreshTokenService;
     @Inject
     JwtTokenService jwtTokenService;
+  @Inject
+    ClaimsOfUser claimsOfUser;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
 
@@ -123,37 +125,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
             Long issuedAt = refreshTokenService.getRefreshTokenByToken(refreshToken).getIssuedAt();
 
-            Map<String, Object> map = listClaimUsingJWT(tokenDto.getAccessToken());
+            Map<String, Object> map = claimsOfUser.listClaimUsingJWT(tokenDto.getAccessToken());
             Long maxSessionTimer = (Long) map.get("maxSessionTimer");
+
+            List<String> list = (  List<String>) map.get("allPermissionsOfUser");
+
 
             if (maxSessionTimer != 0 && issuedAt + maxSessionTimer <= currentTimeInMins()) {
                 throw new SessionTimeoutException("SESSION TIMEOUT");
             }
         }
 
-        /**
-         * listClaimUsingJWT IS COPIED FROM
-         * https://stackoverflow.com/a/71676546
-         **/
-        private static Map<String, Object> listClaimUsingJWT (String accessToken){
-            Map<String, Object> map = new HashMap<>();
 
-            try {
-                SignedJWT signedJWT = SignedJWT.parse(accessToken);
-                JWTClaimsSet claimsSet = signedJWT.getJWTClaimsSet();
-                Map<String, Object> myClaim = claimsSet.getClaims();
-
-                String[] keySet = myClaim.keySet().toArray(new String[0]);
-
-                for (String s : keySet) {
-                    map.put(s, myClaim.get(s));
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return map;
-
-        }
 
         @Transactional
         @Override

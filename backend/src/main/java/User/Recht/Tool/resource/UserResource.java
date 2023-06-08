@@ -5,23 +5,18 @@ import User.Recht.Tool.dtos.userDtos.UserDto;
 import User.Recht.Tool.dtos.userDtos.UserProfileDto;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.DuplicateElementException;
-import User.Recht.Tool.exception.Permission.CannotCreateUserFromLowerLevel;
-import User.Recht.Tool.exception.Permission.EmailAlreadyVerified;
-import User.Recht.Tool.exception.Permission.PinNotFound;
+import User.Recht.Tool.exception.Permission.*;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
 import User.Recht.Tool.exception.user.UserNameDuplicateElementException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.service.UserService;
-import User.Recht.Tool.service.serviceImpl.AuthenticationServiceImpl;
-import io.quarkus.mailer.Mail;
-import io.quarkus.mailer.Mailer;
+import User.Recht.Tool.service.serviceImpl.AutorisationServiceImpl;
 import io.vertx.ext.web.RoutingContext;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -38,20 +33,28 @@ import java.util.List;
 public class UserResource {
     @Inject
     UserService userService;
+    @Inject
+    AutorisationServiceImpl autorisationService;
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserResource.class);
 
     @POST
-    @RolesAllowed({ "USER" })
+    @RolesAllowed({"USER"})
     @Path("registration/{roleName}")
     public Response createPrivateUser(@Context RoutingContext routingContext,
                                       @RequestBody UserDto userDto, @PathParam("roleName") String roleName,
                                       @Context SecurityContext securityContext) {
 
         try {
+
             User user = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
-            User userToCreate = userService.createPrivateUser(userDto, roleName,user);
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+
+            // CHECK PERMISSIONS
+            autorisationService.checkExistedUserPermission("USER_MANAGER_POST", token);
+
+            User userToCreate = userService.createPrivateUser(userDto, roleName, user);
             return Response.ok(userToCreate).header("Email", userDto.getEmail())
                     .build();
 
@@ -71,25 +74,32 @@ public class UserResource {
 
         } catch (UserNotFoundException e) {
             return Response.status(406, "USER NOT SAVED")
+
                     .header("STATUS", "USER NOT SAVED").build();
         } catch (CannotCreateUserFromLowerLevel e) {
             return Response.status(406, "CANNOT CREATE A USER FROM A HIGHER ROLE LEVEL")
                     .header("STATUS", "CANNOT CREATE A USER FROM A HIGHER ROLE LEVEL").build();
+        } catch (UserNotAuthorized e) {
+            return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
+                    .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
         }
     }
-
 
     @GET
     @Path("/id/{userId}/")
     @RolesAllowed({ "USER" })
     public Response getUserWithId(@Context RoutingContext routingContext,
-                                  @PathParam("userId") String id, @Context SecurityContext securityContext) {
+                                  @PathParam("userId") Long id, @Context SecurityContext securityContext) {
 
-     //   checkAllowedPermission (routingContext,"PERMISSION_KEY",assignedTo);
 
         try {
-            String token = routingContext.request().getHeader("Authorization");
-            User user = userService.getUserById(Long.parseLong(id));
+            User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+
+            // CHECK PERMISSIONS
+            autorisationService.checkUserManagerAutorisations(connectedUser, id, "USER_MANAGER_GET", token);
+
+            User user = userService.getUserById(id);
 
             return Response.ok(user).header("Email", user.getEmail())
                     .build();
@@ -97,17 +107,30 @@ public class UserResource {
         } catch (UserNotFoundException e) {
             return Response.status(406, "USER DOSENT EXIST")
                     .header("STATUS", "USER DOSENT EXIST").build();
+        } catch (UserNotAuthorized e) {
+            return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
+                    .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
+        } catch (DeniedRoleLevel e) {
+            return Response.status(406, "CANNOT GET A USER FROM A HIGHER ROLE LEVEL")
+                    .header("STATUS", "CANNOT GET A USER FROM A HIGHER ROLE LEVEL").build();
         }
 
     }
 
     @GET
     @Path("/email/{userEmail}/")
-    @RolesAllowed({ "USER" })
-    public Response getUserWithEmail(@PathParam("userEmail") String userEmail, @Context SecurityContext securityContext){
+    @RolesAllowed({"USER"})
+    public Response getUserWithEmail(@PathParam("userEmail") String userEmail,
+                                     @Context SecurityContext securityContext, @Context RoutingContext routingContext) {
         try {
 
             User user = userService.getUserByEmail(userEmail);
+            User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+
+            // CHECK PERMISSIONS
+            autorisationService.checkUserManagerAutorisations(connectedUser, user.getId(), "USER_MANAGER_GET", token);
+
 
             return Response.ok(user).header("Email", user.getEmail())
                     .build();
@@ -115,62 +138,104 @@ public class UserResource {
         } catch (UserNotFoundException e) {
             return Response.status(406, "USER DOSENT EXIST")
                     .header("STATUS", "USER DOSENT EXIST").build();
+        } catch (UserNotAuthorized e) {
+            return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
+                    .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
+        } catch (DeniedRoleLevel e) {
+            return Response.status(406, "CANNOT GET A USER FROM A HIGHER ROLE LEVEL")
+                    .header("STATUS", "CANNOT GET A USER FROM A HIGHER ROLE LEVEL").build();
         }
 
     }
 
     @GET
-    @RolesAllowed({ "USER" })
+    @RolesAllowed({"USER"})
     @Path("/username/{username}/")
-    public Response getUserWithUsername(@PathParam("username") String username, @Context SecurityContext securityContext) {
+    public Response getUserWithUsername(@PathParam("username") String username,
+                                        @Context SecurityContext securityContext, @Context RoutingContext routingContext) {
         try {
 
             User user = userService.getUserByUsername(username);
 
+            User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+
+            // CHECK PERMISSIONS
+            autorisationService.checkUserManagerAutorisations(connectedUser, user.getId(), "USER_MANAGER_GET", token);
+
             return Response.ok(user).header("Email", user.getEmail())
                     .build();
 
         } catch (UserNotFoundException e) {
             return Response.status(406, "USER DOSENT EXIST")
                     .header("STATUS", "USER DOSENT EXIST").build();
+        } catch (UserNotAuthorized e) {
+            return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
+                    .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
+        } catch (DeniedRoleLevel e) {
+            return Response.status(406, "CANNOT GET A USER FROM A HIGHER ROLE LEVEL")
+                    .header("STATUS", "CANNOT GET A USER FROM A HIGHER ROLE LEVEL").build();
         }
 
     }
 
     @GET
-    @RolesAllowed({ "USER" })
-    public Response getAllUsers(@Context SecurityContext securityContext) {
+    @RolesAllowed({"USER"})
+    public Response getAllUsers(@Context SecurityContext securityContext, @Context RoutingContext routingContext) {
 
-        List<User> users = userService.getAllUsers();
 
-        return Response.ok(users).header("STATUS", "LIST OF USERS")
-                .build();
+        try {
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+            autorisationService.checkExistedUserPermission("USER_MANAGER_GET", token);
+
+            List<User> users = userService.getAllUsers();
+            return Response.ok(users).header("STATUS", "LIST OF USERS")
+                    .build();
+        } catch (UserNotAuthorized e) {
+            return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
+                    .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
+        }
     }
 
     @GET
-    @RolesAllowed({ "USER" })
+    @RolesAllowed({"USER"})
     @Path("/role/{roleName}")
-    public Response getUsersByRole(@PathParam("roleName") String roleName, @Context SecurityContext securityContext) {
+    public Response getUsersByRole(@PathParam("roleName") String roleName
+            , @Context RoutingContext routingContext, @Context SecurityContext securityContext) {
 
         try {
+
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+            autorisationService.checkExistedUserPermission("USER_MANAGER_GET", token);
+
             List<User> users = userService.getAllUsersByRole(roleName);
             return Response.ok(users).header("STATUS", "LIST OF USERS OF THIS ROLE " + roleName)
                     .build();
         } catch (RoleNotFoundException e) {
             return Response.status(406, "ROLE  DOSENT EXIST")
                     .header("STATUS", "ROLE DOSENT EXIST").build();
+        } catch (UserNotAuthorized e) {
+            return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
+                    .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
         }
 
 
     }
 
     @DELETE
-    @RolesAllowed({ "USER" })
+    @RolesAllowed({"USER"})
     @Path("/id/{userId}/")
-    public Response deleteUserWithId(@PathParam("userId") String id, @Context SecurityContext securityContext) {
+    public Response deleteUserWithId(@PathParam("userId") Long id, @Context RoutingContext routingContext
+            , @Context SecurityContext securityContext) {
         try {
 
-            User user = userService.deleteUserById(Long.parseLong(id));
+            User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+
+            // CHECK PERMISSIONS
+            autorisationService.checkUserManagerAutorisations(connectedUser, id, "USER_MANAGER_DELETE", token);
+
+            User user = userService.deleteUserById(id);
 
             return Response.ok(user).header("STATUS", "user is deleted")
                     .build();
@@ -181,17 +246,30 @@ public class UserResource {
         } catch (CannotModifySuperAdminException e) {
             return Response.status(406, "CANNOT MODIFY A SUPERADMIN")
                     .header("STATUS", "CANNOT MODIFY A SUPERADMIN").build();
+        } catch (UserNotAuthorized e) {
+            return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
+                    .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
+        } catch (DeniedRoleLevel e) {
+            return Response.status(406, "CANNOT DELETE A USER FROM A HIGHER ROLE LEVEL")
+                    .header("STATUS", "CANNOT DELETE A USER FROM A HIGHER ROLE LEVEL").build();
         }
 
     }
 
     @PUT
-    @RolesAllowed({ "USER" })
+    @RolesAllowed({"USER"})
     @Path("/email/")
-    public Response updateEmailUser (@HeaderParam("userId") String id, @HeaderParam("newEmail") String newEmail, @Context SecurityContext securityContext) {
+    public Response updateEmailUser(@HeaderParam("userId") Long id, @HeaderParam("newEmail") String newEmail,
+                                    @Context RoutingContext routingContext, @Context SecurityContext securityContext) {
         try {
 
-            User user = userService.updateEmailUser(Long.parseLong(id),newEmail);
+            User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+
+            // CHECK PERMISSIONS
+            autorisationService.checkUserManagerAutorisations(connectedUser, id, "USER_MANAGER_PUT", token);
+
+            User user = userService.updateEmailUser(id, newEmail);
 
             return Response.ok(user).header("STATUS", "email is updated")
                     .build();
@@ -199,23 +277,35 @@ public class UserResource {
         } catch (UserNotFoundException e) {
             return Response.status(406, "USER DOSENT EXIST")
                     .header("STATUS", "USER DOSENT EX").build();
-        } catch (ValidationException e){
+        } catch (ValidationException e) {
             return Response.status(406, "EMAIL IS NOT VALID")
                     .header("STATUS", "EMAIL IS NOT VALID").build();
-        }catch (DuplicateElementException e){
+        } catch (DuplicateElementException e) {
             return Response.status(406, "USER EMAIL IS ALREADY USED")
                     .header("STATUS", "USER EMAIL IS ALREADY USED").build();
+        } catch (UserNotAuthorized e) {
+            return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
+                    .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
+        } catch (DeniedRoleLevel e) {
+            return Response.status(406, "CANNOT UPDATE A USER FROM A HIGHER ROLE LEVEL")
+                    .header("STATUS", "CANNOT UPDATE A USER FROM A HIGHER ROLE LEVEL").build();
         }
 
     }
 
     @PUT
-    @RolesAllowed({ "USER" })
+    @RolesAllowed({"USER"})
     @Path("/password/")
-    public Response updatePasswordUser (@HeaderParam("userId") String id, @RequestBody UpdatePasswordDto updatePasswordDto, @Context SecurityContext securityContext) {
+    public Response updatePasswordUser(@HeaderParam("userId") Long id, @Context RoutingContext routingContext,
+                                       @RequestBody UpdatePasswordDto updatePasswordDto, @Context SecurityContext securityContext) {
         try {
 
-            User user = userService.updatePasswordById(Long.parseLong(id),updatePasswordDto);
+            User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+            // CHECK PERMISSIONS
+            autorisationService.checkUserManagerAutorisations(connectedUser, id, "USER_MANAGER_PUT", token);
+
+            User user = userService.updatePasswordById(id, updatePasswordDto);
 
             return Response.ok(user).header("STATUS", "PASSWORD IS UPDATED")
                     .build();
@@ -223,25 +313,37 @@ public class UserResource {
         } catch (UserNotFoundException e) {
             return Response.status(406, "USER DOSENT EXIST")
                     .header("STATUS", "USER DOSENT EXIST").build();
-        } catch (ValidationException e){
+        } catch (ValidationException e) {
             return Response.status(406, "PASSWORD IS NOT VALID")
                     .header("STATUS", "PASSWORD IS NOT VALID").build();
-        } catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return Response.status(406, "OLD PASSWORD IS WRONG")
                     .header("STATUS", "OLD PASSWORD IS WRONG").build();
+        } catch (UserNotAuthorized e) {
+            return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
+                    .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
+        } catch (DeniedRoleLevel e) {
+            return Response.status(406, "CANNOT UPDATE A USER FROM A HIGHER ROLE LEVEL")
+                    .header("STATUS", "CANNOT UPDATE A USER FROM A HIGHER ROLE LEVEL").build();
         }
 
     }
 
     @PUT
-    @RolesAllowed({ "USER" })
+    @RolesAllowed({"USER"})
     @Path("/profile/")
-    public Response updateProfileUser (@HeaderParam("userId") String id, @RequestBody UserProfileDto userProfileDto
+    public Response updateProfileUser(@HeaderParam("userId") Long id, @RequestBody UserProfileDto userProfileDto,
+                                      @Context RoutingContext routingContext
             , @Context SecurityContext securityContext) {
 
         try {
+            User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
+            String token = routingContext.request().getHeader("Authorization").substring(7);
 
-            User user = userService.updateProfilById(Long.parseLong(id),userProfileDto);
+            // CHECK PERMISSIONS
+            autorisationService.checkUserManagerAutorisations(connectedUser, id, "USER_MANAGER_PUT", token);
+
+            User user = userService.updateProfilById(id, userProfileDto);
 
             return Response.ok(user).header("STATUS", "PROFILE IS UPDATED")
                     .build();
@@ -258,6 +360,12 @@ public class UserResource {
         } catch (CannotModifySuperAdminException e) {
             return Response.status(406, "CANNOT MODIFY A SUPERADMIN")
                     .header("STATUS", "CANNOT MODIFY A SUPERADMIN").build();
+        } catch (UserNotAuthorized e) {
+            return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
+                    .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
+        } catch (DeniedRoleLevel e) {
+            return Response.status(406, "CANNOT UPDATE A USER FROM A HIGHER ROLE LEVEL")
+                    .header("STATUS", "CANNOT UPDATE A USER FROM A HIGHER ROLE LEVEL").build();
         }
 
     }
