@@ -112,17 +112,15 @@ public class PermissionServiceImpl implements PermissionService {
 
         Permission permission = getPermissionByKey(key);
 
-        for (Role role : permission.getRoles()) {
-            permissionToRoleService.deletePermissionRole(key, role.getName());
-        }
-
-        permission = getPermissionByKey(key);
         if (permission.getName().equals("USER_MANAGER") || permission.getName().equals("ROLE_MANAGER") || permission.getName().equals("PERMISSION_MANAGER")) {
             throw new CannotDeleteInitPermissions("CANNOT DELETE AN INITIALE PERMISSION");
+        }else {
+            for (Role role : permission.getRoles()) {
+                permissionToRoleService.deletePermissionRole(key, role.getName());
+            }
+            permission.setRoles(new ArrayList<>());
+            permissionRepository.delete(permission);
         }
-        permission.setRoles(new ArrayList<>());
-        permissionRepository.delete(permission);
-
         return permission;
 
     }
@@ -130,6 +128,7 @@ public class PermissionServiceImpl implements PermissionService {
     @Transactional
     @Override
     public List<Permission> deletePermissionsByName(String name) throws PermissionNotFound, CannotModifySuperAdminException, RoleNotFoundException, PermissionToRoleNotFound, CannotDeleteInitPermissions {
+
         List<Permission> permissions = getPermissionsByName(name);
 
         if (permissions.size()==0) {
