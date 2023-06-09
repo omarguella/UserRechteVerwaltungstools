@@ -1,15 +1,15 @@
 package User.Recht.Tool.service.serviceImpl;
 
+import User.Recht.Tool.dtos.permissionDtos.PermissionRoleDto;
+import User.Recht.Tool.entity.Permission;
 import User.Recht.Tool.entity.Role;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.Permission.DeniedRoleLevel;
+import User.Recht.Tool.exception.Permission.PermissionNotFound;
 import User.Recht.Tool.exception.Permission.UserNotAuthorized;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
-import User.Recht.Tool.service.AutorisationService;
-import User.Recht.Tool.service.ClaimsOfUser;
-import User.Recht.Tool.service.RoleService;
-import User.Recht.Tool.service.UserService;
+import User.Recht.Tool.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,24 +17,28 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static com.fasterxml.jackson.core.io.NumberInput.parseInt;
 
 @RequestScoped
-public class AutorisationServiceImpl implements AutorisationService {
+public class AuthorizationServiceImpl implements AuthorizationService {
 
     @Inject
     ClaimsOfUser claimsOfUser;
     @Inject
     RoleService roleService;
-
+    @Inject
+    PermissionToRoleService permissionToRoleService;
     @Inject
     UserService userService;
+
+    @Inject
+    PermissionService permissionService;
     private static final Logger LOGGER = LoggerFactory.getLogger(ClaimsOfUserImpl.class);
 
     @Override
-    public void checkUserManagerAutorisations(User connectedUser, Long targetedUserId, String permissionKey, String token)
-            throws UserNotAuthorized, DeniedRoleLevel, UserNotFoundException {
+    public void checkUserManagerAutorisations(User connectedUser, Long targetedUserId, String permissionKey, String token) throws UserNotAuthorized, DeniedRoleLevel, UserNotFoundException {
 
 
         String[] parts = permissionKey.split("_");
@@ -129,33 +133,72 @@ public class AutorisationServiceImpl implements AutorisationService {
     public void checkPermissionToRoleAutorisations(User connectedUser, String roleName, String permissionKey, String token, String addPermissionKey)
             throws UserNotAuthorized, DeniedRoleLevel, RoleNotFoundException {
 
-        String[] parts = permissionKey.split("_");
-        String apiFunc = parts[parts.length - 1];
+        if (!connectedUser.getUsername().equals("SUPERADMIN")) {
+            String[] parts = permissionKey.split("_");
+            String apiFunc = parts[parts.length - 1];
 
-        Role role = roleService.getRoleByName(roleName);
+            Role role = roleService.getRoleByName(roleName);
 
-        checkExistedUserPermission(permissionKey, token);
+            checkExistedUserPermission(permissionKey, token);
 
-        if (addPermissionKey!=null){
-            checkExistedUserPermission(addPermissionKey, token);
-        }
+            if (addPermissionKey != null) {
+                checkExistedUserPermission(addPermissionKey, token);
+            }
 
 
-        if (getMinimumRoleLevelFromToken(token) >= role.getLevel()) {
-            throw new DeniedRoleLevel("CANNOT " + apiFunc + " A USER OF A HIGHER OR SAME ROLE LEVEL");
+            if (getMinimumRoleLevelFromToken(token) >= role.getLevel()) {
+                throw new DeniedRoleLevel("CANNOT " + apiFunc + " A USER OF A HIGHER OR SAME ROLE LEVEL");
+            }
         }
     }
 
 
-
     @Override
     public void checkExistedUserPermission(String permissionKey, String token) throws UserNotAuthorized {
-        permissionKey=permissionKey.toUpperCase();
+        permissionKey = permissionKey.toUpperCase();
         if (!getMyPermissions(token).contains(permissionKey + "_ALL")) {
             throw new UserNotAuthorized("USER IS NOT AUTHOROZIED FOR THE PERMISSION");
         }
     }
 
+
+    @Override
+    public boolean verifyingAPIAccessAuthorization(User user, String permissionKey) throws PermissionNotFound, IllegalArgumentException {
+
+        permissionKey = permissionKey.toUpperCase();
+        String[] parts = permissionKey.split("_");
+        String type = parts[parts.length - 1];
+
+        if (!(type.equals("ALL") || type.equals("ME"))) {
+            throw new IllegalArgumentException("TYPE SHOULD BE ALL OR ME");
+        }
+
+        permissionKey = permissionKey.substring(0, permissionKey.indexOf(type) - 1);
+
+
+        Permission checkExistedPermission = permissionService.getPermissionByKey(permissionKey);
+
+
+        List<PermissionRoleDto> allPermissionsOfUser = user.getRoles().stream().flatMap(role -> {
+            try {
+                List<PermissionRoleDto> permissionsOfRole = permissionToRoleService.getAll(role.getName());
+                return permissionsOfRole.stream();
+            } catch (RoleNotFoundException ignored) {
+                return Stream.empty();
+            }
+        }).distinct().toList();
+
+        for (PermissionRoleDto permissionRoleDto : allPermissionsOfUser) {
+            if (permissionRoleDto.getPermissionKey().equals(permissionKey)) {
+                if (permissionRoleDto.getType().equals("ALL")) {
+                    return true;
+                } else if (permissionRoleDto.getType().equals(type)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     @Override
     public List<String> getMyPermissions(String token) {

@@ -2,6 +2,7 @@ package User.Recht.Tool.service;
 
 import User.Recht.Tool.dtos.permissionDtos.ListPermissionKeysDto;
 import User.Recht.Tool.dtos.permissionDtos.PermissionRoleDto;
+import User.Recht.Tool.entity.PermissionRole;
 import User.Recht.Tool.exception.Permission.PermissionNotFound;
 import User.Recht.Tool.exception.Permission.PermissionToRoleNotFound;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
@@ -23,6 +24,8 @@ public interface PermissionToRoleService {
 
     PermissionRoleDto getPermissionByRole(String permissionKey, String roleName)
             throws PermissionToRoleNotFound, PermissionNotFound, RoleNotFoundException;
+
+    List<PermissionRoleDto> getAll(String roleName) throws RoleNotFoundException;
 
     List<String> getAllPermissionsOfRole(String roleName)
             throws  RoleNotFoundException;

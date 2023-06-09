@@ -2,6 +2,7 @@ package User.Recht.Tool.resource;
 
 import User.Recht.Tool.dtos.permissionDtos.ListPermissionKeysDto;
 import User.Recht.Tool.dtos.permissionDtos.PermissionRoleDto;
+import User.Recht.Tool.entity.PermissionRole;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.Permission.DeniedRoleLevel;
 import User.Recht.Tool.exception.Permission.PermissionNotFound;
@@ -10,7 +11,7 @@ import User.Recht.Tool.exception.Permission.UserNotAuthorized;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
-import User.Recht.Tool.service.AutorisationService;
+import User.Recht.Tool.service.AuthorizationService;
 import User.Recht.Tool.service.PermissionToRoleService;
 import User.Recht.Tool.service.UserService;
 import io.vertx.ext.web.RoutingContext;
@@ -36,7 +37,7 @@ public class PermissionToRoleResource {
     @Inject
     UserService userService;
     @Inject
-    AutorisationService autorisationService;
+    AuthorizationService autorisationService;
 
     @POST
     @RolesAllowed({"USER"})
@@ -177,6 +178,39 @@ public class PermissionToRoleResource {
     @GET
     @RolesAllowed({"USER"})
     @Path("/all/{roleName}")
+    public Response getAllPermissions(@PathParam("roleName") String roleName
+            , @Context RoutingContext routingContext, @Context SecurityContext securityContext) {
+
+        try {
+            User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+            // CHECK PERMISSIONS
+            autorisationService.checkPermissionToRoleAutorisations(connectedUser, roleName, "ROLE_MANAGER_PUT", token, null);
+
+            List<PermissionRoleDto> permissionKeys = permissionToRoleService.getAll(roleName);
+            return Response.ok(permissionKeys).header("status", "THE LIST OF THE ALL PERMISSIONS OF THE ROLE " + roleName)
+                    .build();
+        } catch (RoleNotFoundException e) {
+            return Response.status(406, "ROLE NOT FOUND")
+                    .header("status", "ROLE NOT FOUND").build();
+        } catch (UserNotAuthorized e) {
+
+            return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
+                    .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
+
+        } catch (DeniedRoleLevel e) {
+            return Response.status(406, "CANNOT GET A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL")
+                    .header("STATUS", " CANNOT GET A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL").build();
+        } catch (UserNotFoundException e) {
+
+            return Response.status(406, "USER DOSENT EXIST")
+                    .header("status", "USER DOSENT EXIST").build();
+
+        }
+    }
+    @GET
+    @RolesAllowed({"USER"})
+    @Path("/allInString/{roleName}")
     public Response getAllPermissionsOfRole(@PathParam("roleName") String roleName
             , @Context RoutingContext routingContext, @Context SecurityContext securityContext) {
 
@@ -184,7 +218,7 @@ public class PermissionToRoleResource {
             User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
             String token = routingContext.request().getHeader("Authorization").substring(7);
             // CHECK PERMISSIONS
-            autorisationService.checkPermissionToRoleAutorisations(connectedUser, roleName, "ROLE_MANAGER_PUT", token,null);
+            autorisationService.checkPermissionToRoleAutorisations(connectedUser, roleName, "ROLE_MANAGER_PUT", token, null);
 
             List<String> permissionKeys = permissionToRoleService.getAllPermissionsOfRole(roleName);
             return Response.ok(permissionKeys).header("status", "THE LIST OF THE ALL PERMISSIONS OF THE ROLE " + roleName)

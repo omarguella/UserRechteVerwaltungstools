@@ -11,7 +11,7 @@ import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
 import User.Recht.Tool.exception.user.UserNameDuplicateElementException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.service.UserService;
-import User.Recht.Tool.service.serviceImpl.AutorisationServiceImpl;
+import User.Recht.Tool.service.serviceImpl.AuthorizationServiceImpl;
 import io.vertx.ext.web.RoutingContext;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.slf4j.Logger;
@@ -34,7 +34,7 @@ public class UserResource {
     @Inject
     UserService userService;
     @Inject
-    AutorisationServiceImpl autorisationService;
+    AuthorizationServiceImpl autorisationService;
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserResource.class);

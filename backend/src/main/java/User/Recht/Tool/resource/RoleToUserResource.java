@@ -9,7 +9,7 @@ import User.Recht.Tool.exception.role.RoleNotAssignedToUserException;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
-import User.Recht.Tool.service.AutorisationService;
+import User.Recht.Tool.service.AuthorizationService;
 import User.Recht.Tool.service.RoleToUserService;
 import User.Recht.Tool.service.UserService;
 import io.vertx.ext.web.RoutingContext;
@@ -34,7 +34,7 @@ public class RoleToUserResource {
     UserService userService;
 
     @Inject
-    AutorisationService autorisationService;
+    AuthorizationService autorisationService;
 
     @POST
     @RolesAllowed({"USER"})

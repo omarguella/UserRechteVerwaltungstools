@@ -22,6 +22,7 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -89,9 +90,15 @@ public class PermissionToRoleServiceImpl implements PermissionToRoleService {
 
         for(String permissionKey: listPermissionKeysDto.getPermissionsList()) {
             permissionKey=permissionKey.toUpperCase();
-            String type;
 
-            if (permissionKey.contains("ALL")) {
+            String[] parts = permissionKey.split("_");
+            String type = parts[parts.length - 1];
+
+            if (!(type.equals("ALL") || type.equals("ME"))) {
+                throw new IllegalArgumentException("TYPE SHOULD BE ALL OR ME");
+            }
+
+            if (permissionKey.contains("_ALL")) {
                 type = "ALL";
             } else {
                 type = "ME";
@@ -115,20 +122,33 @@ public PermissionRoleDto getPermissionByRole(String permissionKey, String roleNa
     verifyExistPermissionAndRole(permissionKey, roleName);
 
     Long permissionId=permissionService.getPermissionByKey(permissionKey).getId();
-    Long roleId=roleService.getRoleByName(roleName).getId();
+            Long roleId = roleService.getRoleByName(roleName).getId();
 
-    PermissionRole permissionRole = permissionRoleRepository.findByPermissionIdAndRoleId(permissionId, roleId);
+            PermissionRole permissionRole = permissionRoleRepository.findByPermissionIdAndRoleId(permissionId, roleId);
 
-    if (permissionRole != null) {
-        return permissionRoleFactory.permissionRoleDtoFactory(permissionRole);
-    } else {
-        throw new PermissionToRoleNotFound("THIS PERMISSION ASSIGNED TO THIS ROLE NOT FOUND");
+            if (permissionRole != null) {
+                return permissionRoleFactory.permissionRoleDtoFactory(permissionRole);
+            } else {
+                throw new PermissionToRoleNotFound("THIS PERMISSION ASSIGNED TO THIS ROLE NOT FOUND");
+            }
+        }
+
+    @Override
+    public List<PermissionRoleDto> getAll(String roleName) throws RoleNotFoundException {
+        roleName = roleName.toUpperCase();
+        Role role = roleService.getRoleByName(roleName);
+        List<PermissionRole> permissionRoles= permissionRoleRepository.findByRoleId(role.getId());
+        List<PermissionRoleDto> permissionRoleDtos=new ArrayList<>();
+        for(PermissionRole permissionRole:permissionRoles){
+            permissionRoleDtos.add(permissionRoleFactory.permissionRoleDtoFactory(permissionRole));
+        }
+        return permissionRoleDtos;
     }
-}
+
 
     @Override
     public List<String> getAllPermissionsOfRole(String roleName)
-            throws  RoleNotFoundException {
+            throws RoleNotFoundException {
 
         roleName = roleName.toUpperCase();
         Role role = roleService.getRoleByName(roleName);

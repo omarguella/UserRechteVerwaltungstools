@@ -2,13 +2,14 @@ package User.Recht.Tool.service;
 
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.Permission.DeniedRoleLevel;
+import User.Recht.Tool.exception.Permission.PermissionNotFound;
 import User.Recht.Tool.exception.Permission.UserNotAuthorized;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
 
 import java.util.List;
 
-public interface AutorisationService {
+public interface AuthorizationService {
 
 
     void checkUserManagerAutorisations(User connectedUser, Long targetedUserId, String permissionKey, String token) throws UserNotAuthorized, DeniedRoleLevel, UserNotFoundException;
@@ -24,6 +25,8 @@ public interface AutorisationService {
             throws UserNotAuthorized, DeniedRoleLevel, RoleNotFoundException;
 
     void checkExistedUserPermission(String permissionKey, String token) throws UserNotAuthorized;
+
+    boolean verifyingAPIAccessAuthorization(User user,String permissionKey) throws PermissionNotFound;
 
     List<String> getMyPermissions(String token);
 }
