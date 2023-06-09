@@ -4,6 +4,7 @@ package User.Recht.Tool.service.serviceImpl;
 import User.Recht.Tool.dtos.permissionDtos.PermissionDto;
 import User.Recht.Tool.entity.Permission;
 import User.Recht.Tool.entity.Role;
+import User.Recht.Tool.exception.Permission.CannotDeleteInitPermissions;
 import User.Recht.Tool.exception.Permission.PermissionNotFound;
 import User.Recht.Tool.exception.Permission.PermissionToRoleNotFound;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
@@ -107,7 +108,7 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Transactional
     @Override
-    public Permission deletePermissionByKey(String key) throws PermissionNotFound, CannotModifySuperAdminException, RoleNotFoundException, PermissionToRoleNotFound {
+    public Permission deletePermissionByKey(String key) throws PermissionNotFound, CannotModifySuperAdminException, RoleNotFoundException, PermissionToRoleNotFound, CannotDeleteInitPermissions {
 
         Permission permission = getPermissionByKey(key);
 
@@ -116,7 +117,9 @@ public class PermissionServiceImpl implements PermissionService {
         }
 
         permission = getPermissionByKey(key);
-
+        if (permission.getName().equals("USER_MANAGER") || permission.getName().equals("ROLE_MANAGER") || permission.getName().equals("PERMISSION_MANAGER")) {
+            throw new CannotDeleteInitPermissions("CANNOT DELETE AN INITIALE PERMISSION");
+        }
         permission.setRoles(new ArrayList<>());
         permissionRepository.delete(permission);
 
@@ -126,7 +129,7 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Transactional
     @Override
-    public List<Permission> deletePermissionsByName(String name) throws PermissionNotFound, CannotModifySuperAdminException, RoleNotFoundException, PermissionToRoleNotFound {
+    public List<Permission> deletePermissionsByName(String name) throws PermissionNotFound, CannotModifySuperAdminException, RoleNotFoundException, PermissionToRoleNotFound, CannotDeleteInitPermissions {
         List<Permission> permissions = getPermissionsByName(name);
 
         if (permissions.size()==0) {

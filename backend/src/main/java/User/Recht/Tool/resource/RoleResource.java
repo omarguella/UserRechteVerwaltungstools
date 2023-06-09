@@ -169,9 +169,17 @@ public class RoleResource {
     @PUT
     @RolesAllowed({"USER"})
     @Path("/name/{roleName}/")
-    public Response updateRole(@PathParam("roleName") String roleName, @RequestBody UpdateRoleDto updateRoleDto, @Context SecurityContext securityContext) {
+    public Response updateRole(@PathParam("roleName") String roleName, @RequestBody UpdateRoleDto updateRoleDto,
+                               @Context RoutingContext routingContext, @Context SecurityContext securityContext) {
 
         try {
+
+
+            User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+
+            // CHECK PERMISSIONS
+            autorisationService.checkRoleManagerAutorisations(connectedUser, roleName, "ROLE_MANAGER_PUT", token, null);
 
             Role role = roleService.updateRoleByName(roleName, updateRoleDto);
 
@@ -190,6 +198,14 @@ public class RoleResource {
         }catch (CannotModifySuperAdminException e) {
             return Response.status(406, "CANNOT MODIFY A SUPERADMIN")
                     .header("status", "CANNOT MODIFY A SUPERADMIN").build();
+        }catch (UserNotFoundException e) {
+            throw new RuntimeException(e);
+        }catch (UserNotAuthorized e) {
+            return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
+                    .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
+        } catch (DeniedRoleLevel e) {
+            return Response.status(406, "CANNOT DELETE A ROLE OF A HIGHER  ROLE LEVEL")
+                    .header("STATUS", " CANNOT DELETE A ROLE  OF A HIGHER ROLE LEVEL").build();
         }
     }
 

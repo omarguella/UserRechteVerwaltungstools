@@ -21,10 +21,10 @@ public interface PermissionService {
     List<Permission> getAllPermissions();
 
     @Transactional
-    Permission deletePermissionByKey(String key) throws  PermissionNotFound, CannotModifySuperAdminException, RoleNotFoundException,PermissionToRoleNotFound;
+    Permission deletePermissionByKey(String key) throws PermissionNotFound, CannotModifySuperAdminException, RoleNotFoundException, PermissionToRoleNotFound, CannotDeleteInitPermissions;
 
     @Transactional
-    List<Permission> deletePermissionsByName(String name) throws PermissionNotFound, CannotModifySuperAdminException, RoleNotFoundException, PermissionToRoleNotFound;
+    List<Permission> deletePermissionsByName(String name) throws PermissionNotFound, CannotModifySuperAdminException, RoleNotFoundException, PermissionToRoleNotFound, CannotDeleteInitPermissions;
 
     @Transactional
     Permission saveUpdatedPermission(Permission permission);

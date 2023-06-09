@@ -114,9 +114,12 @@ public class RoleToUserResource {
                     .header("status", "CANNOT MODIFY A SUPERADMIN").build();
 
         } catch (UserNotAuthorized e) {
+
             return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
-        } catch (DeniedRoleLevel e) {
+
+        }
+        catch (DeniedRoleLevel e) {
             return Response.status(406, "CANNOT DELETE A ROLE TO/FROM USER OF A HIGHER OR SAME ROLE LEVEL")
                     .header("STATUS", " CANNOT DELETE A ROLE TO/FROM USER OF A HIGHER OR SAME ROLE LEVEL").build();
         }

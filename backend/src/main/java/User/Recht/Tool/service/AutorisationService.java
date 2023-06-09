@@ -20,6 +20,9 @@ public interface AutorisationService {
     void checkRoleManagerAutorisations(User connectedUser, String roleName, String permissionKey, String token, String movedTo)
             throws UserNotAuthorized, DeniedRoleLevel, RoleNotFoundException;
 
+    void checkPermissionToRoleAutorisations(User connectedUser, String roleName, String permissionKey, String token,String addPermissionKey)
+            throws UserNotAuthorized, DeniedRoleLevel, RoleNotFoundException;
+
     void checkExistedUserPermission(String permissionKey, String token) throws UserNotAuthorized;
 
     List<String> getMyPermissions(String token);

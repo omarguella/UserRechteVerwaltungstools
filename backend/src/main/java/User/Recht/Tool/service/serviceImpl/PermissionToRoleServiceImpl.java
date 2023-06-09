@@ -152,6 +152,7 @@ public PermissionRoleDto getPermissionByRole(String permissionKey, String roleNa
         String permissionKey=permissionRoleDto.getPermissionKey().toUpperCase();
         String type=permissionRoleDto.getType().toUpperCase();
 
+
         verifyExistPermissionAndRole(permissionKey,roleName);
 
       /*  if (roleService.getRoleByName(roleName).getName().equalsIgnoreCase("SUPERADMIN")){
