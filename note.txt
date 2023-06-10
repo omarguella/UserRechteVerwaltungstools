@@ -1,0 +1,75 @@
+TOOLS BLOCK NOTE
+
+CHANGE DOCS
+Sicherheit funktionale Anforderung   ❌
+
+DIAGRAM
+ROLE change variable in diagram ❌
+SessionTimer		✓
+mailToVerify		✓
+
+
+INFOS
+Regex PHONE NUMBER ✓
+REGEX EMAIL		✓
+REGEX PASSWORD	✓
+
+Crypt PASSWORD	 BCrypt PBKDF2WithHmacSHA384	❌
+
+USER
+Create privat users from private roles with permission level
+Cannot creat Superadmin 	✓
+
+Cannot delete a superadmin ✓
+update email -> setEmail not verified /if header null =>  Do the api for the logged user✓
+
+Update username in update Profile => cannot update superadmin /if header null =>  Do the api for the logged user✓
+
+Update role of liste of users (add-delete(with movedTo))  if in users List is SUPERADMIN will be deleted
+Role
+IsPrivate can only created from the user that have the permission to create user
+Create cannot creat existed Role  cannot add super ✓
+Change name super admin not possible	✓
+Delete role -> delete this role from all users and if they have only this role will be removed	✓
+Update cannot change superadmin	✓
+Session time in minutes
+
+
+userRole
+Delete role  from user header param usersMovedTo if user have only this role will be changed and response will be (changed or removed)	✓
+can not Romve a role from a superadmin	✓
+ADD Role to user if role already added must not be added 2 times ✓ cannot add superadmin role to user
+
+Update role of liste of users (add-delete(with movedTo)) the user ID list should be from get UserList Form role AND MORE CONDITIONS✓
+
+
+Permission
+Create : Permission name should be only character✓
+Actionslist should be only with DELTE PUT POST GET and Only one Time written✓
+
+
+permissionRole
+ADD UPDATE Delete permission not possible for the super admin role ❌
+ADD PERMISION TYPE MUST BE ONLY ALL OR ONE ✓
+Get all permission of the Role ✓
+
+
+
+TODO
+DELETE PERMISSION  PROBLEM DELETED INIT ❌
+
+
+HINWEIS
+Send logs
+Logs parametr
+https://www.youtube.com/watch?v=7YgaZIFn7mY ssl certificate
+
+
+DATA BASE POSTGRES:
+psql -U postgres
+CREATE USER userrechttool WITH PASSWORD 'postgres';
+GRANT postgres TO userrechttool;
+CREATE DATABASE userrechttooldb;
+grant all privileges on database userrechttooldb to userrechttool;
+
+

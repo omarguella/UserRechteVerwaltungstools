@@ -2,6 +2,7 @@ package User.Recht.Tool.service;
 
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.Permission.DeniedRoleLevel;
+import User.Recht.Tool.exception.Permission.EmailNotVerified;
 import User.Recht.Tool.exception.Permission.PermissionNotFound;
 import User.Recht.Tool.exception.Permission.UserNotAuthorized;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
@@ -26,7 +27,7 @@ public interface AuthorizationService {
 
     void checkExistedUserPermission(String permissionKey, String token) throws UserNotAuthorized;
 
-    boolean verifyingAPIAccessAuthorization(User user,String permissionKey) throws PermissionNotFound;
+    boolean verifyingAPIAccessAuthorization(User user,String permissionKey,String token) throws PermissionNotFound, EmailNotVerified;
 
     List<String> getMyPermissions(String token);
 }

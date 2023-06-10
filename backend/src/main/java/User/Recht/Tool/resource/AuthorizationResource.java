@@ -1,6 +1,7 @@
 package User.Recht.Tool.resource;
 
 import User.Recht.Tool.entity.User;
+import User.Recht.Tool.exception.Permission.EmailNotVerified;
 import User.Recht.Tool.exception.Permission.PermissionNotFound;
 import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.service.UserService;
@@ -45,7 +46,9 @@ public class AuthorizationResource {
 
         try {
             User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
-            return Response.ok(autorisationService.verifyingAPIAccessAuthorization(connectedUser, permissionKey))
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+
+            return Response.ok(autorisationService.verifyingAPIAccessAuthorization(connectedUser, permissionKey,token))
                     .header("status", "YOU HAVE ACCESS TO THE API").build();
 
         } catch (IllegalArgumentException e) {
@@ -54,7 +57,9 @@ public class AuthorizationResource {
         }catch (PermissionNotFound e) {
             return Response.status(406, "PERMISSION NOT FOUND")
                     .header("status", "PERMISSION NOT FOUND").build();
-        }
+        } catch (EmailNotVerified e) {
+            return Response.status(406, "THE EMAIL SHOULD BE VERIFIED")
+                    .header("status", "THE EMAIL SHOULD BE VERIFIED").build();        }
     }
 
 

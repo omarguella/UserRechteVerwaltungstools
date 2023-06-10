@@ -258,8 +258,8 @@ public class UserResource {
 
     @PUT
     @RolesAllowed({"USER"})
-    @Path("/email/")
-    public Response updateEmailUser(@HeaderParam("userId") Long id, @HeaderParam("newEmail") String newEmail,
+    @Path("/email/{userId}")
+    public Response updateEmailUser(@PathParam("userId") Long id, @HeaderParam("newEmail") String newEmail,
                                     @Context RoutingContext routingContext, @Context SecurityContext securityContext) {
         try {
 
@@ -295,8 +295,8 @@ public class UserResource {
 
     @PUT
     @RolesAllowed({"USER"})
-    @Path("/password/")
-    public Response updatePasswordUser(@HeaderParam("userId") Long id, @Context RoutingContext routingContext,
+    @Path("/password/{userId}")
+    public Response updatePasswordUser(@PathParam("userId") Long id, @Context RoutingContext routingContext,
                                        @RequestBody UpdatePasswordDto updatePasswordDto, @Context SecurityContext securityContext) {
         try {
 
@@ -331,8 +331,8 @@ public class UserResource {
 
     @PUT
     @RolesAllowed({"USER"})
-    @Path("/profile/")
-    public Response updateProfileUser(@HeaderParam("userId") Long id, @RequestBody UserProfileDto userProfileDto,
+    @Path("/profile/{userId}")
+    public Response updateProfileUser(@PathParam("userId") Long id, @RequestBody UserProfileDto userProfileDto,
                                       @Context RoutingContext routingContext
             , @Context SecurityContext securityContext) {
 

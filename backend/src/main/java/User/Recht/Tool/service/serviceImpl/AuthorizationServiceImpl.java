@@ -5,6 +5,7 @@ import User.Recht.Tool.entity.Permission;
 import User.Recht.Tool.entity.Role;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.Permission.DeniedRoleLevel;
+import User.Recht.Tool.exception.Permission.EmailNotVerified;
 import User.Recht.Tool.exception.Permission.PermissionNotFound;
 import User.Recht.Tool.exception.Permission.UserNotAuthorized;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
@@ -163,7 +164,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
 
     @Override
-    public boolean verifyingAPIAccessAuthorization(User user, String permissionKey) throws PermissionNotFound, IllegalArgumentException {
+    public boolean verifyingAPIAccessAuthorization(User user, String permissionKey, String token) throws PermissionNotFound, IllegalArgumentException, EmailNotVerified {
 
         permissionKey = permissionKey.toUpperCase();
         String[] parts = permissionKey.split("_");
@@ -172,6 +173,15 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         if (!(type.equals("ALL") || type.equals("ME"))) {
             throw new IllegalArgumentException("TYPE SHOULD BE ALL OR ME");
         }
+
+        Map<String, Object> map = claimsOfUser.listClaimUsingJWT(token);
+        boolean isMailToVerify = (boolean) map.get("isMailToVerify");
+        LOGGER.info(String.valueOf(isMailToVerify));
+
+        if (isMailToVerify && !user.getIsVerifiedEmail()) {
+            throw new EmailNotVerified("THE EMAIL IS NOT VERIFIED");
+        }
+
 
         permissionKey = permissionKey.substring(0, permissionKey.indexOf(type) - 1);
 
