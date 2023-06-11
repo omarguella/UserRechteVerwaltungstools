@@ -112,7 +112,8 @@ public class PermissionServiceImpl implements PermissionService {
 
         Permission permission = getPermissionByKey(key);
 
-        if (permission.getName().equals("USER_MANAGER") || permission.getName().equals("ROLE_MANAGER") || permission.getName().equals("PERMISSION_MANAGER")) {
+        if (permission.getName().equals("USER_MANAGER") || permission.getName().equals("ROLE_MANAGER") || permission.getName().equals("PERMISSION_MANAGER")
+        || permission.getName().equals("AUDIT_LOGS") ) {
             throw new CannotDeleteInitPermissions("CANNOT DELETE AN INITIALE PERMISSION");
         }else {
             for (Role role : permission.getRoles()) {

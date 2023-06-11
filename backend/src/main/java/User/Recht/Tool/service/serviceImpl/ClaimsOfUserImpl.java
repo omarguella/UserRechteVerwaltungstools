@@ -80,11 +80,14 @@ public class ClaimsOfUserImpl implements ClaimsOfUser {
         PrivateKey privateKey = jwtTokenService.readPrivateKey(privateKeyLocation);
         long currentTimeInSecs = currentTimeInSecs();
 
+        toString();
         return Jwt.issuer(ISSUER)
                 .upn(user.getEmail())
                 .groups("USER")
                 .subject(user.getEmail())
                 .claim("roleNames",rolesNames)
+                .claim("type","USER")
+                .claim("userId", String.valueOf(user.getId()))
                 .claim("maxSessionTimer",maxSessionTimer)
                 .claim("minRoleLevel",minRoleLevel)
                 .claim("allPermissionsOfUser",allPermissionsOfUser)

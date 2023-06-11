@@ -209,6 +209,42 @@ public class DatabaseInitializer {
             permission.setName("PERMISSION_MANAGER");
             permissionRepository.persist(permission);
 
+            permission=permissionRepository.find("key",permission.getKey()).firstResult();
+            permissionRole = new PermissionRole();
+            permissionRole.setRole(role);
+            permissionRole.setPermission(permission);
+            permissionRole.setType("ALL");
+            permissionRoleRepository.persist(permissionRole);
+
+
+            permission = new Permission();
+            permission.setKey("AUDIT_LOGS_DELETE_ALL");
+            permission.setName("AUDIT_LOGS");
+            permissionRepository.persist(permission);
+
+            permission=permissionRepository.find("key",permission.getKey()).firstResult();
+            permissionRole = new PermissionRole();
+            permissionRole.setRole(role);
+            permissionRole.setPermission(permission);
+            permissionRole.setType("ALL");
+            permissionRoleRepository.persist(permissionRole);
+
+            permission = new Permission();
+            permission.setKey("AUDIT_LOGS_POST_ALL");
+            permission.setName("AUDIT_LOGS");
+            permissionRepository.persist(permission);
+
+            permission=permissionRepository.find("key",permission.getKey()).firstResult();
+            permissionRole = new PermissionRole();
+            permissionRole.setRole(role);
+            permissionRole.setPermission(permission);
+            permissionRole.setType("ALL");
+            permissionRoleRepository.persist(permissionRole);
+
+            permission = new Permission();
+            permission.setKey("AUDIT_LOGS_GET_ALL");
+            permission.setName("AUDIT_LOGS");
+            permissionRepository.persist(permission);
 
             permission=permissionRepository.find("key",permission.getKey()).firstResult();
             permissionRole = new PermissionRole();
