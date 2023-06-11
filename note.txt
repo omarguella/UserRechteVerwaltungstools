@@ -72,19 +72,10 @@ GRANT postgres TO userrechttool;
 CREATE DATABASE userrechttooldb;
 grant all privileges on database userrechttooldb to userrechttool;
 
-Logs
-post
- { userID
-   userEmail
-   emailVerified
-   action
-   time
-   date
-}
 
 
-Get Logs By User Id
-Get Logs From To
-Get by Actions
-delete all
+send Logs for every api
+get logs
+delete logs
+
 set database archivierung
