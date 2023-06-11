@@ -14,10 +14,8 @@ import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.user.UserNameDuplicateElementException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.service.AuthenticationService;
-import User.Recht.Tool.service.RoleService;
-import User.Recht.Tool.service.UserService;
-import io.quarkus.mailer.Mail;
-import io.quarkus.mailer.Mailer;
+import User.Recht.Tool.service.LogsService;
+import User.Recht.Tool.service.UserService;;
 import io.vertx.ext.web.RoutingContext;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
@@ -43,6 +41,8 @@ public class AuthenticationResource {
     @ConfigProperty(name = "quarkus.http.proxy.proxy-address-forwarding", defaultValue = "false")
     boolean proxyAddressForwarding;
 
+    @Inject
+    LogsService logsService;
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationResource.class);
 
 
@@ -79,8 +79,16 @@ public class AuthenticationResource {
                           @RequestBody AuthenticationDto authenticationDto, @Context SecurityContext securityContext) throws Exception {
 
         try {
+
+            // Device Infos
             DeviceInfosDto deviceInfos = authenticationService.setDeviceInfos(headers, routingContext, proxyAddressForwarding);
+
+            //Token Generate
             TokenDto tokenDto = authenticationService.login(authenticationDto, deviceInfos);
+
+            // Send Logs
+            logsService.saveLogs("LOGIN",tokenDto.getAccessToken());
+
             return Response.ok(tokenDto).header("ACCESS_TOKEN", tokenDto.getAccessToken())
                     .header("REFRESH_TOKEN", tokenDto.getRefreshToken())
                     .build();
@@ -99,8 +107,13 @@ public class AuthenticationResource {
     @RolesAllowed({"USER"})
     @GET
     @Path("/me/")
-    public Response getMe(@Context SecurityContext securityContext) {
+    public Response getMe( @Context RoutingContext routingContext,@Context SecurityContext securityContext) {
         try {
+
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+            // Send Logs
+            logsService.saveLogs("GET_MY_SELF",token);
+
             User user = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
             return Response.ok(user).header("EMAIL", user.getEmail())
                     .build();
@@ -139,9 +152,13 @@ public class AuthenticationResource {
     @RolesAllowed({"USER"})
     @POST
     @Path("/logout/")
-    public Response logout(@Context SecurityContext securityContext, @HeaderParam("refreshToken") String refreshToken) {
+    public Response logout(@Context SecurityContext securityContext,@Context RoutingContext routingContext, @HeaderParam("refreshToken") String refreshToken) {
 
         try {
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+            // Send Logs
+            logsService.saveLogs("LOGOUT",token);
+
             authenticationService.logout(refreshToken);
             return Response.ok().header("STATUS", "USER IS LOGGED OUT").build();
         } catch (TokenNotFoundException e) {
@@ -150,13 +167,17 @@ public class AuthenticationResource {
         }
     }
 
-    @PermitAll
+    @RolesAllowed({"USER"})
     @POST
     @Path("logoutAll")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response logoutAll(@Context SecurityContext securityContext) {
+    public Response logoutAll(@Context SecurityContext securityContext,@Context RoutingContext routingContext) {
 
         try {
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+            // Send Logs
+            logsService.saveLogs("LOGOUT_ALL",token);
+
             User user = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
 
             authenticationService.logoutAll(user.getId());

@@ -52,7 +52,7 @@ public class LogServiceImpl implements LogService {
         String formattedDate = currentDate.format(formatter);
         currentDate = LocalDate.parse(formattedDate, formatter);
 
-        Log log= new Log(userId,  userEmail, currentDate, action, osName,
+        Log log= new Log(userId,  userEmail, currentDate, action.toUpperCase(), osName,
                 osVersion, userAgent, clientIpAddress, isVerifiedEmail);
         logRepository.persist(log);
 
@@ -95,7 +95,7 @@ public class LogServiceImpl implements LogService {
 
         if (action != null) {
             queryBuilder.append(" AND l.action = :action");
-            queryParams.put("action", action);
+            queryParams.put("action", action.toUpperCase());
         }
 
         try {
@@ -146,7 +146,7 @@ public class LogServiceImpl implements LogService {
 
         if (action != null) {
             queryBuilder.append(" AND l.action = :action");
-            queryParams.put("action", action);
+            queryParams.put("action", action.toUpperCase());
         }
 
         try {

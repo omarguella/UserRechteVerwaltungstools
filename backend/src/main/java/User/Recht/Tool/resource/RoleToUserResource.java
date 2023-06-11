@@ -10,6 +10,7 @@ import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.service.AuthorizationService;
+import User.Recht.Tool.service.LogsService;
 import User.Recht.Tool.service.RoleToUserService;
 import User.Recht.Tool.service.UserService;
 import io.vertx.ext.web.RoutingContext;
@@ -35,6 +36,8 @@ public class RoleToUserResource {
 
     @Inject
     AuthorizationService autorisationService;
+    @Inject
+    LogsService logsService;
 
     @POST
     @RolesAllowed({"USER"})
@@ -48,6 +51,10 @@ public class RoleToUserResource {
             autorisationService.checkRoleToUserAutorisations(connectedUser, userId, "USER_MANAGER_PUT", token, roleName,null);
 
             User user = roleToUserService.addRoleToUser(userId, roleName);
+
+            // Send Logs
+            logsService.saveLogs("ADD_ROLE_TO_USER",token);
+
             return Response.ok(user).header("status", "THE ROLE " + roleName + " IS ADDED TO THE USERID " + user.getUsername())
                     .build();
         } catch (UserNotFoundException e) {
@@ -80,6 +87,10 @@ public class RoleToUserResource {
             autorisationService.checkRoleToUserAutorisations(connectedUser, userId, "USER_MANAGER_PUT", token, roleName,userMovedTo);
 
             User user = roleToUserService.deleteRoleFromUser(userId, roleName, userMovedTo);
+
+            // Send Logs
+            logsService.saveLogs("DELETE_ROLE_FROM_USER",token);
+
             String status;
             if (user.getRoles().size() == 1) {
                 status = "CHANGED";
@@ -148,6 +159,10 @@ public class RoleToUserResource {
                 autorisationService.checkRoleToUserAutorisations(connectedUser, userId, "USER_MANAGER_PUT", token, roleName, movedTo);
             }
             roleToUserService.updateRolesForUsersWithAction(updateRoleForUsersList);
+
+            // Send Logs
+            logsService.saveLogs("UPDATE_ROLE_OF_USER",token);
+
             return Response.ok().header("status", "LIST OF USERS UPDATED")
                     .build();
         } catch (UserNotFoundException e) {

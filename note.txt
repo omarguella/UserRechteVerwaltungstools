@@ -56,8 +56,8 @@ Get all permission of the Role ✓
 
 
 TODO
-DELETE PERMISSION  PROBLEM DELETED INIT ❌
-
+• Der Super-Admin kann über die benutzerfreundliche Benutzeroberfläche alle Berechtigungen nach Rollen filtern und als PDF herunterladen.❌
+Nach Action FROM TO USERID..
 
 HINWEIS
 Send logs

@@ -13,11 +13,11 @@ import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.service.AuthorizationService;
+import User.Recht.Tool.service.LogsService;
 import User.Recht.Tool.service.RoleService;
 import User.Recht.Tool.service.UserService;
 import io.vertx.ext.web.RoutingContext;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
-
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
@@ -38,6 +38,8 @@ public class RoleResource {
     UserService userService;
     @Inject
     AuthorizationService autorisationService;
+    @Inject
+    LogsService logsService ;
 
 
     @POST
@@ -53,6 +55,10 @@ public class RoleResource {
             autorisationService.checkExistedUserPermission("ROLE_MANAGER_POST", token);
 
             Role role = roleService.createRole(roleDto);
+
+            // Send Logs
+            logsService.saveLogs("CREATE_ROLE",token);
+
             return Response.ok(role).header(roleDto.getName(), "IS CREATED")
                     .build();
 
@@ -88,6 +94,10 @@ public class RoleResource {
             autorisationService.checkRoleManagerAutorisations(connectedUser, roleName, "ROLE_MANAGER_GET", token, null);
 
             Role role = roleService.getRoleByName(roleName);
+
+            // Send Logs
+            logsService.saveLogs("GET_ROLE_BY_NAME",token);
+
             return Response.ok(role).header("ROLE", role.getName())
                     .build();
         } catch (RoleNotFoundException e) {
@@ -110,6 +120,7 @@ public class RoleResource {
     @RolesAllowed({"USER"})
     public Response getAllRoles(@Context SecurityContext securityContext) {
         List<Role> role = roleService.getAllRoles();
+
         return Response.ok(role).header("STATUS", "LIST OF ROLES")
                 .build();
     }
@@ -129,6 +140,9 @@ public class RoleResource {
             autorisationService.checkRoleManagerAutorisations(connectedUser, roleName, "ROLE_MANAGER_DELETE", token, userMovedTo);
 
             Role role = roleService.deleteRoleByName(roleName, userMovedTo);
+
+            // Send Logs
+            logsService.saveLogs("DELETE_ROLE",token);
 
             return Response.ok(role).header("ROLE", "IS DELETED")
                     .build();
@@ -182,6 +196,10 @@ public class RoleResource {
             autorisationService.checkRoleManagerAutorisations(connectedUser, roleName, "ROLE_MANAGER_PUT", token, null);
 
             Role role = roleService.updateRoleByName(roleName, updateRoleDto);
+
+            // Send Logs
+            logsService.saveLogs("UPDATE_ROLE",token);
+
 
             return Response.ok(role).header("status", "ROLE IS UPDATED")
                     .build();

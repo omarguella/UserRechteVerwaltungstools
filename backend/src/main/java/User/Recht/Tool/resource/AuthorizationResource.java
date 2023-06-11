@@ -4,6 +4,7 @@ import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.Permission.EmailNotVerified;
 import User.Recht.Tool.exception.Permission.PermissionNotFound;
 import User.Recht.Tool.exception.user.UserNotFoundException;
+import User.Recht.Tool.service.LogsService;
 import User.Recht.Tool.service.UserService;
 import User.Recht.Tool.service.serviceImpl.AuthorizationServiceImpl;
 import io.vertx.ext.web.RoutingContext;
@@ -28,6 +29,9 @@ public class AuthorizationResource {
 
     @Inject
     UserService userService;
+
+    @Inject
+    LogsService logsService;
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationResource.class);
 
     @GET
@@ -36,6 +40,8 @@ public class AuthorizationResource {
     public Response getMyPermissions(@Context RoutingContext routingContext, @Context SecurityContext securityContext) {
 
         String token = routingContext.request().getHeader("Authorization").substring(7);
+        // Send Logs
+        logsService.saveLogs("GET_MY_PERMISSIONS", token);
         return Response.ok(autorisationService.getMyPermissions(token)).build();
     }
 
@@ -48,6 +54,8 @@ public class AuthorizationResource {
             User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
             String token = routingContext.request().getHeader("Authorization").substring(7);
 
+            // Send Logs
+            logsService.saveLogs("EXTERNE API CALL FOR THE PERMISSION: "+permissionKey, token);
             return Response.ok(autorisationService.verifyingAPIAccessAuthorization(connectedUser, permissionKey,token))
                     .header("status", "YOU HAVE ACCESS TO THE API").build();
 

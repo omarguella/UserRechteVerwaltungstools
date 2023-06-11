@@ -54,7 +54,7 @@ public class LogsResource {
             try {
                 logService.checkPermission(token,"AUDIT_POST_GET_ALL");
                 Log savedLog = logService.saveLog(action, token);
-                return Response.ok(savedLog).header("STATUS", "LOG IS SAVED")
+                return Response.ok(savedLog).type("application/json;charset=UTF-8").header("STATUS", "LOG IS SAVED")
                         .build();
             }catch (PermissionDeniedException e) {
                 return Response.status(406, "PERMISSION DENIED")
