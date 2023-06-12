@@ -88,15 +88,42 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public List<Role>  getPrivatRoles ()  {
+    public List<Role>  getPrivatRoles (User user)  {
         List<Role>  roles =getAllRoles();
-        return roles=roles.stream().filter(Role::getIsPrivate).collect(Collectors.toList());
+        int minRoleLevel = user.getRoles()
+                .stream()
+                .mapToInt(Role::getLevel)
+                .min()
+                .orElse(1);
+
+
+        return roles.stream()
+                .filter(r -> r.getIsPrivate() && r.getLevel() >= minRoleLevel)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<Role> getAllRoles() {
+
         return roleRepository.listAll();
     }
+
+    @Override
+    public List<Role> getAvailibaleRoles(User user) {
+
+
+        int minRoleLevel = user.getRoles()
+                .stream()
+                .mapToInt(Role::getLevel)
+                .min()
+                .orElse(1);
+
+        List<Role> allRoles=getAllRoles();
+
+        return allRoles.stream().filter(r-> r.getLevel()>=minRoleLevel).collect(Collectors.toList());
+    }
+
+
 
     @Transactional
     @Override
@@ -162,7 +189,6 @@ public class RoleServiceImpl implements RoleService {
         roleRepository.getEntityManager().merge(role);
         return role;
     }
-
 
 
 }

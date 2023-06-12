@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService {
             RoleNotFoundException, UserNotFoundException, CannotCreateUserFromLowerLevel {
 
         int minRoleLevel;
-        List<Role> roles = roleService.getPrivatRoles();
+        List<Role> roles = roleService.getPrivatRoles(user);
         Role role = roleService.getRoleByName(roleName);
         if (roles.contains(role)) {
             minRoleLevel = user.getRoles()
@@ -162,6 +162,7 @@ public class UserServiceImpl implements UserService {
         TypedQuery<User> query = entityManager.createQuery(
                 "SELECT u FROM User u JOIN u.roles r WHERE r.name = :roleName", User.class);
         query.setParameter("roleName", roleName);
+
         return query.getResultList();
     }
 
@@ -215,14 +216,16 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public User updatePasswordById(Long id, UpdatePasswordDto updatePasswordDto) throws UserNotFoundException, ValidationException, IllegalArgumentException {
+    public User updatePasswordById(User user, Long id, UpdatePasswordDto updatePasswordDto) throws UserNotFoundException, ValidationException, IllegalArgumentException {
 
         User userToUpdate = getUserById(id);
 
-
-        if (!verifyPasswordById(updatePasswordDto.getOldPassword(), id)) {
-            throw new IllegalArgumentException("OLD PASSWORD IS WRONG");
-        } else if (!isValidPassword(updatePasswordDto.getNewPassword())) {
+        if (id == user.getId()) {
+            if (!verifyPasswordById(updatePasswordDto.getOldPassword(), id)) {
+                throw new IllegalArgumentException("OLD PASSWORD IS WRONG");
+            }
+        }
+        if (!isValidPassword(updatePasswordDto.getNewPassword())) {
             throw new ValidationException(" NEW PASSWORD IS NOT VALID");
         }
 

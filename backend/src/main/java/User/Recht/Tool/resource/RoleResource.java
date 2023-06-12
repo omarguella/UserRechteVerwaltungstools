@@ -18,6 +18,7 @@ import User.Recht.Tool.service.RoleService;
 import User.Recht.Tool.service.UserService;
 import io.vertx.ext.web.RoutingContext;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
@@ -118,11 +119,30 @@ public class RoleResource {
 
     @GET
     @RolesAllowed({"USER"})
-    public Response getAllRoles(@Context SecurityContext securityContext) {
-        List<Role> role = roleService.getAllRoles();
+    public Response getAvailibaleRoles(@Context SecurityContext securityContext, @Context RoutingContext routingContext) {
 
-        return Response.ok(role).header("STATUS", "LIST OF ROLES")
-                .build();
+        try {
+            User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+
+            // CHECK PERMISSIONS
+            autorisationService.checkExistedUserPermission("ROLE_MANAGER_GET", token);
+
+            List<Role> role = roleService.getAvailibaleRoles(connectedUser);
+
+            // Send Logs
+            logsService.saveLogs("GET_AVAILIBALE_ROLES", token);
+
+
+            return Response.ok(role).header("STATUS", "LIST OF AVAILIBALE ROLES")
+                    .build();
+        } catch (UserNotFoundException e) {
+            return Response.status(406, "USER DOSENT EXIST")
+                    .header("status", "USER DOSENT EXIST").build();
+        } catch (UserNotAuthorized e) {
+            return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
+                    .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
+        }
     }
 
 
@@ -235,13 +255,35 @@ public class RoleResource {
         return Response.ok(roles).header("STATUS", "LIST OF PUBLIC ROLES")
                 .build();
     }
+
     @GET
     @PermitAll
     @Path("/privatRoles/")
-    public Response getPrivateRoles(@Context SecurityContext securityContext) {
-        List<Role> roles = roleService.getPrivatRoles();
-        return Response.ok(roles).header("STATUS", "LIST OF PRIVATE ROLES")
-                .build();
+    public Response getPrivateRoles(@Context RoutingContext routingContext, @Context SecurityContext securityContext) {
+
+        try {
+
+
+            User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+
+            // CHECK PERMISSIONS
+            autorisationService.checkExistedUserPermission("ROLE_MANAGER_GET", token);
+
+            List<Role> roles = roleService.getPrivatRoles(connectedUser);
+
+            // Send Logs
+            logsService.saveLogs("UPDATE_ROLE", token);
+
+            return Response.ok(roles).header("STATUS", "LIST OF PRIVATE ROLES")
+                    .build();
+        } catch (UserNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (UserNotAuthorized e) {
+            return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
+                    .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
+        }
     }
+
 
 }

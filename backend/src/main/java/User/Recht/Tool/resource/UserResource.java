@@ -335,7 +335,7 @@ public class UserResource {
             // CHECK PERMISSIONS
             autorisationService.checkUserManagerAutorisations(connectedUser, id, "USER_MANAGER_PUT", token);
 
-            User user = userService.updatePasswordById(id, updatePasswordDto);
+            User user = userService.updatePasswordById(connectedUser,id, updatePasswordDto);
             // Send Logs
             logsService.saveLogs("UPDATE_PASSWORD_USER",token);
 

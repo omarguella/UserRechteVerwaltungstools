@@ -3,6 +3,7 @@ package User.Recht.Tool.service;
 import User.Recht.Tool.dtos.roleDtos.RoleDto;
 import User.Recht.Tool.dtos.roleDtos.UpdateRoleDto;
 import User.Recht.Tool.entity.Role;
+import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.Permission.LevelRoleException;
 import User.Recht.Tool.exception.Permission.PermissionNotFound;
 import User.Recht.Tool.exception.Permission.PermissionToRoleNotFound;
@@ -27,10 +28,12 @@ public interface RoleService {
 
     List<Role>  getPublicRoles();
 
-    List<Role>  getPrivatRoles();
+    List<Role>  getPrivatRoles(User user);
 
     List<Role> getAllRoles();
 
+
+    List<Role> getAvailibaleRoles(User user);
 
     @Transactional
     Role deleteRoleByName(String roleName, String moveTo) throws RoleNotFoundException, CannotModifySuperAdminException,
