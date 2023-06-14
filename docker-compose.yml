@@ -25,7 +25,7 @@ services:
     image: postgres:latest
     restart: always
     ports:
-      - "5961:5433"
+      - "5961:5432"
     volumes:
       - ./docker_postgres_init.sql:/docker-entrypoint-initdb.d/docker_postgres_init.sql
 
@@ -38,7 +38,7 @@ services:
     image: postgres:15.3-alpine
     restart: always
     ports:
-      - "5105:5432"
+      - "5566:5432"
     volumes:
       - ./docker_postgres_init.sql:/docker-entrypoint-initdb.d/docker_postgres_init.sql
     environment:

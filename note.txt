@@ -102,3 +102,46 @@ get logs
 delete logs
 
 set database archivierung
+
+
+
+3: Bell–LaPadula model
+￼
+
+
+Basiert auf roles level
+
+Examples of use cases:
+Create Private Users with higher role not possible
+Delete User that have higher or same Role not possible
+
+Add a Role to a User Check if the added Role is higher or the User have a higher Role is not possible
+Delete a Role From a User Check if the Deleted Role is higher or the User have a higher or a same Level of Roles is not possible
+Get Role is Only of the same Role or lower
+
+Create Role with a higher  or same Role Level not possible
+Delete Role with a higher or a Same  Role Level not possible
+update role with set higher or same  level not possible
+
+User that have the permission to assign Permissions to a role can only the available permissions added
+If he have a permission with a type „ME“ cannot add or update a permission to Role with a type ALL
+CANNOT DELETE A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL
+
+
+Zum Zeigen 
+Login durch JWT accesstoken Refreshtoken
+Logout / logout all
+Verify Email
+Verifying API Access Authorization cannot working when the email is not verified and in the Role it must be verified
+
+http://localhost:9000/swagger-ui.html/ Swagger for Dokumentation / Insomnia zum testen
+
+
+Bis nächsten Termin
+
++Backend vollständigen (Logs) + Dockerzieren
++Bericht weiterschreiben
++Mockups  for Frontend
++APP Qualität testen
+
+https://h-brs.webex.com/meet/teena-chakkalayil.hassan
