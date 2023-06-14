@@ -3,6 +3,7 @@ package User.Recht.Tool.resource;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.Permission.EmailNotVerified;
 import User.Recht.Tool.exception.Permission.PermissionNotFound;
+import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.service.LogsService;
 import User.Recht.Tool.service.UserService;
@@ -36,13 +37,25 @@ public class AuthorizationResource {
 
     @GET
     @RolesAllowed({"USER"})
-    @Path("/allPermissions")
-    public Response getMyPermissions(@Context RoutingContext routingContext, @Context SecurityContext securityContext) {
+    @Path("/allPermissions/text")
+    public Response getMyPermissionsInText(@Context RoutingContext routingContext, @Context SecurityContext securityContext) {
 
         String token = routingContext.request().getHeader("Authorization").substring(7);
         // Send Logs
         logsService.saveLogs("GET_MY_PERMISSIONS", token);
         return Response.ok(autorisationService.getMyPermissions(token)).build();
+    }
+    @GET
+    @RolesAllowed({"USER"})
+    @Path("/allPermissions")
+    public Response getMyPermissionsObject(@Context RoutingContext routingContext, @Context SecurityContext securityContext) throws UserNotFoundException, RoleNotFoundException {
+
+        User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
+        String token = routingContext.request().getHeader("Authorization").substring(7);
+
+        // Send Logs
+        logsService.saveLogs("GET_MY_PERMISSIONS", token);
+        return Response.ok(autorisationService.getMyPermissionsObject(connectedUser)).build();
     }
 
     @GET

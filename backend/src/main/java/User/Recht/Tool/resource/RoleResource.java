@@ -55,7 +55,7 @@ public class RoleResource {
             // CHECK PERMISSIONS
             autorisationService.checkExistedUserPermission("ROLE_MANAGER_POST", token);
 
-            Role role = roleService.createRole(roleDto);
+            Role role = roleService.createRole(roleDto,token);
 
             // Send Logs
             logsService.saveLogs("CREATE_ROLE",token);
@@ -70,8 +70,8 @@ public class RoleResource {
             return Response.status(406, "ROLE IS NOT SAFE CREATED")
                     .header("status", " ROLE IS NOT SAFE CREATED ").build();
         } catch (LevelRoleException e) {
-            return Response.status(406, "LEVEL SHOULD BE BIGGER THAN 0")
-                    .header("status", " LEVEL SHOULD BE BIGGER THAN 0 ").build();
+            return Response.status(406, "LEVEL SHOULD BE BIGGER THEN THE MINIMUM LEVEL OF THE ROLE")
+                    .header("status", " LEVEL SHOULD BE BIGGER THEN THE MINIMUM LEVEL OF THE ROLE ").build();
         } catch (UserNotFoundException e) {
             return Response.status(406, "USER DOSENT EXIST")
                     .header("status", "USER DOSENT EXIST").build();
@@ -145,6 +145,34 @@ public class RoleResource {
         }
     }
 
+    @GET
+    @RolesAllowed({"USER"})
+    @Path("/edit/")
+    public Response getAvailibaleRolesToEdit(@Context SecurityContext securityContext, @Context RoutingContext routingContext) {
+
+        try {
+            User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+
+            // CHECK PERMISSIONS
+            autorisationService.checkExistedUserPermission("ROLE_MANAGER_GET", token);
+
+            List<Role> role = roleService.getAvailibaleRolesToEdit(connectedUser,token);
+
+            // Send Logs
+            logsService.saveLogs("GET_AVAILIBALE_ROLES_TO_EDIT", token);
+
+
+            return Response.ok(role).header("STATUS", "LIST OF AVAILIBALE ROLES TO EDIT")
+                    .build();
+        } catch (UserNotFoundException e) {
+            return Response.status(406, "USER DOSENT EXIST")
+                    .header("status", "USER DOSENT EXIST").build();
+        } catch (UserNotAuthorized e) {
+            return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
+                    .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
+        }
+    }
 
     @DELETE
     @RolesAllowed({"USER"})
@@ -215,7 +243,7 @@ public class RoleResource {
             // CHECK PERMISSIONS
             autorisationService.checkRoleManagerAutorisations(connectedUser, roleName, "ROLE_MANAGER_PUT", token, null);
 
-            Role role = roleService.updateRoleByName(roleName, updateRoleDto);
+            Role role = roleService.updateRoleByName(roleName, updateRoleDto,token);
 
             // Send Logs
             logsService.saveLogs("UPDATE_ROLE",token);
@@ -233,17 +261,17 @@ public class RoleResource {
         } catch (IllegalArgumentException e) {
             return Response.status(406, "CANNOT CHANGE SUPERADMIN NAME")
                     .header("status", "CANNOT CHANGE SUPERADMIN NAME").build();
-        }catch (CannotModifySuperAdminException e) {
-            return Response.status(406, "CANNOT MODIFY A SUPERADMIN")
-                    .header("status", "CANNOT MODIFY A SUPERADMIN").build();
         }catch (UserNotFoundException e) {
             throw new RuntimeException(e);
         }catch (UserNotAuthorized e) {
             return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
         } catch (DeniedRoleLevel e) {
-            return Response.status(406, "CANNOT DELETE A ROLE OF A HIGHER  ROLE LEVEL")
-                    .header("STATUS", " CANNOT DELETE A ROLE  OF A HIGHER ROLE LEVEL").build();
+            return Response.status(406, "CANNOT UPDATE A ROLE OF A HIGHER  ROLE LEVEL")
+                    .header("STATUS", " CANNOT UPDATE A ROLE  OF A HIGHER ROLE LEVEL").build();
+        } catch (LevelRoleException e) {
+            return Response.status(406, "CANNOT UPDATE A LEVEL HIGHER THEN THE CURRENT LEVEL OF USER")
+                    .header("STATUS", " CANNOT UPDATE A LEVEL HIGHER THEN THE CURRENT LEVEL OF USER").build();
         }
     }
 

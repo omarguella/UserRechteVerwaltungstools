@@ -67,20 +67,18 @@ public class UserServiceImpl implements UserService {
             throws DuplicateElementException, NullPointerException, ValidationException,
             RoleNotFoundException, UserNotFoundException, CannotCreateUserFromLowerLevel {
 
+
         int minRoleLevel;
-        List<Role> roles = roleService.getPrivatRoles(user);
+
+        List<Role> roles = roleService.getAvailibaleRoles(user);
+
         Role role = roleService.getRoleByName(roleName);
+
         if (roles.contains(role)) {
-            minRoleLevel = user.getRoles()
-                    .stream()
-                    .mapToInt(Role::getLevel)
-                    .min()
-                    .orElse(1);
-            if (minRoleLevel > role.getLevel()) {
-                throw new CannotCreateUserFromLowerLevel("CANNOT CREATE A USER FROM A HIGHER ROLE LEVEL");
+            return createUser(userDto, roleName);}
+            else{
+            throw new CannotCreateUserFromLowerLevel("CANNOT CREATE A USER FROM A HIGHER ROLE LEVEL");
             }
-        }
-        return createUser(userDto, roleName);
     }
 
     @Transactional

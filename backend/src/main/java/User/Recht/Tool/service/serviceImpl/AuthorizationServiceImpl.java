@@ -4,10 +4,7 @@ import User.Recht.Tool.dtos.permissionDtos.PermissionRoleDto;
 import User.Recht.Tool.entity.Permission;
 import User.Recht.Tool.entity.Role;
 import User.Recht.Tool.entity.User;
-import User.Recht.Tool.exception.Permission.DeniedRoleLevel;
-import User.Recht.Tool.exception.Permission.EmailNotVerified;
-import User.Recht.Tool.exception.Permission.PermissionNotFound;
-import User.Recht.Tool.exception.Permission.UserNotAuthorized;
+import User.Recht.Tool.exception.Permission.*;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.service.*;
@@ -16,8 +13,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.fasterxml.jackson.core.io.NumberInput.parseInt;
@@ -132,7 +131,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
     @Override
     public void checkPermissionToRoleAutorisations(User connectedUser, String roleName, String permissionKey, String token, String addPermissionKey)
-            throws UserNotAuthorized, DeniedRoleLevel, RoleNotFoundException {
+            throws UserNotAuthorized, DeniedRoleLevel, RoleNotFoundException, PermissionNotValid {
 
         if (!connectedUser.getUsername().equals("SUPERADMIN")) {
             String[] parts = permissionKey.split("_");
@@ -143,7 +142,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
             checkExistedUserPermission(permissionKey, token);
 
             if (addPermissionKey != null) {
-                checkExistedUserPermission(addPermissionKey, token);
+                checkAddPermissionKey(addPermissionKey, token);
             }
 
 
@@ -159,6 +158,21 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         permissionKey = permissionKey.toUpperCase();
         if (!getMyPermissions(token).contains(permissionKey + "_ALL")) {
             throw new UserNotAuthorized("USER IS NOT AUTHOROZIED FOR THE PERMISSION");
+        }
+    }
+    public void checkAddPermissionKey(String addPermissionKeyWithType, String token) throws UserNotAuthorized, PermissionNotValid {
+        addPermissionKeyWithType = addPermissionKeyWithType.toUpperCase();
+        String[] parts = addPermissionKeyWithType.split("_");
+        String type = parts[parts.length - 1];
+        String PermissionKey=addPermissionKeyWithType.substring(0,addPermissionKeyWithType.indexOf(type)-1);
+
+        LOGGER.info(PermissionKey);
+
+        if (!getMyPermissions(token).contains(addPermissionKeyWithType)) {
+            if(!getMyPermissions(token).contains(PermissionKey+"_ALL")){
+                throw new PermissionNotValid("CANNOT ADD A PERMISSION OF HIGHER TYPE");
+
+            }
         }
     }
 
@@ -216,6 +230,19 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         List<String> list = (List<String>) map.get("allPermissionsOfUser");
         return list;
 
+    }
+    @Override
+    public List<PermissionRoleDto> getMyPermissionsObject(User user) throws RoleNotFoundException {
+
+        List<Role> roles=user.getRoles();
+        List<PermissionRoleDto> permissions=new ArrayList<>();
+        for(Role role:roles){
+            permissions.addAll(permissionToRoleService.getAll(role.getName()));
+        }
+
+        return permissions.stream()
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     private int getMinimumRoleLevelFromToken(String token) {

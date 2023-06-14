@@ -43,13 +43,12 @@ public class UserResource {
 
     @POST
     @RolesAllowed({"USER"})
-    @Path("registration/{roleName}")
+    @Path("signup/{roleName}")
     public Response createPrivateUser(@Context RoutingContext routingContext,
                                       @RequestBody UserDto userDto, @PathParam("roleName") String roleName,
                                       @Context SecurityContext securityContext) {
 
         try {
-
 
             User user = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
             String token = routingContext.request().getHeader("Authorization").substring(7);

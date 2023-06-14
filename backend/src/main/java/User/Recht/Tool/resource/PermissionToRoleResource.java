@@ -3,10 +3,7 @@ package User.Recht.Tool.resource;
 import User.Recht.Tool.dtos.permissionDtos.ListPermissionKeysDto;
 import User.Recht.Tool.dtos.permissionDtos.PermissionRoleDto;
 import User.Recht.Tool.entity.User;
-import User.Recht.Tool.exception.Permission.DeniedRoleLevel;
-import User.Recht.Tool.exception.Permission.PermissionNotFound;
-import User.Recht.Tool.exception.Permission.PermissionToRoleNotFound;
-import User.Recht.Tool.exception.Permission.UserNotAuthorized;
+import User.Recht.Tool.exception.Permission.*;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
@@ -50,7 +47,7 @@ public class PermissionToRoleResource {
             String token = routingContext.request().getHeader("Authorization").substring(7);
             // CHECK PERMISSIONS
             autorisationService.checkPermissionToRoleAutorisations(connectedUser, permissionRoleDto.getRoleName(),
-                    "ROLE_MANAGER_PUT", token, permissionRoleDto.getPermissionKey());
+                    "ROLE_MANAGER_PUT", token, permissionRoleDto.getPermissionKey()+"_"+permissionRoleDto.getType());
 
             PermissionRoleDto permissionRole = permissionToRoleService.addPermissionToRole(permissionRoleDto);
 
@@ -87,7 +84,11 @@ public class PermissionToRoleResource {
         } catch (DeniedRoleLevel e) {
             return Response.status(406, "CANNOT ADD A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL")
                     .header("STATUS", " CANNOT ADD A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL").build();
+        } catch (PermissionNotValid e) {
+            return Response.status(406, "CANNOT ADD A PERMISSION OF HIGHER TYPE")
+                    .header("STATUS", " CANNOT ADD A PERMISSION OF HIGHER TYPE").build();
         }
+
     }
 
     @POST
@@ -142,6 +143,9 @@ public class PermissionToRoleResource {
         } catch (DeniedRoleLevel e) {
             return Response.status(406, "CANNOT ADD A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL")
                     .header("STATUS", " CANNOT ADD A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL").build();
+        }catch (PermissionNotValid e) {
+            return Response.status(406, "CANNOT ADD A PERMISSION OF HIGHER TYPE")
+                    .header("STATUS", " CANNOT ADD A PERMISSION OF HIGHER TYPE").build();
         }
     }
 
@@ -186,6 +190,8 @@ public class PermissionToRoleResource {
         } catch (DeniedRoleLevel e) {
             return Response.status(406, "CANNOT GET A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL")
                     .header("STATUS", " CANNOT GET A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL").build();
+        } catch (PermissionNotValid e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -224,6 +230,8 @@ public class PermissionToRoleResource {
             return Response.status(406, "USER DOSENT EXIST")
                     .header("status", "USER DOSENT EXIST").build();
 
+        } catch (PermissionNotValid e) {
+            throw new RuntimeException(e);
         }
     }
     @GET
@@ -261,6 +269,8 @@ public class PermissionToRoleResource {
         } catch (DeniedRoleLevel e) {
             return Response.status(406, "CANNOT GET A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL")
                     .header("STATUS", " CANNOT GET A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL").build();
+        } catch (PermissionNotValid e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -307,6 +317,8 @@ public class PermissionToRoleResource {
         } catch (DeniedRoleLevel e) {
             return Response.status(406, "CANNOT UPDATE A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL")
                     .header("STATUS", " CANNOT UPDATE A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL").build();
+        } catch (PermissionNotValid e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -355,6 +367,8 @@ public class PermissionToRoleResource {
         } catch (DeniedRoleLevel e) {
             return Response.status(406, "CANNOT DELETE A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL")
                     .header("STATUS", " CANNOT DELETE A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL").build();
+        } catch (PermissionNotValid e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -406,6 +420,8 @@ public class PermissionToRoleResource {
         } catch (DeniedRoleLevel e) {
             return Response.status(406, "CANNOT DELETE A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL")
                     .header("STATUS", " CANNOT DELETE A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL").build();
+        } catch (PermissionNotValid e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -456,6 +472,8 @@ public class PermissionToRoleResource {
         } catch (DeniedRoleLevel e) {
             return Response.status(406, "CANNOT DELETE A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL")
                     .header("STATUS", " CANNOT DELETE A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL").build();
+        } catch (PermissionNotValid e) {
+            throw new RuntimeException(e);
         }
     }
 

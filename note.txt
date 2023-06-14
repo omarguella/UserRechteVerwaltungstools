@@ -72,6 +72,29 @@ GRANT postgres TO userrechttool;
 CREATE DATABASE userrechttooldb;
 grant all privileges on database userrechttooldb to userrechttool;
 
+CREATE USER auditlog WITH PASSWORD 'postgres';
+GRANT postgres TO auditlog;
+CREATE DATABASE auditlogdb;
+grant all privileges on database auditlogdb to auditlog;
+
+
+++****+++** FOR DOCKER ++*****+++**++
+
+./mvnw package
+
+build Images
+docker build -f src/main/docker/Dockerfile.jvm -t backend-user-recht-tool .
+docker build -f src/main/docker/Dockerfile.jvm -t auditlogs .
+
+create Repo for the tow images
+
+Docker login with acesstoken
+
+docker tag backend-user-recht-tool guellaomar/backend-user-recht-tool:latest
+docker tag auditlogs guellaomar/auditlogs:latest
+
+docker push guellaomar/backend-user-recht-tool:latest
+docker push guellaomar/auditlogs:latest
 
 
 send Logs for every api
