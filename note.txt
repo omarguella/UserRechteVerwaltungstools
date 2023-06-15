@@ -67,10 +67,10 @@ https://www.youtube.com/watch?v=7YgaZIFn7mY ssl certificate
 
 DATA BASE POSTGRES:
 psql -U postgres
-CREATE USER userrechttool WITH PASSWORD 'postgres';
-GRANT postgres TO userrechttool;
-CREATE DATABASE userrechttooldb;
-grant all privileges on database userrechttooldb to userrechttool;
+CREATE USER auditlog WITH PASSWORD 'postgres';
+GRANT postgres TO auditlog;
+CREATE DATABASE auditlogdb;
+grant all privileges on database auditlogdb to auditlog;
 
 
 
