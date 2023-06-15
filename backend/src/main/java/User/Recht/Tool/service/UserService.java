@@ -50,7 +50,7 @@ public interface UserService {
     User saveUpdatedUser(User user);
 
     @Transactional
-    User updatePasswordById(Long id, UpdatePasswordDto updatePasswordDto) throws UserNotFoundException, ValidationException ,IllegalArgumentException;
+    User updatePasswordById(User user, Long id, UpdatePasswordDto updatePasswordDto) throws UserNotFoundException, ValidationException ,IllegalArgumentException;
 
     @Transactional
     User updateProfilById(Long id, UserProfileDto userProfileDto) throws CannotModifySuperAdminException,UserNotFoundException,ValidationException, DuplicateElementException;

@@ -15,6 +15,7 @@ import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.factory.roleFactorys.RoleFactory;
 import User.Recht.Tool.repository.RoleRepository;
+import User.Recht.Tool.service.ClaimsOfUser;
 import User.Recht.Tool.service.RoleService;
 import User.Recht.Tool.service.RoleToUserService;
 import User.Recht.Tool.service.UserService;
@@ -25,6 +26,7 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -41,14 +43,21 @@ public class RoleServiceImpl implements RoleService {
     PermissionToRoleServiceImpl permissionToRoleService;
     @Inject
     UserService userService;
+    @Inject
+    ClaimsOfUser claimsOfUser;
     private static final Logger LOGGER = LoggerFactory.getLogger(RoleServiceImpl.class);
 
     @Transactional
     @Override
-    public Role createRole(RoleDto roleDto) throws RoleNameDuplicateElementException, RoleNotFoundException, LevelRoleException {
+    public Role createRole(RoleDto roleDto, String token) throws RoleNameDuplicateElementException, RoleNotFoundException, LevelRoleException {
         roleDto.setName(roleDto.getName().toUpperCase());
-        if(roleDto.getLevel()<=0){
-            throw  new LevelRoleException("LEVEL SHOULD BE BIGGER THAN 0");
+
+        Map<String, Object> map = claimsOfUser.listClaimUsingJWT(token);
+        Long minRoleLevel = (Long) map.get("minRoleLevel");
+
+
+        if (roleDto.getLevel() <= minRoleLevel) {
+            throw new LevelRoleException("LEVEL SHOULD BE BIGGER THAN THE MINIMUM LEVEL OF THE ROLE");
         }
         try {
             Role roleCheckWithName = getRoleByName(roleDto.getName());
@@ -88,15 +97,57 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public List<Role>  getPrivatRoles ()  {
+    public List<Role>  getPrivatRoles (User user)  {
         List<Role>  roles =getAllRoles();
-        return roles=roles.stream().filter(Role::getIsPrivate).collect(Collectors.toList());
+        int minRoleLevel = user.getRoles()
+                .stream()
+                .mapToInt(Role::getLevel)
+                .min()
+                .orElse(1);
+
+        return roles.stream()
+                .filter(r -> r.getIsPrivate() && r.getLevel() >= minRoleLevel)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<Role> getAllRoles() {
+
         return roleRepository.listAll();
     }
+
+    @Override
+    public List<Role> getAvailibaleRoles(User user) {
+
+
+        int minRoleLevel = user.getRoles()
+                .stream()
+                .mapToInt(Role::getLevel)
+                .min()
+                .orElse(1);
+
+        List<Role> allRoles=getAllRoles();
+
+        return allRoles.stream().filter(r-> r.getLevel()>=minRoleLevel).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Role> getAvailibaleRolesToEdit(User user,String token) {
+
+
+        int minRoleLevel = user.getRoles()
+                .stream()
+                .mapToInt(Role::getLevel)
+                .min()
+                .orElse(1);
+
+        List<Role> allRoles=getAllRoles();
+
+        return allRoles.stream().filter(r-> r.getLevel()>minRoleLevel).collect(Collectors.toList());
+    }
+
+
+
 
     @Transactional
     @Override
@@ -131,29 +182,39 @@ public class RoleServiceImpl implements RoleService {
 
     @Transactional
     @Override
-    public Role updateRoleByName(String name, UpdateRoleDto updateRoleDto)
-            throws RoleNotFoundException, RoleNameDuplicateElementException, IllegalArgumentException,CannotModifySuperAdminException {
+    public Role updateRoleByName(String name, UpdateRoleDto updateRoleDto,String token)
+            throws RoleNotFoundException, RoleNameDuplicateElementException, IllegalArgumentException, LevelRoleException {
 
-      /*  if (name.equalsIgnoreCase("SUPERADMIN")){
-            throw new CannotModifySuperAdminException("CANNOT MODIFY A SUPERADMIN");
-        }*/
 
         Role roleToUpdate = getRoleByName(name);
 
+
         if (updateRoleDto.getName() != null) {
+            updateRoleDto.setName(updateRoleDto.getName().toUpperCase());
+
             try {
-                updateRoleDto.setName(updateRoleDto.getName().toUpperCase());
-                if (updateRoleDto.getName().equals("SUPERADMIN")) {
-                    throw new IllegalArgumentException("CANNOT CHANGE SUPERADMIN NAME");
-                }
                 Role checkName = getRoleByName(updateRoleDto.getName());
                 if (!Objects.equals(checkName.getId(), roleToUpdate.getId())) {
-                    throw new RoleNameDuplicateElementException("USERNAME ALREADY USED");
+                    throw new RoleNameDuplicateElementException("ROLE NAME ALREADY USED");
                 }
             } catch (RoleNotFoundException ignored) {
             }
         }
-        roleToUpdate = roleFactory.updateRoleFactory(roleToUpdate, updateRoleDto);
+
+        if (updateRoleDto.getLevel() != 0) {
+
+            Map<String, Object> map = claimsOfUser.listClaimUsingJWT(token);
+            Long minRoleLevel = (Long) map.get("minRoleLevel");
+
+            if(minRoleLevel>=updateRoleDto.getLevel() ){
+                throw new LevelRoleException("CANNOT UPDATE A LEVEL HIGHER THEN THE CURRENT LEVEL OF USER ");
+            }
+
+        }
+
+
+
+            roleToUpdate = roleFactory.updateRoleFactory(roleToUpdate, updateRoleDto);
         return saveUpdatedRole(roleToUpdate);
     }
 
@@ -162,7 +223,6 @@ public class RoleServiceImpl implements RoleService {
         roleRepository.getEntityManager().merge(role);
         return role;
     }
-
 
 
 }

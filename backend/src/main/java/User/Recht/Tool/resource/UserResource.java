@@ -10,6 +10,7 @@ import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
 import User.Recht.Tool.exception.user.UserNameDuplicateElementException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
+import User.Recht.Tool.service.LogsService;
 import User.Recht.Tool.service.UserService;
 import User.Recht.Tool.service.serviceImpl.AuthorizationServiceImpl;
 import io.vertx.ext.web.RoutingContext;
@@ -36,12 +37,13 @@ public class UserResource {
     @Inject
     AuthorizationServiceImpl autorisationService;
 
-
+    @Inject
+    LogsService logsService;
     private static final Logger LOGGER = LoggerFactory.getLogger(UserResource.class);
 
     @POST
     @RolesAllowed({"USER"})
-    @Path("registration/{roleName}")
+    @Path("signup/{roleName}")
     public Response createPrivateUser(@Context RoutingContext routingContext,
                                       @RequestBody UserDto userDto, @PathParam("roleName") String roleName,
                                       @Context SecurityContext securityContext) {
@@ -55,6 +57,10 @@ public class UserResource {
             autorisationService.checkExistedUserPermission("USER_MANAGER_POST", token);
 
             User userToCreate = userService.createPrivateUser(userDto, roleName, user);
+
+            // Send Logs
+            logsService.saveLogs("CREATE_PRIVATE_USER",token);
+
             return Response.ok(userToCreate).header("Email", userDto.getEmail())
                     .build();
 
@@ -101,6 +107,10 @@ public class UserResource {
 
             User user = userService.getUserById(id);
 
+            // Send Logs
+            logsService.saveLogs("GET_USER_BY_ID",token);
+
+
             return Response.ok(user).header("Email", user.getEmail())
                     .build();
 
@@ -131,6 +141,8 @@ public class UserResource {
             // CHECK PERMISSIONS
             autorisationService.checkUserManagerAutorisations(connectedUser, user.getId(), "USER_MANAGER_GET", token);
 
+            // Send Logs
+            logsService.saveLogs("GET_USER_BY_EMAIL",token);
 
             return Response.ok(user).header("Email", user.getEmail())
                     .build();
@@ -163,6 +175,10 @@ public class UserResource {
             // CHECK PERMISSIONS
             autorisationService.checkUserManagerAutorisations(connectedUser, user.getId(), "USER_MANAGER_GET", token);
 
+            // Send Logs
+            logsService.saveLogs("GET_USER_BY_USERNAME",token);
+
+
             return Response.ok(user).header("Email", user.getEmail())
                     .build();
 
@@ -185,10 +201,13 @@ public class UserResource {
 
 
         try {
+
             String token = routingContext.request().getHeader("Authorization").substring(7);
             autorisationService.checkExistedUserPermission("USER_MANAGER_GET", token);
-
             List<User> users = userService.getAllUsers();
+            // Send Logs
+            logsService.saveLogs("GET_ALL_USERS",token);
+
             return Response.ok(users).header("STATUS", "LIST OF USERS")
                     .build();
         } catch (UserNotAuthorized e) {
@@ -209,6 +228,10 @@ public class UserResource {
             autorisationService.checkExistedUserPermission("USER_MANAGER_GET", token);
 
             List<User> users = userService.getAllUsersByRole(roleName);
+
+            // Send Logs
+            logsService.saveLogs("GET_USERS_BY_ROLE",token);
+
             return Response.ok(users).header("STATUS", "LIST OF USERS OF THIS ROLE " + roleName)
                     .build();
         } catch (RoleNotFoundException e) {
@@ -236,6 +259,9 @@ public class UserResource {
             autorisationService.checkUserManagerAutorisations(connectedUser, id, "USER_MANAGER_DELETE", token);
 
             User user = userService.deleteUserById(id);
+
+            // Send Logs
+            logsService.saveLogs("DELETE_USER_BY_ID",token);
 
             return Response.ok(user).header("STATUS", "user is deleted")
                     .build();
@@ -271,6 +297,9 @@ public class UserResource {
 
             User user = userService.updateEmailUser(id, newEmail);
 
+            // Send Logs
+            logsService.saveLogs("UPDATE_EMAIL_USER",token);
+
             return Response.ok(user).header("STATUS", "email is updated")
                     .build();
 
@@ -305,7 +334,9 @@ public class UserResource {
             // CHECK PERMISSIONS
             autorisationService.checkUserManagerAutorisations(connectedUser, id, "USER_MANAGER_PUT", token);
 
-            User user = userService.updatePasswordById(id, updatePasswordDto);
+            User user = userService.updatePasswordById(connectedUser,id, updatePasswordDto);
+            // Send Logs
+            logsService.saveLogs("UPDATE_PASSWORD_USER",token);
 
             return Response.ok(user).header("STATUS", "PASSWORD IS UPDATED")
                     .build();
@@ -345,6 +376,9 @@ public class UserResource {
 
             User user = userService.updateProfilById(id, userProfileDto);
 
+            // Send Logs
+            logsService.saveLogs("UPDATE_PROFIL_USER",token);
+
             return Response.ok(user).header("STATUS", "PROFILE IS UPDATED")
                     .build();
 
@@ -372,10 +406,15 @@ public class UserResource {
     @POST
     @Path("/mail/sendPin/")
     @RolesAllowed({ "USER" })
-    public Response sendVerifyMail(
+    public Response sendVerifyMail( @Context RoutingContext routingContext,
              @Context SecurityContext securityContext)  {
 
         try {
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+
+            // Send Logs
+            logsService.saveLogs("SEND_VERIFY_EMAIL_PIN",token);
+
             User user=userService.getUserByEmail(securityContext.getUserPrincipal().getName());
             userService.sendPinForEmailVerify(user);
             return Response.accepted().header("STATUS", "EMAIL IS SEND").build();
@@ -388,12 +427,18 @@ public class UserResource {
     @POST
     @Path("/mail/verify/")
     @RolesAllowed({ "USER" })
-    public Response verifyEmail(@HeaderParam("pin") String pin,
+    public Response verifyEmail(@Context RoutingContext routingContext,@HeaderParam("pin") String pin,
             @Context SecurityContext securityContext)  {
 
         try {
             User user=userService.getUserByEmail(securityContext.getUserPrincipal().getName());
             user= userService.emailVerifyByPin(user,pin);
+
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+            // Send Logs
+            logsService.saveLogs("VERIFY_EMAIL",token);
+
+
             return Response.accepted(user).header("STATUS", "EMAIL IS VERIFIED").build();
         } catch (PinNotFound e) {
             return Response.status(406, "PIN IS WRONG")

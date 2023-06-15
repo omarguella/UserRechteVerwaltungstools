@@ -1,0 +1,52 @@
+version: '3.8'
+services:
+  backend:
+    container_name: backend-user-recht-tool
+    image: guellaomar/backend-user-recht-tool:latest
+    build:
+        context: .
+        dockerfile: backend/src/main/docker/Dockerfile.azure
+    ports:
+      - "9000:9000"
+    depends_on:
+      - backenddb
+  auditlogs:
+    container_name: auditlogs
+    image: guellaomar/auditlogs:latest
+    build:
+      context: .
+      dockerfile: auditLogs/src/main/docker/Dockerfile.azure
+    ports:
+      - "9001:9001"
+    depends_on:
+      - logsdb
+  backenddb:
+    container_name: backenddb
+    image: postgres:latest
+    restart: always
+    ports:
+      - "5961:5432"
+    volumes:
+      - ./docker_postgres_init.sql:/docker-entrypoint-initdb.d/docker_postgres_init.sql
+
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=userrechttool
+      - POSTGRES_DB=userrechttooldb
+  logsdb:
+    container_name: logsdb
+    image: postgres:15.3-alpine
+    restart: always
+    ports:
+      - "5566:5432"
+    volumes:
+      - ./docker_postgres_init.sql:/docker-entrypoint-initdb.d/docker_postgres_init.sql
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=auditlog
+      - POSTGRES_DB=auditlogdb
+
+
+#    build:
+#      context: .
+#      dockerfile: src/main/docker/Dockerfile.jvm

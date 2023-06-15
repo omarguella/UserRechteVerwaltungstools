@@ -3,7 +3,9 @@ package User.Recht.Tool.resource;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.Permission.EmailNotVerified;
 import User.Recht.Tool.exception.Permission.PermissionNotFound;
+import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
+import User.Recht.Tool.service.LogsService;
 import User.Recht.Tool.service.UserService;
 import User.Recht.Tool.service.serviceImpl.AuthorizationServiceImpl;
 import io.vertx.ext.web.RoutingContext;
@@ -28,15 +30,32 @@ public class AuthorizationResource {
 
     @Inject
     UserService userService;
+
+    @Inject
+    LogsService logsService;
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationResource.class);
 
     @GET
     @RolesAllowed({"USER"})
-    @Path("/allPermissions")
-    public Response getMyPermissions(@Context RoutingContext routingContext, @Context SecurityContext securityContext) {
+    @Path("/allPermissions/text")
+    public Response getMyPermissionsInText(@Context RoutingContext routingContext, @Context SecurityContext securityContext) {
 
         String token = routingContext.request().getHeader("Authorization").substring(7);
+        // Send Logs
+        logsService.saveLogs("GET_MY_PERMISSIONS", token);
         return Response.ok(autorisationService.getMyPermissions(token)).build();
+    }
+    @GET
+    @RolesAllowed({"USER"})
+    @Path("/allPermissions")
+    public Response getMyPermissionsObject(@Context RoutingContext routingContext, @Context SecurityContext securityContext) throws UserNotFoundException, RoleNotFoundException {
+
+        User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
+        String token = routingContext.request().getHeader("Authorization").substring(7);
+
+        // Send Logs
+        logsService.saveLogs("GET_MY_PERMISSIONS", token);
+        return Response.ok(autorisationService.getMyPermissionsObject(connectedUser)).build();
     }
 
     @GET
@@ -48,6 +67,8 @@ public class AuthorizationResource {
             User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
             String token = routingContext.request().getHeader("Authorization").substring(7);
 
+            // Send Logs
+            logsService.saveLogs("EXTERNE API CALL FOR THE PERMISSION: "+permissionKey, token);
             return Response.ok(autorisationService.verifyingAPIAccessAuthorization(connectedUser, permissionKey,token))
                     .header("status", "YOU HAVE ACCESS TO THE API").build();
 

@@ -11,6 +11,7 @@ import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.service.AuthorizationService;
+import User.Recht.Tool.service.LogsService;
 import User.Recht.Tool.service.PermissionService;
 import User.Recht.Tool.service.UserService;
 import io.vertx.ext.web.RoutingContext;
@@ -37,6 +38,9 @@ public class PermissionResource {
     @Inject
     AuthorizationService autorisationService;
 
+    @Inject
+    LogsService logsService;
+
     @POST
     @RolesAllowed({"USER"})
     public Response addPermissions(@RequestBody PermissionDto permissionDto,
@@ -49,6 +53,11 @@ public class PermissionResource {
             autorisationService.checkExistedUserPermission("PERMISSION_MANAGER_POST", token);
 
             List<Permission> permissions = permissionService.createPermission(permissionDto);
+
+            // Send Logs
+            logsService.saveLogs("CREATE_PERMISSION", token);
+
+
             return Response.ok(permissions).header("status", "NEW PERMISSIONS ARE ADDED")
                     .build();
 
@@ -93,6 +102,9 @@ public class PermissionResource {
             autorisationService.checkExistedUserPermission("PERMISSION_MANAGER_GET", token);
             List<Permission> permissions = permissionService.getAllPermissions();
 
+            // Send Logs
+            logsService.saveLogs("GET_ALL_PERMISSION", token);
+
             return Response.ok(permissions).header("STATUS", "LIST OF PERMISSIONS")
                     .build();
         } catch (UserNotFoundException e) {
@@ -123,6 +135,11 @@ public class PermissionResource {
             autorisationService.checkExistedUserPermission("PERMISSION_MANAGER_GET", token);
 
             List<Permission> permissions = permissionService.getPermissionsByName(name);
+
+            // Send Logs
+            logsService.saveLogs("GET_PERMISSIONS_BY_NAME", token);
+
+
             return Response.ok(permissions).header("STATUS", "LIST OF PERMISSIONS")
                     .build();
         } catch (UserNotFoundException e) {
@@ -151,6 +168,9 @@ public class PermissionResource {
             autorisationService.checkExistedUserPermission("PERMISSION_MANAGER_GET", token);
 
             Permission permission = permissionService.getPermissionByKey(key);
+
+            // Send Logs
+            logsService.saveLogs("GET_PERMISSION_BY_KEY", token);
 
             return Response.ok(permission).header("PERMISSION_KEY", key)
                     .build();
@@ -183,6 +203,9 @@ public class PermissionResource {
             autorisationService.checkExistedUserPermission("PERMISSION_MANAGER_DELETE", token);
 
             Permission permissionToDelete = permissionService.deletePermissionByKey(key);
+
+            // Send Logs
+            logsService.saveLogs("DELETE_PERMISSION_BY_KEY", token);
 
             return Response.ok(permissionToDelete).header("STATUS", "THE PERMISSION_KEY " + key + " IS DELETED")
                     .build();
@@ -230,6 +253,9 @@ public class PermissionResource {
             autorisationService.checkExistedUserPermission("PERMISSION_MANAGER_DELETE", token);
 
             List<Permission> permissionToDelete = permissionService.deletePermissionsByName(name);
+
+            // Send Logs
+            logsService.saveLogs("DELETE_PERMISSIONS_BY_NAME", token);
 
             return Response.ok(permissionToDelete).header("STATUS", "THE PERMISSIONS WITH THE NAME  " + name + " are DELETED")
                     .build();

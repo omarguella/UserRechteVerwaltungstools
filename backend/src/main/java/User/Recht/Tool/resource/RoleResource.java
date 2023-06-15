@@ -13,6 +13,7 @@ import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.service.AuthorizationService;
+import User.Recht.Tool.service.LogsService;
 import User.Recht.Tool.service.RoleService;
 import User.Recht.Tool.service.UserService;
 import io.vertx.ext.web.RoutingContext;
@@ -38,6 +39,8 @@ public class RoleResource {
     UserService userService;
     @Inject
     AuthorizationService autorisationService;
+    @Inject
+    LogsService logsService ;
 
 
     @POST
@@ -52,7 +55,11 @@ public class RoleResource {
             // CHECK PERMISSIONS
             autorisationService.checkExistedUserPermission("ROLE_MANAGER_POST", token);
 
-            Role role = roleService.createRole(roleDto);
+            Role role = roleService.createRole(roleDto,token);
+
+            // Send Logs
+            logsService.saveLogs("CREATE_ROLE",token);
+
             return Response.ok(role).header(roleDto.getName(), "IS CREATED")
                     .build();
 
@@ -63,8 +70,8 @@ public class RoleResource {
             return Response.status(406, "ROLE IS NOT SAFE CREATED")
                     .header("status", " ROLE IS NOT SAFE CREATED ").build();
         } catch (LevelRoleException e) {
-            return Response.status(406, "LEVEL SHOULD BE BIGGER THAN 0")
-                    .header("status", " LEVEL SHOULD BE BIGGER THAN 0 ").build();
+            return Response.status(406, "LEVEL SHOULD BE BIGGER THEN THE MINIMUM LEVEL OF THE ROLE")
+                    .header("status", " LEVEL SHOULD BE BIGGER THEN THE MINIMUM LEVEL OF THE ROLE ").build();
         } catch (UserNotFoundException e) {
             return Response.status(406, "USER DOSENT EXIST")
                     .header("status", "USER DOSENT EXIST").build();
@@ -88,6 +95,10 @@ public class RoleResource {
             autorisationService.checkRoleManagerAutorisations(connectedUser, roleName, "ROLE_MANAGER_GET", token, null);
 
             Role role = roleService.getRoleByName(roleName);
+
+            // Send Logs
+            logsService.saveLogs("GET_ROLE_BY_NAME",token);
+
             return Response.ok(role).header("ROLE", role.getName())
                     .build();
         } catch (RoleNotFoundException e) {
@@ -108,12 +119,60 @@ public class RoleResource {
 
     @GET
     @RolesAllowed({"USER"})
-    public Response getAllRoles(@Context SecurityContext securityContext) {
-        List<Role> role = roleService.getAllRoles();
-        return Response.ok(role).header("STATUS", "LIST OF ROLES")
-                .build();
+    public Response getAvailibaleRoles(@Context SecurityContext securityContext, @Context RoutingContext routingContext) {
+
+        try {
+            User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+
+            // CHECK PERMISSIONS
+            autorisationService.checkExistedUserPermission("ROLE_MANAGER_GET", token);
+
+            List<Role> role = roleService.getAvailibaleRoles(connectedUser);
+
+            // Send Logs
+            logsService.saveLogs("GET_AVAILIBALE_ROLES", token);
+
+
+            return Response.ok(role).header("STATUS", "LIST OF AVAILIBALE ROLES")
+                    .build();
+        } catch (UserNotFoundException e) {
+            return Response.status(406, "USER DOSENT EXIST")
+                    .header("status", "USER DOSENT EXIST").build();
+        } catch (UserNotAuthorized e) {
+            return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
+                    .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
+        }
     }
 
+    @GET
+    @RolesAllowed({"USER"})
+    @Path("/edit/")
+    public Response getAvailibaleRolesToEdit(@Context SecurityContext securityContext, @Context RoutingContext routingContext) {
+
+        try {
+            User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+
+            // CHECK PERMISSIONS
+            autorisationService.checkExistedUserPermission("ROLE_MANAGER_GET", token);
+
+            List<Role> role = roleService.getAvailibaleRolesToEdit(connectedUser,token);
+
+            // Send Logs
+            logsService.saveLogs("GET_AVAILIBALE_ROLES_TO_EDIT", token);
+
+
+            return Response.ok(role).header("STATUS", "LIST OF AVAILIBALE ROLES TO EDIT")
+                    .build();
+        } catch (UserNotFoundException e) {
+            return Response.status(406, "USER DOSENT EXIST")
+                    .header("status", "USER DOSENT EXIST").build();
+        } catch (UserNotAuthorized e) {
+            return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
+                    .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
+        }
+    }
 
     @DELETE
     @RolesAllowed({"USER"})
@@ -129,6 +188,9 @@ public class RoleResource {
             autorisationService.checkRoleManagerAutorisations(connectedUser, roleName, "ROLE_MANAGER_DELETE", token, userMovedTo);
 
             Role role = roleService.deleteRoleByName(roleName, userMovedTo);
+
+            // Send Logs
+            logsService.saveLogs("DELETE_ROLE",token);
 
             return Response.ok(role).header("ROLE", "IS DELETED")
                     .build();
@@ -181,7 +243,11 @@ public class RoleResource {
             // CHECK PERMISSIONS
             autorisationService.checkRoleManagerAutorisations(connectedUser, roleName, "ROLE_MANAGER_PUT", token, null);
 
-            Role role = roleService.updateRoleByName(roleName, updateRoleDto);
+            Role role = roleService.updateRoleByName(roleName, updateRoleDto,token);
+
+            // Send Logs
+            logsService.saveLogs("UPDATE_ROLE",token);
+
 
             return Response.ok(role).header("status", "ROLE IS UPDATED")
                     .build();
@@ -195,17 +261,17 @@ public class RoleResource {
         } catch (IllegalArgumentException e) {
             return Response.status(406, "CANNOT CHANGE SUPERADMIN NAME")
                     .header("status", "CANNOT CHANGE SUPERADMIN NAME").build();
-        }catch (CannotModifySuperAdminException e) {
-            return Response.status(406, "CANNOT MODIFY A SUPERADMIN")
-                    .header("status", "CANNOT MODIFY A SUPERADMIN").build();
         }catch (UserNotFoundException e) {
             throw new RuntimeException(e);
         }catch (UserNotAuthorized e) {
             return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
         } catch (DeniedRoleLevel e) {
-            return Response.status(406, "CANNOT DELETE A ROLE OF A HIGHER  ROLE LEVEL")
-                    .header("STATUS", " CANNOT DELETE A ROLE  OF A HIGHER ROLE LEVEL").build();
+            return Response.status(406, "CANNOT UPDATE A ROLE OF A HIGHER  ROLE LEVEL")
+                    .header("STATUS", " CANNOT UPDATE A ROLE  OF A HIGHER ROLE LEVEL").build();
+        } catch (LevelRoleException e) {
+            return Response.status(406, "CANNOT UPDATE A LEVEL HIGHER THEN THE CURRENT LEVEL OF USER")
+                    .header("STATUS", " CANNOT UPDATE A LEVEL HIGHER THEN THE CURRENT LEVEL OF USER").build();
         }
     }
 
@@ -217,13 +283,35 @@ public class RoleResource {
         return Response.ok(roles).header("STATUS", "LIST OF PUBLIC ROLES")
                 .build();
     }
+
     @GET
     @PermitAll
     @Path("/privatRoles/")
-    public Response getPrivateRoles(@Context SecurityContext securityContext) {
-        List<Role> roles = roleService.getPrivatRoles();
-        return Response.ok(roles).header("STATUS", "LIST OF PRIVATE ROLES")
-                .build();
+    public Response getPrivateRoles(@Context RoutingContext routingContext, @Context SecurityContext securityContext) {
+
+        try {
+
+
+            User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+
+            // CHECK PERMISSIONS
+            autorisationService.checkExistedUserPermission("ROLE_MANAGER_GET", token);
+
+            List<Role> roles = roleService.getPrivatRoles(connectedUser);
+
+            // Send Logs
+            logsService.saveLogs("UPDATE_ROLE", token);
+
+            return Response.ok(roles).header("STATUS", "LIST OF PRIVATE ROLES")
+                    .build();
+        } catch (UserNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (UserNotAuthorized e) {
+            return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
+                    .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
+        }
     }
+
 
 }
