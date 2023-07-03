@@ -281,8 +281,10 @@ public class UserServiceImpl implements UserService {
         }
 
         if(userProfileDto.getRoles()!=null){
-            for (Role role: userToUpdate.getRoles()){
-                roleToUserService.deleteRoleFromUser(userToUpdate.getId(),role.getName(),userProfileDto.getRoles().get(0));
+            while(userToUpdate.getRoles().size()>0){
+                roleToUserService.deleteRoleFromUser(userToUpdate.getId(),userToUpdate.getRoles().get(userToUpdate.getRoles().size()-1)
+                        .getName(),userProfileDto.getRoles().get(0));
+                userToUpdate.getRoles().remove(userToUpdate.getRoles().size()-1);
             }
 
             for (String role: userProfileDto.getRoles()){
@@ -290,6 +292,11 @@ public class UserServiceImpl implements UserService {
             }
 
         }
+
+        if(userProfileDto.getEmail()!=null){
+            updateEmailUser(userToUpdate.getId(),userProfileDto.getEmail());
+        }
+
         userToUpdate = userFactory.userUpdateProfileFactory(userToUpdate, userProfileDto);
         Hibernate.initialize(userToUpdate.getRoles());
         return saveUpdatedUser(userToUpdate);

@@ -4,7 +4,9 @@ import User.Recht.Tool.dtos.userDtos.*;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.DuplicateElementException;
 import User.Recht.Tool.exception.Permission.*;
+import User.Recht.Tool.exception.role.RoleMovedToException;
 import User.Recht.Tool.exception.role.RoleNotAccessibleException;
+import User.Recht.Tool.exception.role.RoleNotAssignedToUserException;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
 import User.Recht.Tool.exception.user.UserNameDuplicateElementException;
@@ -396,8 +398,8 @@ public class UserResource {
             return Response.status(406, "USER DOSENT EXIST")
                     .header("STATUS", "USER DOSENT EXIST").build();
         } catch (DuplicateElementException e) {
-            return Response.status(406, "USERNAME IS ALREADY USED")
-                    .header("STATUS", "USERNAME IS ALREADY USED").build();
+            return Response.status(406, "USERNAME OR EMAIL IS ALREADY USED")
+                    .header("STATUS", "USERNAME OR EMAIL IS ALREADY USED").build();
         } catch (ValidationException e) {
             return Response.status(406, "PHONENUMBER IS NOT VALID")
                     .header("STATUS", "PHONENUMBER IS NOT VALID").build();
@@ -407,7 +409,7 @@ public class UserResource {
         } catch (UserNotAuthorized e) {
             return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
-        } catch (DeniedRoleLevel e) {
+        } catch (DeniedRoleLevel | RoleNotFoundException | RoleMovedToException | RoleNotAssignedToUserException e) {
             return Response.status(406, "CANNOT UPDATE A USER FROM A HIGHER ROLE LEVEL")
                     .header("STATUS", "CANNOT UPDATE A USER FROM A HIGHER ROLE LEVEL").build();
         }

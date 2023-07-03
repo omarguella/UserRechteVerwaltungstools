@@ -41,9 +41,6 @@ public class UserFactory {
         if(userProfileDto.getPhoneNumber()!=null){
             user.setPhoneNumber(userProfileDto.getPhoneNumber());
         }
-        if(userProfileDto.getEmail()!=null){
-            user.setEmail(userProfileDto.getEmail());
-        }
         if(userProfileDto.getPassword()!=null){
             user.setPassword(passwordEncoder.passwordCoder(userProfileDto.getPassword()));
         }
