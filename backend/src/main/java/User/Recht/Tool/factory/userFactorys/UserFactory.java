@@ -3,11 +3,16 @@ package User.Recht.Tool.factory.userFactorys;
 import User.Recht.Tool.dtos.userDtos.UserDto;
 import User.Recht.Tool.dtos.userDtos.UserProfileDto;
 import User.Recht.Tool.entity.User;
+import User.Recht.Tool.util.Encoder;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 
 @RequestScoped
 public class UserFactory {
+
+    @Inject
+    Encoder passwordEncoder;
 
     public User userFactory(UserDto userDto){
         User user=new User();
@@ -35,6 +40,12 @@ public class UserFactory {
         }
         if(userProfileDto.getPhoneNumber()!=null){
             user.setPhoneNumber(userProfileDto.getPhoneNumber());
+        }
+        if(userProfileDto.getEmail()!=null){
+            user.setEmail(userProfileDto.getEmail());
+        }
+        if(userProfileDto.getPassword()!=null){
+            user.setPassword(passwordEncoder.passwordCoder(userProfileDto.getPassword()));
         }
         return user;
     }

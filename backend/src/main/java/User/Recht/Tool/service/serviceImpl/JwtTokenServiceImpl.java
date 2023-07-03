@@ -2,6 +2,7 @@ package User.Recht.Tool.service.serviceImpl;
 
 import User.Recht.Tool.dtos.DeviceInfosDto;
 import User.Recht.Tool.entity.User;
+import User.Recht.Tool.service.ClaimsOfUserService;
 import User.Recht.Tool.service.JwtTokenService;
 import io.smallrye.jwt.build.Jwt;
 import org.slf4j.Logger;
@@ -24,7 +25,7 @@ import java.util.Base64;
 public class JwtTokenServiceImpl implements JwtTokenService {
 
     @Inject
-    ClaimsOfUserImpl claimsOfUser;
+    ClaimsOfUserService claimsOfUser;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JwtTokenServiceImpl.class);
     private static final String ISSUER = "USER_RECHT_TOOL";

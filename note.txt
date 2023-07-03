@@ -86,7 +86,7 @@ build Images
 docker build -f src/main/docker/Dockerfile.jvm -t backend-user-recht-tool .
 docker build -f src/main/docker/Dockerfile.jvm -t auditlogs .
 
-create Repo for the tow images
+create Repo for the two images
 
 Docker login with acesstoken
 
@@ -139,9 +139,10 @@ http://localhost:9000/swagger-ui.html/ Swagger for Dokumentation / Insomnia zum 
 
 Bis nächsten Termin
 
-+Backend vollständigen (Logs) + Dockerzieren
-+Bericht weiterschreiben
++Backend vollständigen (Logs)
++Dockerzieren
++Bericht weiterschreiben und anpassen
 +Mockups  for Frontend
-+APP Qualität testen
++APP Qualität testen loader.io
 
 https://h-brs.webex.com/meet/teena-chakkalayil.hassan

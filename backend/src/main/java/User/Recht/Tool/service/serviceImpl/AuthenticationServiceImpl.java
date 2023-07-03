@@ -16,8 +16,6 @@ import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.service.*;
 import User.Recht.Tool.util.Encoder;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.SignedJWT;
 import io.vertx.ext.web.RoutingContext;
 import org.jose4j.jwt.MalformedClaimException;
 import org.jose4j.jwt.consumer.InvalidJwtException;
@@ -32,7 +30,6 @@ import javax.xml.bind.ValidationException;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -54,7 +51,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Inject
     JwtTokenService jwtTokenService;
   @Inject
-    ClaimsOfUser claimsOfUser;
+  ClaimsOfUserService claimsOfUserService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
 
@@ -125,7 +122,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
             Long issuedAt = refreshTokenService.getRefreshTokenByToken(refreshToken).getIssuedAt();
 
-            Map<String, Object> map = claimsOfUser.listClaimUsingJWT(tokenDto.getAccessToken());
+            Map<String, Object> map = claimsOfUserService.listClaimUsingJWT(tokenDto.getAccessToken());
             Long maxSessionTimer = (Long) map.get("maxSessionTimer");
 
             List<String> list = (  List<String>) map.get("allPermissionsOfUser");

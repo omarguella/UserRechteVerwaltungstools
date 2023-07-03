@@ -1,6 +1,7 @@
 package User.Recht.Tool.dtos.userDtos;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 public class UserProfileDto {
 
@@ -8,6 +9,9 @@ public class UserProfileDto {
     private String username;
     @NotNull
     private String name;
+    private String email;
+    private String password;
+    private List<String> roles;
     @NotNull
     private String lastname;
     private String phoneNumber;
@@ -42,6 +46,30 @@ public class UserProfileDto {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public List<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
     }
 
     @Override

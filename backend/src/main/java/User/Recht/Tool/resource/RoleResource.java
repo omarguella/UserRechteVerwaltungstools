@@ -6,10 +6,7 @@ import User.Recht.Tool.dtos.roleDtos.UpdateRoleDto;
 import User.Recht.Tool.entity.Role;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.Permission.*;
-import User.Recht.Tool.exception.role.RoleMovedToException;
-import User.Recht.Tool.exception.role.RoleNameDuplicateElementException;
-import User.Recht.Tool.exception.role.RoleNotAssignedToUserException;
-import User.Recht.Tool.exception.role.RoleNotFoundException;
+import User.Recht.Tool.exception.role.*;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.service.AuthorizationService;
@@ -187,7 +184,7 @@ public class RoleResource {
             // CHECK PERMISSIONS
             autorisationService.checkRoleManagerAutorisations(connectedUser, roleName, "ROLE_MANAGER_DELETE", token, userMovedTo);
 
-            Role role = roleService.deleteRoleByName(roleName, userMovedTo);
+            Role role = roleService.deleteRoleByName(connectedUser,token,roleName, userMovedTo);
 
             // Send Logs
             logsService.saveLogs("DELETE_ROLE",token);
@@ -225,6 +222,9 @@ public class RoleResource {
         } catch (DeniedRoleLevel e) {
             return Response.status(406, "CANNOT DELETE A ROLE OF A HIGHER OR SAME ROLE LEVEL")
                     .header("STATUS", " CANNOT DELETE A ROLE  OF A HIGHER OR SAME ROLE LEVEL").build();
+        } catch (RoleNotAccessibleException e) {
+            return Response.status(406, "ROLE NOT AVAILABLE TO THE USER")
+                    .header("status", "ROLE NOT AVAILABLE TO THE USER").build();
         }
     }
 

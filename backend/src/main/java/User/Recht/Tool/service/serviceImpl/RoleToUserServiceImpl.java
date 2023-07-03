@@ -4,6 +4,7 @@ import User.Recht.Tool.dtos.userDtos.UpdateRoleForUsersList;
 import User.Recht.Tool.entity.Role;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.role.RoleMovedToException;
+import User.Recht.Tool.exception.role.RoleNotAccessibleException;
 import User.Recht.Tool.exception.role.RoleNotAssignedToUserException;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
@@ -56,8 +57,8 @@ public class RoleToUserServiceImpl implements RoleToUserService {
 
     @Transactional
     @Override
-    public void updateRolesForUsersWithAction(UpdateRoleForUsersList updateRoleForUsersList)
-            throws RoleNotFoundException, UserNotFoundException, NullPointerException, CannotModifySuperAdminException, IllegalArgumentException, IllegalAccessException, RoleMovedToException, RoleNotAssignedToUserException {
+    public void updateRolesForUsersWithAction(User user,String token,UpdateRoleForUsersList updateRoleForUsersList)
+            throws RoleNotFoundException, UserNotFoundException, NullPointerException, CannotModifySuperAdminException, IllegalArgumentException, IllegalAccessException, RoleMovedToException, RoleNotAssignedToUserException, RoleNotAccessibleException {
 
         if (updateRoleForUsersList.getUsersIdList() == null) {
             throw new IllegalArgumentException("USERSIDLIST SHOULD BE WITH IDS OF THE TYPE LONG");
@@ -87,7 +88,7 @@ public class RoleToUserServiceImpl implements RoleToUserService {
                 throw new IllegalAccessException("DELETEROLE OR MOVEDTO NOT FOUND");
             }
 
-            usersIdListIsValid(updateRoleForUsersList.getUsersIdList(),updateRoleForUsersList.getDeleteRole());
+            usersIdListIsValid(user,token,updateRoleForUsersList.getUsersIdList(),updateRoleForUsersList.getDeleteRole());
 
             for (Long id : updateRoleForUsersList.getUsersIdList()) {
                 deleteRoleFromUser(id, updateRoleForUsersList.getDeleteRole(), updateRoleForUsersList.getMovedTo());
@@ -155,9 +156,9 @@ public class RoleToUserServiceImpl implements RoleToUserService {
         Role role = roleService.getRoleByName(roleName.toUpperCase());
 
     }
-    public void usersIdListIsValid(List<Long> idList, String roleName) throws RoleNotFoundException, RoleNotAssignedToUserException {
+    public void usersIdListIsValid(User connectedUser,String token,List<Long> idList, String roleName) throws RoleNotFoundException, RoleNotAssignedToUserException, RoleNotAccessibleException {
 
-        List<User> listUsers = userService.getAllUsersByRole(roleName);
+        List<User> listUsers = userService.getAllUsersByRole(connectedUser,token,roleName);
         boolean allIdsExist = true;
 
         for (Long id : idList) {

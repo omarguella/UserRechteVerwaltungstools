@@ -1,11 +1,10 @@
 package User.Recht.Tool.resource;
 
-import User.Recht.Tool.dtos.userDtos.UpdatePasswordDto;
-import User.Recht.Tool.dtos.userDtos.UserDto;
-import User.Recht.Tool.dtos.userDtos.UserProfileDto;
+import User.Recht.Tool.dtos.userDtos.*;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.DuplicateElementException;
 import User.Recht.Tool.exception.Permission.*;
+import User.Recht.Tool.exception.role.RoleNotAccessibleException;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
 import User.Recht.Tool.exception.user.UserNameDuplicateElementException;
@@ -201,10 +200,10 @@ public class UserResource {
 
 
         try {
-
+            User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
             String token = routingContext.request().getHeader("Authorization").substring(7);
             autorisationService.checkExistedUserPermission("USER_MANAGER_GET", token);
-            List<User> users = userService.getAllUsers();
+            List<User> users = userService.getAllUsers(connectedUser,token);
             // Send Logs
             logsService.saveLogs("GET_ALL_USERS",token);
 
@@ -213,6 +212,11 @@ public class UserResource {
         } catch (UserNotAuthorized e) {
             return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
+        } catch (UserNotFoundException e) {
+            return Response.status(406, "USER DOSENT EXIST")
+                    .header("status", "USER DOSENT EXIST").build();
+        } catch (RoleNotFoundException | RoleNotAccessibleException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -223,11 +227,11 @@ public class UserResource {
             , @Context RoutingContext routingContext, @Context SecurityContext securityContext) {
 
         try {
-
+            User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
             String token = routingContext.request().getHeader("Authorization").substring(7);
             autorisationService.checkExistedUserPermission("USER_MANAGER_GET", token);
 
-            List<User> users = userService.getAllUsersByRole(roleName);
+            List<User> users = userService.getAllUsersByRole(connectedUser,token,roleName);
 
             // Send Logs
             logsService.saveLogs("GET_USERS_BY_ROLE",token);
@@ -240,6 +244,12 @@ public class UserResource {
         } catch (UserNotAuthorized e) {
             return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
+        } catch (UserNotFoundException e) {
+            return Response.status(406, "USER DOSENT EXIST")
+                    .header("status", "USER DOSENT EXIST").build();
+        } catch (RoleNotAccessibleException e) {
+            return Response.status(406, "ROLE NOT AVAILABLE TO THE USER")
+                    .header("status", "ROLE NOT AVAILABLE TO THE USER").build();
         }
 
 
@@ -285,7 +295,7 @@ public class UserResource {
     @PUT
     @RolesAllowed({"USER"})
     @Path("/email/{userId}")
-    public Response updateEmailUser(@PathParam("userId") Long id, @HeaderParam("newEmail") String newEmail,
+    public Response updateEmailUser(@PathParam("userId") Long id, @RequestBody EmailDto email,
                                     @Context RoutingContext routingContext, @Context SecurityContext securityContext) {
         try {
 
@@ -295,7 +305,7 @@ public class UserResource {
             // CHECK PERMISSIONS
             autorisationService.checkUserManagerAutorisations(connectedUser, id, "USER_MANAGER_PUT", token);
 
-            User user = userService.updateEmailUser(id, newEmail);
+            User user = userService.updateEmailUser(id, email.getEmail());
 
             // Send Logs
             logsService.saveLogs("UPDATE_EMAIL_USER",token);
@@ -427,7 +437,7 @@ public class UserResource {
     @POST
     @Path("/mail/verify/")
     @RolesAllowed({ "USER" })
-    public Response verifyEmail(@Context RoutingContext routingContext,@HeaderParam("pin") String pin,
+    public Response verifyEmail(@Context RoutingContext routingContext,@RequestBody PinVerifyDto pin,
             @Context SecurityContext securityContext)  {
 
         try {

@@ -1,5 +1,6 @@
 package User.Recht.Tool.service.serviceImpl;
 
+import User.Recht.Tool.dtos.userDtos.PinVerifyDto;
 import User.Recht.Tool.dtos.userDtos.UpdatePasswordDto;
 import User.Recht.Tool.dtos.userDtos.UserDto;
 import User.Recht.Tool.dtos.userDtos.UserProfileDto;
@@ -9,6 +10,9 @@ import User.Recht.Tool.exception.DuplicateElementException;
 import User.Recht.Tool.exception.Permission.CannotCreateUserFromLowerLevel;
 import User.Recht.Tool.exception.Permission.EmailAlreadyVerified;
 import User.Recht.Tool.exception.Permission.PinNotFound;
+import User.Recht.Tool.exception.role.RoleMovedToException;
+import User.Recht.Tool.exception.role.RoleNotAccessibleException;
+import User.Recht.Tool.exception.role.RoleNotAssignedToUserException;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
 import User.Recht.Tool.exception.user.UserNameDuplicateElementException;
@@ -16,6 +20,7 @@ import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.factory.userFactorys.UserFactory;
 import User.Recht.Tool.repository.UserRepository;
 import User.Recht.Tool.service.RoleService;
+import User.Recht.Tool.service.RoleToUserService;
 import User.Recht.Tool.service.UserService;
 import User.Recht.Tool.util.Encoder;
 import io.quarkus.mailer.Mail;
@@ -47,6 +52,8 @@ public class UserServiceImpl implements UserService {
     UserFactory userFactory;
     @Inject
     RoleService roleService;
+    @Inject
+    RoleToUserService roleToUserService;
     @PersistenceContext
     EntityManager entityManager;
 
@@ -145,16 +152,29 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.listAll();
+    public List<User> getAllUsers(User user,String token) throws RoleNotFoundException, RoleNotAccessibleException {
+
+        List <Role> availableRoles= roleService.getAvailibaleRolesToEdit(user,token);
+        List<User> allAvailableUsers=new ArrayList<>();
+
+        for(Role role : availableRoles){
+            allAvailableUsers.addAll(getAllUsersByRole(user,token, role.getName()));
+        }
+
+        return allAvailableUsers;
 
     }
 
     @Override
-    public List<User> getAllUsersByRole(String roleName) throws RoleNotFoundException {
-        if (roleName == null) {
-            throw new RoleNotFoundException("ROLE NOT FOUND");
+    public List<User> getAllUsersByRole(User user,String token,String roleName) throws RoleNotFoundException, RoleNotAccessibleException {
+
+        List <Role> availableRoles= roleService.getAvailibaleRolesToEdit(user,token);
+        Role checkRole= roleService.getRoleByName(roleName);
+
+        if (!availableRoles.contains(checkRole)){
+            throw new RoleNotAccessibleException("Role not available to the User");
         }
+
         roleName = roleName.toUpperCase();
         roleService.getRoleByName(roleName);
         TypedQuery<User> query = entityManager.createQuery(
@@ -234,7 +254,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public User updateProfilById(Long id, UserProfileDto userProfileDto) throws UserNotFoundException, CannotModifySuperAdminException, ValidationException, DuplicateElementException {
+    public User updateProfilById(Long id, UserProfileDto userProfileDto) throws UserNotFoundException, CannotModifySuperAdminException, ValidationException, DuplicateElementException, RoleNotFoundException, RoleMovedToException, RoleNotAssignedToUserException {
 
         User userToUpdate = getUserById(id);
 
@@ -260,6 +280,16 @@ public class UserServiceImpl implements UserService {
             }
         }
 
+        if(userProfileDto.getRoles()!=null){
+            for (Role role: userToUpdate.getRoles()){
+                roleToUserService.deleteRoleFromUser(userToUpdate.getId(),role.getName(),userProfileDto.getRoles().get(0));
+            }
+
+            for (String role: userProfileDto.getRoles()){
+                roleToUserService.addRoleToUser(userToUpdate.getId(),role);
+            }
+
+        }
         userToUpdate = userFactory.userUpdateProfileFactory(userToUpdate, userProfileDto);
         Hibernate.initialize(userToUpdate.getRoles());
         return saveUpdatedUser(userToUpdate);
@@ -308,11 +338,11 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public User emailVerifyByPin(User user, String pin) throws PinNotFound, EmailAlreadyVerified {
+    public User emailVerifyByPin(User user, PinVerifyDto pinVerify) throws PinNotFound, EmailAlreadyVerified {
         if(user.getIsVerifiedEmail()){
             throw new EmailAlreadyVerified("EMAIL IS ALREADY VERIFIED");
         }
-        pin=passwordEncoder.passwordCoder(pin);
+        String pin =passwordEncoder.passwordCoder(pinVerify.getPin());
         if(!pin.equals(user.getPinEmail())){
             throw new PinNotFound("PIN IS WRONG");
         } else {

@@ -4,7 +4,7 @@ import User.Recht.Tool.dtos.DeviceInfosDto;
 import User.Recht.Tool.entity.Role;
 import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
-import User.Recht.Tool.service.ClaimsOfUser;
+import User.Recht.Tool.service.ClaimsOfUserService;
 import User.Recht.Tool.service.PermissionToRoleService;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RequestScoped
-public class ClaimsOfUserImpl implements ClaimsOfUser {
+public class ClaimsOfUserServiceImpl implements ClaimsOfUserService {
     @Inject
     JwtTokenServiceImpl jwtTokenService;
 
@@ -33,7 +33,7 @@ public class ClaimsOfUserImpl implements ClaimsOfUser {
     PermissionToRoleService permissionToRoleService;
     private static final String ISSUER = "USER_RECHT_TOOL";
     private static final long TOKEN_EXPIRE_IN = 4300L;
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClaimsOfUserImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClaimsOfUserServiceImpl.class);
 
     @Override
     public String  createUserClaims(User user, DeviceInfosDto deviceInfos)

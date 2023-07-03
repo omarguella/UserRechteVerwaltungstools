@@ -25,7 +25,7 @@ import static com.fasterxml.jackson.core.io.NumberInput.parseInt;
 public class AuthorizationServiceImpl implements AuthorizationService {
 
     @Inject
-    ClaimsOfUser claimsOfUser;
+    ClaimsOfUserService claimsOfUserService;
     @Inject
     RoleService roleService;
     @Inject
@@ -35,7 +35,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
     @Inject
     PermissionService permissionService;
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClaimsOfUserImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClaimsOfUserServiceImpl.class);
 
     @Override
     public void checkUserManagerAutorisations(User connectedUser, Long targetedUserId, String permissionKey, String token) throws UserNotAuthorized, DeniedRoleLevel, UserNotFoundException {
@@ -188,7 +188,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
             throw new IllegalArgumentException("TYPE SHOULD BE ALL OR ME");
         }
 
-        Map<String, Object> map = claimsOfUser.listClaimUsingJWT(token);
+        Map<String, Object> map = claimsOfUserService.listClaimUsingJWT(token);
         boolean isMailToVerify = (boolean) map.get("isMailToVerify");
 
         if (isMailToVerify && !user.getIsVerifiedEmail()) {
@@ -226,7 +226,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     @Override
     public List<String> getMyPermissions(String token) {
 
-        Map<String, Object> map = claimsOfUser.listClaimUsingJWT(token);
+        Map<String, Object> map = claimsOfUserService.listClaimUsingJWT(token);
         List<String> list = (List<String>) map.get("allPermissionsOfUser");
         return list;
 
@@ -246,7 +246,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     }
 
     private int getMinimumRoleLevelFromToken(String token) {
-        Map<String, Object> allClaims = claimsOfUser.listClaimUsingJWT(token);
+        Map<String, Object> allClaims = claimsOfUserService.listClaimUsingJWT(token);
         int minRoleLevel = parseInt(String.valueOf((Long) allClaims.get("minRoleLevel")));
         return minRoleLevel;
     }

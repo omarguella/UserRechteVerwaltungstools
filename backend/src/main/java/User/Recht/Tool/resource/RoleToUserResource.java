@@ -5,6 +5,7 @@ import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.Permission.DeniedRoleLevel;
 import User.Recht.Tool.exception.Permission.UserNotAuthorized;
 import User.Recht.Tool.exception.role.RoleMovedToException;
+import User.Recht.Tool.exception.role.RoleNotAccessibleException;
 import User.Recht.Tool.exception.role.RoleNotAssignedToUserException;
 import User.Recht.Tool.exception.role.RoleNotFoundException;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
@@ -158,7 +159,7 @@ public class RoleToUserResource {
                 // CHECK PERMISSIONS
                 autorisationService.checkRoleToUserAutorisations(connectedUser, userId, "USER_MANAGER_PUT", token, roleName, movedTo);
             }
-            roleToUserService.updateRolesForUsersWithAction(updateRoleForUsersList);
+            roleToUserService.updateRolesForUsersWithAction(connectedUser,token,updateRoleForUsersList);
 
             // Send Logs
             logsService.saveLogs("UPDATE_ROLE_OF_USER",token);
@@ -210,6 +211,9 @@ public class RoleToUserResource {
         } catch (DeniedRoleLevel e) {
             return Response.status(406, "CANNOT UPDATE ROLES OF A USER OF A HIGHER OR SAME ROLE LEVEL")
                     .header("STATUS", " CANNOT UPDATE ROLES OF A USER OF A HIGHER OR SAME ROLE LEVEL").build();
+        } catch (RoleNotAccessibleException e) {
+            return Response.status(406, "ROLE NOT AVAILABLE TO THE USER")
+                    .header("status", "ROLE NOT AVAILABLE TO THE USER").build();
         }
     }
 }

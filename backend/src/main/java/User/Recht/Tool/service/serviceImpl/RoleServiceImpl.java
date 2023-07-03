@@ -7,15 +7,12 @@ import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.Permission.LevelRoleException;
 import User.Recht.Tool.exception.Permission.PermissionNotFound;
 import User.Recht.Tool.exception.Permission.PermissionToRoleNotFound;
-import User.Recht.Tool.exception.role.RoleMovedToException;
-import User.Recht.Tool.exception.role.RoleNameDuplicateElementException;
-import User.Recht.Tool.exception.role.RoleNotAssignedToUserException;
-import User.Recht.Tool.exception.role.RoleNotFoundException;
+import User.Recht.Tool.exception.role.*;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
 import User.Recht.Tool.factory.roleFactorys.RoleFactory;
 import User.Recht.Tool.repository.RoleRepository;
-import User.Recht.Tool.service.ClaimsOfUser;
+import User.Recht.Tool.service.ClaimsOfUserService;
 import User.Recht.Tool.service.RoleService;
 import User.Recht.Tool.service.RoleToUserService;
 import User.Recht.Tool.service.UserService;
@@ -44,7 +41,7 @@ public class RoleServiceImpl implements RoleService {
     @Inject
     UserService userService;
     @Inject
-    ClaimsOfUser claimsOfUser;
+    ClaimsOfUserService claimsOfUserService;
     private static final Logger LOGGER = LoggerFactory.getLogger(RoleServiceImpl.class);
 
     @Transactional
@@ -52,7 +49,7 @@ public class RoleServiceImpl implements RoleService {
     public Role createRole(RoleDto roleDto, String token) throws RoleNameDuplicateElementException, RoleNotFoundException, LevelRoleException {
         roleDto.setName(roleDto.getName().toUpperCase());
 
-        Map<String, Object> map = claimsOfUser.listClaimUsingJWT(token);
+        Map<String, Object> map = claimsOfUserService.listClaimUsingJWT(token);
         Long minRoleLevel = (Long) map.get("minRoleLevel");
 
 
@@ -151,8 +148,10 @@ public class RoleServiceImpl implements RoleService {
 
     @Transactional
     @Override
-    public Role deleteRoleByName(String roleName, String moveTo) throws RoleNotFoundException, CannotModifySuperAdminException,
-            PermissionNotFound, PermissionToRoleNotFound, UserNotFoundException, RoleMovedToException, RoleNotAssignedToUserException,CannotModifySuperAdminException {
+    public Role deleteRoleByName(User connectedUser,String token, String roleName, String moveTo) throws RoleNotFoundException,
+            PermissionNotFound, PermissionToRoleNotFound, UserNotFoundException,
+            RoleMovedToException, RoleNotAssignedToUserException, CannotModifySuperAdminException,
+            RoleNotAccessibleException {
 
         roleName=roleName.toUpperCase();
         moveTo=moveTo.toUpperCase();
@@ -167,7 +166,7 @@ public class RoleServiceImpl implements RoleService {
             permissionToRoleService.deleteALLPermissionsOfRole(roleName);
 
             //Delete Role from Users und move to another Role
-            List<User> users=userService.getAllUsersByRole(roleName);
+            List<User> users=userService.getAllUsersByRole(connectedUser,token,roleName);
 
             for (User user:users){
                 roleToUserService.deleteRoleFromUser(user.getId(),roleName,moveTo);
@@ -203,7 +202,7 @@ public class RoleServiceImpl implements RoleService {
 
         if (updateRoleDto.getLevel() != 0) {
 
-            Map<String, Object> map = claimsOfUser.listClaimUsingJWT(token);
+            Map<String, Object> map = claimsOfUserService.listClaimUsingJWT(token);
             Long minRoleLevel = (Long) map.get("minRoleLevel");
 
             if(minRoleLevel>=updateRoleDto.getLevel() ){

@@ -7,10 +7,7 @@ import User.Recht.Tool.entity.User;
 import User.Recht.Tool.exception.Permission.LevelRoleException;
 import User.Recht.Tool.exception.Permission.PermissionNotFound;
 import User.Recht.Tool.exception.Permission.PermissionToRoleNotFound;
-import User.Recht.Tool.exception.role.RoleMovedToException;
-import User.Recht.Tool.exception.role.RoleNameDuplicateElementException;
-import User.Recht.Tool.exception.role.RoleNotAssignedToUserException;
-import User.Recht.Tool.exception.role.RoleNotFoundException;
+import User.Recht.Tool.exception.role.*;
 import User.Recht.Tool.exception.superadmin.CannotModifySuperAdminException;
 import User.Recht.Tool.exception.user.UserNotFoundException;
 
@@ -37,8 +34,8 @@ public interface RoleService {
     List<Role> getAvailibaleRolesToEdit(User user,String token);
 
     @Transactional
-    Role deleteRoleByName(String roleName, String moveTo) throws RoleNotFoundException, CannotModifySuperAdminException,
-            PermissionNotFound, PermissionToRoleNotFound, UserNotFoundException, RoleMovedToException, RoleNotAssignedToUserException;
+    Role deleteRoleByName(User user, String token,String roleName, String moveTo) throws RoleNotFoundException, CannotModifySuperAdminException,
+            PermissionNotFound, PermissionToRoleNotFound, UserNotFoundException, RoleMovedToException, RoleNotAssignedToUserException, RoleNotAccessibleException;
 
     @Transactional
     Role updateRoleByName (String name, UpdateRoleDto updateRoleDto, String token)
