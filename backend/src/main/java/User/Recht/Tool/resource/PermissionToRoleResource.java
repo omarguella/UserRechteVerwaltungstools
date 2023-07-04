@@ -82,11 +82,11 @@ public class PermissionToRoleResource {
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
 
         } catch (DeniedRoleLevel e) {
-            return Response.status(406, "CANNOT ADD A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL")
-                    .header("STATUS", " CANNOT ADD A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL").build();
+            return Response.status(406, "CANNOT ADD A PERMISSION OF ROLE OF A LOWER OR SAME ROLE LEVEL")
+                    .header("STATUS", " CANNOT ADD A PERMISSION OF ROLE OF A LOWER OR SAME ROLE LEVEL").build();
         } catch (PermissionNotValid e) {
-            return Response.status(406, "CANNOT ADD A PERMISSION OF HIGHER TYPE")
-                    .header("STATUS", " CANNOT ADD A PERMISSION OF HIGHER TYPE").build();
+            return Response.status(406, "CANNOT ADD A PERMISSION OF LOWER TYPE")
+                    .header("STATUS", " CANNOT ADD A PERMISSION OF LOWER TYPE").build();
         }
 
     }
@@ -141,11 +141,11 @@ public class PermissionToRoleResource {
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
 
         } catch (DeniedRoleLevel e) {
-            return Response.status(406, "CANNOT ADD A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL")
-                    .header("STATUS", " CANNOT ADD A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL").build();
+            return Response.status(406, "CANNOT ADD A PERMISSION OF ROLE OF A LOWER OR SAME ROLE LEVEL")
+                    .header("STATUS", " CANNOT ADD A PERMISSION OF ROLE OF A LOWER OR SAME ROLE LEVEL").build();
         }catch (PermissionNotValid e) {
-            return Response.status(406, "CANNOT ADD A PERMISSION OF HIGHER TYPE")
-                    .header("STATUS", " CANNOT ADD A PERMISSION OF HIGHER TYPE").build();
+            return Response.status(406, "CANNOT ADD A PERMISSION OF LOWER TYPE")
+                    .header("STATUS", " CANNOT ADD A PERMISSION OF LOWER TYPE").build();
         }
     }
 
@@ -188,8 +188,8 @@ public class PermissionToRoleResource {
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
 
         } catch (DeniedRoleLevel e) {
-            return Response.status(406, "CANNOT GET A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL")
-                    .header("STATUS", " CANNOT GET A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL").build();
+            return Response.status(406, "CANNOT GET A PERMISSION OF ROLE OF A LOWER OR SAME ROLE LEVEL")
+                    .header("STATUS", " CANNOT GET A PERMISSION OF ROLE OF A LOWER OR SAME ROLE LEVEL").build();
         } catch (PermissionNotValid e) {
             throw new RuntimeException(e);
         }
@@ -223,8 +223,8 @@ public class PermissionToRoleResource {
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
 
         } catch (DeniedRoleLevel e) {
-            return Response.status(406, "CANNOT GET A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL")
-                    .header("STATUS", " CANNOT GET A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL").build();
+            return Response.status(406, "CANNOT GET A PERMISSION OF ROLE OF A LOWER OR SAME ROLE LEVEL")
+                    .header("STATUS", " CANNOT GET A PERMISSION OF ROLE OF A LOWER OR SAME ROLE LEVEL").build();
         } catch (UserNotFoundException e) {
 
             return Response.status(406, "USER DOSENT EXIST")
@@ -267,8 +267,8 @@ public class PermissionToRoleResource {
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
 
         } catch (DeniedRoleLevel e) {
-            return Response.status(406, "CANNOT GET A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL")
-                    .header("STATUS", " CANNOT GET A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL").build();
+            return Response.status(406, "CANNOT GET A PERMISSION OF ROLE OF A LOWER OR SAME ROLE LEVEL")
+                    .header("STATUS", " CANNOT GET A PERMISSION OF ROLE OF A LOWER OR SAME ROLE LEVEL").build();
         } catch (PermissionNotValid e) {
             throw new RuntimeException(e);
         }
@@ -315,8 +315,8 @@ public class PermissionToRoleResource {
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
 
         } catch (DeniedRoleLevel e) {
-            return Response.status(406, "CANNOT UPDATE A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL")
-                    .header("STATUS", " CANNOT UPDATE A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL").build();
+            return Response.status(406, "CANNOT UPDATE A PERMISSION OF ROLE OF A LOWER OR SAME ROLE LEVEL")
+                    .header("STATUS", " CANNOT UPDATE A PERMISSION OF ROLE OF A LOWER OR SAME ROLE LEVEL").build();
         } catch (PermissionNotValid e) {
             throw new RuntimeException(e);
         }
@@ -326,7 +326,7 @@ public class PermissionToRoleResource {
     @PermitAll
     @Path("/{roleName}")
 
-    public Response deletePermissionRole(@HeaderParam("permissionKey") String permissionKey, @PathParam("roleName") String roleName,
+    public Response deletePermissionRole(@QueryParam("permissionKey") String permissionKey, @PathParam("roleName") String roleName,
                                          @Context RoutingContext routingContext, @Context SecurityContext securityContext) {
 
         try {
@@ -365,8 +365,8 @@ public class PermissionToRoleResource {
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
 
         } catch (DeniedRoleLevel e) {
-            return Response.status(406, "CANNOT DELETE A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL")
-                    .header("STATUS", " CANNOT DELETE A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL").build();
+            return Response.status(406, "CANNOT DELETE A PERMISSION OF ROLE OF A LOWER OR SAME ROLE LEVEL")
+                    .header("STATUS", " CANNOT DELETE A PERMISSION OF ROLE OF A LOWER OR SAME ROLE LEVEL").build();
         } catch (PermissionNotValid e) {
             throw new RuntimeException(e);
         }
@@ -418,8 +418,8 @@ public class PermissionToRoleResource {
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
 
         } catch (DeniedRoleLevel e) {
-            return Response.status(406, "CANNOT DELETE A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL")
-                    .header("STATUS", " CANNOT DELETE A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL").build();
+            return Response.status(406, "CANNOT DELETE A PERMISSION OF ROLE OF A LOWER OR SAME ROLE LEVEL")
+                    .header("STATUS", " CANNOT DELETE A PERMISSION OF ROLE OF A LOWER OR SAME ROLE LEVEL").build();
         } catch (PermissionNotValid e) {
             throw new RuntimeException(e);
         }
@@ -470,8 +470,8 @@ public class PermissionToRoleResource {
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
 
         } catch (DeniedRoleLevel e) {
-            return Response.status(406, "CANNOT DELETE A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL")
-                    .header("STATUS", " CANNOT DELETE A PERMISSION OF ROLE OF A HIGHER OR SAME ROLE LEVEL").build();
+            return Response.status(406, "CANNOT DELETE A PERMISSION OF ROLE OF A LOWER OR SAME ROLE LEVEL")
+                    .header("STATUS", " CANNOT DELETE A PERMISSION OF ROLE OF A LOWER OR SAME ROLE LEVEL").build();
         } catch (PermissionNotValid e) {
             throw new RuntimeException(e);
         }

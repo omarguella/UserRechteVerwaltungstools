@@ -47,14 +47,16 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         if (targetedUserId != null && (targetedUserId != connectedUser.getId())) {
 
             checkExistedUserPermission(permissionKey, token);
+
             User targetedUser = userService.getUserById(targetedUserId);
-            if (apiFunc.equals("DELETE")) {
+
+            if (apiFunc.equals("DELETE")|| apiFunc.equals("PUT")) {
                 if (getMinimumRoleLevelFromToken(token) >= getMinimumRoleLevelOfTargetUser(targetedUser)) {
-                    throw new DeniedRoleLevel("CANNOT " + apiFunc + " A USER OF A HIGHER OR SAME ROLE LEVEL");
+                    throw new DeniedRoleLevel("CANNOT " + apiFunc + " A USER OF A LOWER OR SAME ROLE LEVEL");
                 }
             } else {
                 if (getMinimumRoleLevelFromToken(token) > getMinimumRoleLevelOfTargetUser(targetedUser)) {
-                    throw new DeniedRoleLevel("CANNOT " + apiFunc + " A USER OF A HIGHER  ROLE LEVEL");
+                    throw new DeniedRoleLevel("CANNOT " + apiFunc + " A USER OF A LOWER  ROLE LEVEL");
                 }
             }
         }
@@ -76,16 +78,16 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         checkExistedUserPermission(permissionKey, token);
         Role role = roleService.getRoleByName(roleName);
 
-        //Cannot add/Delete update User with a Role Level Higher of my Self
+        //Cannot add/Delete update User with a Role Level LOWER of my Self
         if (role.getLevel() < getMinimumRoleLevelFromToken(token)) {
-            throw new DeniedRoleLevel("CANNOT " + apiFunc + " A ROLE TO/FROM USER OF A HIGHER OR SAME ROLE LEVEL");
+            throw new DeniedRoleLevel("CANNOT " + apiFunc + " A ROLE TO/FROM USER OF A LOWER OR SAME ROLE LEVEL");
         }
 
         if (movedTo != null) {
             if (!movedTo.isEmpty()) {
                 Role movedToRole = roleService.getRoleByName(movedTo);
                 if (movedToRole.getLevel() < getMinimumRoleLevelFromToken(token)) {
-                    throw new DeniedRoleLevel("CANNOT " + apiFunc + " A ROLE TO/FROM USER OF A HIGHER OR SAME ROLE LEVEL");
+                    throw new DeniedRoleLevel("CANNOT " + apiFunc + " A ROLE TO/FROM USER OF A LOWER OR SAME ROLE LEVEL");
                 }
             }
         }
@@ -93,7 +95,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         //Only for sub Users
         User targetedUser = userService.getUserById(targetedUserId);
         if (getMinimumRoleLevelFromToken(token) >= getMinimumRoleLevelOfTargetUser(targetedUser))
-            throw new DeniedRoleLevel("CANNOT " + apiFunc + " A ROLE TO/FROM USER OF A HIGHER OR SAME ROLE LEVEL");
+            throw new DeniedRoleLevel("CANNOT " + apiFunc + " A ROLE TO/FROM USER OF A LOWER OR SAME ROLE LEVEL");
 
     }
 
@@ -111,18 +113,18 @@ public class AuthorizationServiceImpl implements AuthorizationService {
             if (!movedTo.isEmpty()) {
                 Role movedToRole = roleService.getRoleByName(movedTo);
                 if (movedToRole.getLevel() < getMinimumRoleLevelFromToken(token)) {
-                    throw new DeniedRoleLevel("CANNOT " + apiFunc + " A ROLE TO/FROM USER OF A HIGHER OR SAME ROLE LEVEL");
+                    throw new DeniedRoleLevel("CANNOT " + apiFunc + " A ROLE TO/FROM USER OF A LOWER OR SAME ROLE LEVEL");
                 }
             }
         }
 
             if (apiFunc.equals("DELETE")) {
             if (getMinimumRoleLevelFromToken(token) >= role.getLevel()) {
-                throw new DeniedRoleLevel("CANNOT " + apiFunc + " A USER OF A HIGHER OR SAME ROLE LEVEL");
+                throw new DeniedRoleLevel("CANNOT " + apiFunc + " A USER OF A LOWER OR SAME ROLE LEVEL");
             }
         } else {
             if (getMinimumRoleLevelFromToken(token) > role.getLevel()) {
-                throw new DeniedRoleLevel("CANNOT " + apiFunc + " A USER OF A HIGHER  ROLE LEVEL");
+                throw new DeniedRoleLevel("CANNOT " + apiFunc + " A USER OF A LOWER  ROLE LEVEL");
             }
         }
 
@@ -147,7 +149,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
 
             if (getMinimumRoleLevelFromToken(token) >= role.getLevel()) {
-                throw new DeniedRoleLevel("CANNOT " + apiFunc + " A USER OF A HIGHER OR SAME ROLE LEVEL");
+                throw new DeniedRoleLevel("CANNOT " + apiFunc + " A USER OF A LOWER OR SAME ROLE LEVEL");
             }
         }
     }
@@ -170,7 +172,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
         if (!getMyPermissions(token).contains(addPermissionKeyWithType)) {
             if(!getMyPermissions(token).contains(PermissionKey+"_ALL")){
-                throw new PermissionNotValid("CANNOT ADD A PERMISSION OF HIGHER TYPE");
+                throw new PermissionNotValid("CANNOT ADD A PERMISSION OF LOWER TYPE");
 
             }
         }

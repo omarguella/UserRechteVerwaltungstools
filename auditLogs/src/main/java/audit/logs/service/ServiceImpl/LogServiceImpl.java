@@ -45,7 +45,6 @@ public class LogServiceImpl implements LogService {
         String osName = (String) map.get("osName");
         boolean isVerifiedEmail = (boolean) map.get("isVerifiedEmail");
         String userId = (String) map.get("userId");
-        LOGGER.info(String.valueOf(userId));
 
         LocalDate currentDate = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");

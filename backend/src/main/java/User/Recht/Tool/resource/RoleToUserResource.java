@@ -71,8 +71,8 @@ public class RoleToUserResource {
             return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
         } catch (DeniedRoleLevel e) {
-            return Response.status(406, "CANNOT ADD A ROLE TO/FROM USER OF A HIGHER  ROLE LEVEL")
-                    .header("STATUS", " CANNOT ADD A ROLE TO/FROM USER OF A HIGHER  ROLE LEVEL").build();
+            return Response.status(406, "CANNOT ADD A ROLE TO/FROM USER OF A LOWER  ROLE LEVEL")
+                    .header("STATUS", " CANNOT ADD A ROLE TO/FROM USER OF A LOWER  ROLE LEVEL").build();
         }
     }
 
@@ -132,8 +132,8 @@ public class RoleToUserResource {
 
         }
         catch (DeniedRoleLevel e) {
-            return Response.status(406, "CANNOT DELETE A ROLE TO/FROM USER OF A HIGHER OR SAME ROLE LEVEL")
-                    .header("STATUS", " CANNOT DELETE A ROLE TO/FROM USER OF A HIGHER OR SAME ROLE LEVEL").build();
+            return Response.status(406, "CANNOT DELETE A ROLE TO/FROM USER OF A LOWER OR SAME ROLE LEVEL")
+                    .header("STATUS", " CANNOT DELETE A ROLE TO/FROM USER OF A LOWER OR SAME ROLE LEVEL").build();
         }
     }
 
@@ -209,8 +209,8 @@ public class RoleToUserResource {
             return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
         } catch (DeniedRoleLevel e) {
-            return Response.status(406, "CANNOT UPDATE ROLES OF A USER OF A HIGHER OR SAME ROLE LEVEL")
-                    .header("STATUS", " CANNOT UPDATE ROLES OF A USER OF A HIGHER OR SAME ROLE LEVEL").build();
+            return Response.status(406, "CANNOT UPDATE ROLES OF A USER OF A LOWER OR SAME ROLE LEVEL")
+                    .header("STATUS", " CANNOT UPDATE ROLES OF A USER OF A LOWER OR SAME ROLE LEVEL").build();
         } catch (RoleNotAccessibleException e) {
             return Response.status(406, "ROLE NOT AVAILABLE TO THE USER")
                     .header("status", "ROLE NOT AVAILABLE TO THE USER").build();

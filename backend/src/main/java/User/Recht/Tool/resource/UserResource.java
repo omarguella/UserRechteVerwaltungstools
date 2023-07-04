@@ -84,8 +84,8 @@ public class UserResource {
 
                     .header("STATUS", "USER NOT SAVED").build();
         } catch (CannotCreateUserFromLowerLevel e) {
-            return Response.status(406, "CANNOT CREATE A USER FROM A HIGHER ROLE LEVEL")
-                    .header("STATUS", "CANNOT CREATE A USER FROM A HIGHER ROLE LEVEL").build();
+            return Response.status(406, "CANNOT CREATE A USER FROM A LOWER ROLE LEVEL")
+                    .header("STATUS", "CANNOT CREATE A USER FROM A LOWER ROLE LEVEL").build();
         } catch (UserNotAuthorized e) {
             return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
@@ -122,8 +122,8 @@ public class UserResource {
             return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
         } catch (DeniedRoleLevel e) {
-            return Response.status(406, "CANNOT GET A USER FROM A HIGHER ROLE LEVEL")
-                    .header("STATUS", "CANNOT GET A USER FROM A HIGHER ROLE LEVEL").build();
+            return Response.status(406, "CANNOT GET A USER FROM A LOWER ROLE LEVEL")
+                    .header("STATUS", "CANNOT GET A USER FROM A LOWER ROLE LEVEL").build();
         }
 
     }
@@ -155,8 +155,8 @@ public class UserResource {
             return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
         } catch (DeniedRoleLevel e) {
-            return Response.status(406, "CANNOT GET A USER FROM A HIGHER ROLE LEVEL")
-                    .header("STATUS", "CANNOT GET A USER FROM A HIGHER ROLE LEVEL").build();
+            return Response.status(406, "CANNOT GET A USER FROM A LOWER ROLE LEVEL")
+                    .header("STATUS", "CANNOT GET A USER FROM A LOWER ROLE LEVEL").build();
         }
 
     }
@@ -190,8 +190,8 @@ public class UserResource {
             return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
         } catch (DeniedRoleLevel e) {
-            return Response.status(406, "CANNOT GET A USER FROM A HIGHER ROLE LEVEL")
-                    .header("STATUS", "CANNOT GET A USER FROM A HIGHER ROLE LEVEL").build();
+            return Response.status(406, "CANNOT GET A USER FROM A LOWER ROLE LEVEL")
+                    .header("STATUS", "CANNOT GET A USER FROM A LOWER ROLE LEVEL").build();
         }
 
     }
@@ -288,8 +288,8 @@ public class UserResource {
             return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
         } catch (DeniedRoleLevel e) {
-            return Response.status(406, "CANNOT DELETE A USER FROM A HIGHER ROLE LEVEL")
-                    .header("STATUS", "CANNOT DELETE A USER FROM A HIGHER ROLE LEVEL").build();
+            return Response.status(406, "CANNOT DELETE A USER FROM A LOWER OR SAME ROLE LEVEL")
+                    .header("STATUS", "CANNOT DELETE A USER FROM A LOWER OR SAME ROLE LEVEL").build();
         }
 
     }
@@ -328,8 +328,8 @@ public class UserResource {
             return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
         } catch (DeniedRoleLevel e) {
-            return Response.status(406, "CANNOT UPDATE A USER FROM A HIGHER ROLE LEVEL")
-                    .header("STATUS", "CANNOT UPDATE A USER FROM A HIGHER ROLE LEVEL").build();
+            return Response.status(406, "CANNOT UPDATE A USER FROM A LOWER ROLE LEVEL")
+                    .header("STATUS", "CANNOT UPDATE A USER FROM A LOWER ROLE LEVEL").build();
         }
 
     }
@@ -366,8 +366,8 @@ public class UserResource {
             return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
         } catch (DeniedRoleLevel e) {
-            return Response.status(406, "CANNOT UPDATE A USER FROM A HIGHER ROLE LEVEL")
-                    .header("STATUS", "CANNOT UPDATE A USER FROM A HIGHER ROLE LEVEL").build();
+            return Response.status(406, "CANNOT UPDATE A USER FROM A LOWER OR SAME ROLE LEVEL")
+                    .header("STATUS", "CANNOT UPDATE A USER FROM A LOWER A LOWER OR SAME ROLE LEVEL").build();
         }
 
     }
@@ -410,8 +410,8 @@ public class UserResource {
             return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
         } catch (DeniedRoleLevel | RoleNotFoundException | RoleMovedToException | RoleNotAssignedToUserException e) {
-            return Response.status(406, "CANNOT UPDATE A USER FROM A HIGHER ROLE LEVEL")
-                    .header("STATUS", "CANNOT UPDATE A USER FROM A HIGHER ROLE LEVEL").build();
+            return Response.status(406, "CANNOT UPDATE A USER FROM A LOWER OR SAME ROLE LEVEL")
+                    .header("STATUS", "CANNOT UPDATE A USER FROM A LOWER OR SAME ROLE LEVEL").build();
         }
 
     }
