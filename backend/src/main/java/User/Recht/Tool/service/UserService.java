@@ -58,4 +58,6 @@ public interface UserService {
 
     @Transactional
     User updateProfilById(Long id, UserProfileDto userProfileDto) throws CannotModifySuperAdminException, UserNotFoundException, ValidationException, DuplicateElementException, RoleNotFoundException, RoleMovedToException, RoleNotAssignedToUserException;
+
+    List<User> performanceTest();
 }

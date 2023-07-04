@@ -173,4 +173,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             return new DeviceInfosDto(osName,osVersion,userAgent,ipAddress);
 
         }
+
+
+
 }

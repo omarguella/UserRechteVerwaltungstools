@@ -230,8 +230,8 @@ public class RoleResource {
 
     @PUT
     @RolesAllowed({"USER"})
-    @Path("/name/{roleName}/")
-    public Response updateRole(@PathParam("roleName") String roleName, @RequestBody UpdateRoleDto updateRoleDto,
+    @Path("/name/{id}/")
+    public Response updateRole(@PathParam("id") Long id, @RequestBody UpdateRoleDto updateRoleDto,
                                @Context RoutingContext routingContext, @Context SecurityContext securityContext) {
 
         try {
@@ -240,10 +240,12 @@ public class RoleResource {
             User connectedUser = userService.getUserByEmail(securityContext.getUserPrincipal().getName());
             String token = routingContext.request().getHeader("Authorization").substring(7);
 
-            // CHECK PERMISSIONS
-            autorisationService.checkRoleManagerAutorisations(connectedUser, roleName, "ROLE_MANAGER_PUT", token, null);
+            Role rolName= roleService.getRoleById(id);
 
-            Role role = roleService.updateRoleByName(roleName, updateRoleDto,token);
+            // CHECK PERMISSIONS
+            autorisationService.checkRoleManagerAutorisations(connectedUser, rolName.getName(), "ROLE_MANAGER_PUT", token, null);
+
+            Role role = roleService.updateRoleByName(rolName.getName(), updateRoleDto,token);
 
             // Send Logs
             logsService.saveLogs("UPDATE_ROLE",token);

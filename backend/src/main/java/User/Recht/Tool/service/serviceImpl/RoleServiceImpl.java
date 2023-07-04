@@ -86,6 +86,18 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    public Role getRoleById(Long id) throws RoleNotFoundException {
+        Role role = roleRepository.findById(id);
+
+        if (role != null) {
+            return role;
+        } else {
+            throw new RoleNotFoundException("ROLE DONT EXIST");
+        }
+
+    }
+
+    @Override
     public List<Role>  getPublicRoles ()  {
         List<Role>  roles =getAllRoles();
 

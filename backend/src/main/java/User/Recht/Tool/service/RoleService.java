@@ -23,6 +23,8 @@ public interface RoleService {
 
     Role getRoleByName(String name) throws RoleNotFoundException;
 
+    Role getRoleById(Long id) throws RoleNotFoundException;
+
     List<Role>  getPublicRoles();
 
     List<Role>  getPrivatRoles(User user);

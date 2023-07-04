@@ -82,10 +82,10 @@ public class UserServiceImpl implements UserService {
         Role role = roleService.getRoleByName(roleName);
 
         if (roles.contains(role)) {
-            return createUser(userDto, roleName);}
-            else{
+            return createUser(userDto, roleName);
+        } else {
             throw new CannotCreateUserFromLowerLevel("CANNOT CREATE A USER FROM A HIGHER ROLE LEVEL");
-            }
+        }
     }
 
     @Transactional
@@ -152,13 +152,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getAllUsers(User user,String token) throws RoleNotFoundException, RoleNotAccessibleException {
+    public List<User> getAllUsers(User user, String token) throws RoleNotFoundException, RoleNotAccessibleException {
 
-        List <Role> availableRoles= roleService.getAvailibaleRolesToEdit(user,token);
-        List<User> allAvailableUsers=new ArrayList<>();
+        List<Role> availableRoles = roleService.getAvailibaleRolesToEdit(user, token);
+        List<User> allAvailableUsers = new ArrayList<>();
 
-        for(Role role : availableRoles){
-            allAvailableUsers.addAll(getAllUsersByRole(user,token, role.getName()));
+        for (Role role : availableRoles) {
+            allAvailableUsers.addAll(getAllUsersByRole(user, token, role.getName()));
         }
 
         return allAvailableUsers;
@@ -166,12 +166,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getAllUsersByRole(User user,String token,String roleName) throws RoleNotFoundException, RoleNotAccessibleException {
+    public List<User> getAllUsersByRole(User user, String token, String roleName) throws RoleNotFoundException, RoleNotAccessibleException {
 
-        List <Role> availableRoles= roleService.getAvailibaleRolesToEdit(user,token);
-        Role checkRole= roleService.getRoleByName(roleName);
+        List<Role> availableRoles = roleService.getAvailibaleRolesToEdit(user, token);
+        Role checkRole = roleService.getRoleByName(roleName);
 
-        if (!availableRoles.contains(checkRole)){
+        if (!availableRoles.contains(checkRole)) {
             throw new RoleNotAccessibleException("Role not available to the User");
         }
 
@@ -280,21 +280,21 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        if(userProfileDto.getRoles()!=null){
-            while(userToUpdate.getRoles().size()>0){
-                roleToUserService.deleteRoleFromUser(userToUpdate.getId(),userToUpdate.getRoles().get(userToUpdate.getRoles().size()-1)
-                        .getName(),userProfileDto.getRoles().get(0));
-                userToUpdate.getRoles().remove(userToUpdate.getRoles().size()-1);
+        if (userProfileDto.getRoles() != null) {
+            while (userToUpdate.getRoles().size() > 0) {
+                roleToUserService.deleteRoleFromUser(userToUpdate.getId(), userToUpdate.getRoles().get(userToUpdate.getRoles().size() - 1)
+                        .getName(), userProfileDto.getRoles().get(0));
+                userToUpdate.getRoles().remove(userToUpdate.getRoles().size() - 1);
             }
 
-            for (String role: userProfileDto.getRoles()){
-                roleToUserService.addRoleToUser(userToUpdate.getId(),role);
+            for (String role : userProfileDto.getRoles()) {
+                roleToUserService.addRoleToUser(userToUpdate.getId(), role);
             }
 
         }
 
-        if(userProfileDto.getEmail()!=null){
-            updateEmailUser(userToUpdate.getId(),userProfileDto.getEmail());
+        if (userProfileDto.getEmail() != null) {
+            updateEmailUser(userToUpdate.getId(), userProfileDto.getEmail());
         }
 
         userToUpdate = userFactory.userUpdateProfileFactory(userToUpdate, userProfileDto);
@@ -322,11 +322,11 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public void sendPinForEmailVerify(User user){
-        String userMail= user.getEmail();
-        String pin=generateRandomDigits(5);
+    public void sendPinForEmailVerify(User user) {
+        String userMail = user.getEmail();
+        String pin = generateRandomDigits(5);
         user.setPinEmail(passwordEncoder.passwordCoder(pin));
-        user= saveUpdatedUser(user);
+        user = saveUpdatedUser(user);
 
         String body = "<!DOCTYPE html>\n" +
                 "<html>\n" +
@@ -334,7 +334,7 @@ public class UserServiceImpl implements UserService {
                 "\n" +
                 "<h1><strong>EMAIL VERIFICATION </strong></h1>\n" +
                 "<p>This is your PIN to verify your Email\n </p>" +
-                " <div>"+pin+" </div>  \n" +
+                " <div>" + pin + " </div>  \n" +
                 "<div> Thanks! </div>  \n" +
                 " \n" +
                 " \n" +
@@ -346,11 +346,11 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public User emailVerifyByPin(User user, PinVerifyDto pinVerify) throws PinNotFound, EmailAlreadyVerified {
-        if(user.getIsVerifiedEmail()){
+        if (user.getIsVerifiedEmail()) {
             throw new EmailAlreadyVerified("EMAIL IS ALREADY VERIFIED");
         }
-        String pin =passwordEncoder.passwordCoder(pinVerify.getPin());
-        if(!pin.equals(user.getPinEmail())){
+        String pin = passwordEncoder.passwordCoder(pinVerify.getPin());
+        if (!pin.equals(user.getPinEmail())) {
             throw new PinNotFound("PIN IS WRONG");
         } else {
             user.setIsVerifiedEmail(true);
@@ -388,19 +388,20 @@ public class UserServiceImpl implements UserService {
         Matcher matcher = pattern.matcher(phoneNumber);
         return matcher.matches();
     }
+
     @Transactional
     public UserDto assignRoleToUser(UserDto userDto, String roleName) throws RoleNotFoundException {
-        roleName=roleName.toUpperCase();
+        roleName = roleName.toUpperCase();
         Role role = roleService.getRoleByName(roleName);
         userDto.getRoles().add(role);
         return userDto;
-        }
+    }
 
 
     @Transactional
-    public void deleteAllRolesFromUser(User user)  {
+    public void deleteAllRolesFromUser(User user) {
         user.setRoles(null);
-        user=saveUpdatedUser(user);
+        user = saveUpdatedUser(user);
         userRepository.delete(user);
     }
 
@@ -416,6 +417,17 @@ public class UserServiceImpl implements UserService {
         return sb.toString();
     }
 
+    @Override
+    public List<User> performanceTest() {
 
+        List<User> users = userRepository.listAll();
+        List<User> duplicatedUsers = new ArrayList<>(users);
+        while (duplicatedUsers.size() < 100) {
+            duplicatedUsers.addAll(users);
+        }
+        LOGGER.info(String.valueOf(duplicatedUsers.size()));
+        return duplicatedUsers;
     }
+
+}
 

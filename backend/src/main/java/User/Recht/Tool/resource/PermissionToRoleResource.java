@@ -69,8 +69,8 @@ public class PermissionToRoleResource {
             return Response.status(406, "PERMISSION TO ROLE NOT SAVE")
                     .header("status", "PERMISSION TO ROLE NOT SAVE").build();
         } catch (IllegalArgumentException e) {
-            return Response.status(406, "TYPE SHOULD BE ALL OR ONE")
-                    .header("status", "TYPE SHOULD BE ALL OR ONE").build();
+            return Response.status(406, "TYPE SHOULD BE ALL OR ME")
+                    .header("status", "TYPE SHOULD BE ALL OR ME").build();
         } catch (UserNotFoundException e) {
 
             return Response.status(406, "USER DOSENT EXIST")

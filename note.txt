@@ -136,6 +136,8 @@ Verifying API Access Authorization cannot working when the email is not verified
 
 http://localhost:9000/swagger-ui.html/ Swagger for Dokumentation / Insomnia zum testen
 
+NGROK
+ngrok http http://localhost:9000 --host-header="localhost:9000"
 
 Bis nächsten Termin
 
