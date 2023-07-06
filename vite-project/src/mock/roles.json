@@ -1,0 +1,36 @@
+{
+  "roles": [
+    {
+      "id": 5,
+      "isMailToVerify": false,
+      "isPrivate": false,
+      "level": 1,
+      "name": "OMAR",
+      "sessionTimer": 1
+    },
+    {
+      "id": 6,
+      "isMailToVerify": false,
+      "isPrivate": false,
+      "level": 1,
+      "name": "OMAR2",
+      "sessionTimer": 1
+    },
+    {
+      "id": 7,
+      "isMailToVerify": false,
+      "isPrivate": false,
+      "level": 1,
+      "name": "OMAR3",
+      "sessionTimer": 1
+    },
+    {
+      "id": 8,
+      "isMailToVerify": false,
+      "isPrivate": false,
+      "level": 1,
+      "name": "OMAR4",
+      "sessionTimer": 1
+    }
+  ]
+}
