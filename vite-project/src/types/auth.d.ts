@@ -12,3 +12,8 @@ export type TRegistration = {
   phoneNumber: string;
   role: string;
 };
+
+export type TTokens = {
+  accessToken: string;
+  refreshToken: string;
+};

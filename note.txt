@@ -163,7 +163,7 @@ next
 the same Performance test for a Spring App 1
 Front Implement 1
 Dockerize React 1
-Weiter Schreiben
+Weiter Schreiben (NGROK)
 +Optional erweiterung jede 30 Tage Neue Speicherung der Logs.
 
 19.07 14Uhrp

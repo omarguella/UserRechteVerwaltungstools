@@ -3,7 +3,7 @@ import { useForm } from "antd/es/form/Form";
 import { LogInIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import Input from "../components/forms/Input";
-import { Button } from "../components/forms/style.d";
+import { Button, Password } from "../components/forms/style.d";
 import Back from "../components/layouts/Back";
 import { Container } from "../components/layouts/style.d";
 import UseNotification from "../hooks/notification";
@@ -32,7 +32,13 @@ function Login() {
               onFinish={(values: TLogin) => {
                 dispatch(LoginAction(values))
                   .unwrap()
-                  .catch(err => openErrorNotification(err));
+                  .then(res => {
+                    console.log(res);
+                    window.location.href = "/";
+                  })
+                  .catch(err =>
+                    openErrorNotification(`Something wrong try again`)
+                  );
               }}
             >
               <Form.Item
@@ -47,7 +53,7 @@ function Login() {
                 name="password"
                 rules={[{ required: true, message: "Required field" }]}
               >
-                <Input />
+                <Password />
               </Form.Item>
               <Space
                 align="center"

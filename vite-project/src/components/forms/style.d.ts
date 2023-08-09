@@ -16,6 +16,19 @@ export const Password = styled(Antd.Input.Password)`
   }
 `;
 
+export const Search = styled(Antd.Input.Search)`
+  .ant-input {
+    border-radius: 5px;
+    height: 50px;
+  }
+  .ant-input-search-button {
+    height: 50px;
+  }
+  &:focus {
+    border-width: 1px;
+  }
+`;
+
 export const Select = styled(Antd.Select)`
   .ant-select-selector {
     height: 50px !important;

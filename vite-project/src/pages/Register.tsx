@@ -1,6 +1,6 @@
 import { Col, Form, Row, Typography } from "antd";
 import { useForm } from "antd/es/form/Form";
-import { LogInIcon } from "lucide-react";
+import { LogInIcon, Regex } from "lucide-react";
 import { FetchRole } from "../api/fetchRoles";
 import Input from "../components/forms/Input";
 import { Button, Password, Select } from "../components/forms/style.d";
@@ -21,7 +21,9 @@ function Register() {
   const dispatch = useAppDispatch();
   const { loading } = useAppSelector(state => state.auth);
   const { openErrorNotification, contextHolder } = UseNotification();
-
+  const passwordPattern =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[.@$!%*?&])[A-Za-z\d.@$!%*?&]{8,}$/;
+  const phonePattern = /^(\\+[0-9]{1,3})?[0-9]{9,15}$/;
   return (
     <Container style={{ flexDirection: "column" }}>
       {contextHolder}
@@ -65,7 +67,17 @@ function Register() {
                   <Form.Item
                     label="Password"
                     name="password"
-                    rules={[{ required: true, message: "Required field" }]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Required Password",
+                      },
+                      {
+                        pattern: passwordPattern,
+                        message:
+                          "Required Password does not meet the requirements",
+                      },
+                    ]}
                   >
                     <Password />
                   </Form.Item>
@@ -88,7 +100,13 @@ function Register() {
                   <Form.Item
                     label="Phone"
                     name="phoneNumber"
-                    rules={[{ required: true, message: "Required field" }]}
+                    rules={[
+                      { required: true, message: "Required field" },
+                      {
+                        pattern: phonePattern,
+                        message: "Invalid phone format",
+                      },
+                    ]}
                   >
                     <Input />
                   </Form.Item>

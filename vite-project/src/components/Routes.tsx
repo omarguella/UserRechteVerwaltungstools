@@ -1,23 +1,44 @@
 import React from "react";
 import { createBrowserRouter } from "react-router-dom";
-const HomePage = React.lazy(() => import("../pages/Home"));
+import { withLoading } from "../hoc/withLoading.hoc";
+import PrivateRoute from "./PrivateRoute";
+import Layout from "./layouts/Layout";
+
 const RegisterPage = React.lazy(() => import("../pages/Register"));
 const LoginPage = React.lazy(() => import("../pages/Login"));
-import PrivateRoute from "./PrivateRoute";
-import { withLoading } from "../hoc/withLoading.hoc";
-
+const ProfilePage = React.lazy(() => import("../pages/Profile"));
+const AdministrationPage = React.lazy(() => import("../pages/Administration"));
 /* with loading */
 const Register = withLoading(RegisterPage);
 const Login = withLoading(LoginPage);
-const Home = withLoading(HomePage);
+const Profile = withLoading(ProfilePage);
+const Administration = withLoading(AdministrationPage);
 const routes = createBrowserRouter([
   {
     path: "/",
     element: (
       <PrivateRoute>
-        <Home />
+        <Layout />
       </PrivateRoute>
     ),
+    children: [
+      {
+        path: "/",
+        element: (
+          <PrivateRoute>
+            <Profile />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/administration",
+        element: (
+          <PrivateRoute>
+            <Administration />
+          </PrivateRoute>
+        ),
+      },
+    ],
   },
   {
     path: "/login",

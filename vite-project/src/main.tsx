@@ -6,7 +6,8 @@ import "./index.css";
 import { ConfigProvider } from "antd";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Provider } from "react-redux";
-import { store } from "./redux/store.ts";
+import { persistor, store } from "./redux/store.ts";
+import { PersistGate } from "redux-persist/integration/react";
 const queryClient = new QueryClient();
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
@@ -17,14 +18,18 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
           colorBorder: "#B5BEC6",
           colorBorderBg: "red",
           borderRadius: 5,
+          colorBgTextHover: "#8c8c8d",
+          colorPrimaryBg: "#cccccc",
         },
       }}
     >
-      <QueryClientProvider client={queryClient}>
-        <Provider store={store}>
-          <RouterProvider router={routes} />
-        </Provider>
-      </QueryClientProvider>
+      <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+          <QueryClientProvider client={queryClient}>
+            <RouterProvider router={routes} />
+          </QueryClientProvider>
+        </PersistGate>
+      </Provider>
     </ConfigProvider>
   </React.StrictMode>
 );
