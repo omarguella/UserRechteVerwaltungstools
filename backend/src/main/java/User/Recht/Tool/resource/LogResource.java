@@ -34,10 +34,10 @@ public class LogResource {
 
     @GET
     @RolesAllowed({"USER"})
-    public Response getLogs (@HeaderParam("userId") String userId,
-                             @HeaderParam("from") String from,
-                             @HeaderParam("to") String to,
-                             @HeaderParam("action") String action ,
+    public Response getLogs (@QueryParam("userId") String userId,
+                             @QueryParam("from") String from,
+                             @QueryParam("to") String to,
+                             @QueryParam("action") String action ,
                              @Context RoutingContext routingContext,
                              @Context SecurityContext securityContext) {
 
@@ -64,10 +64,10 @@ public class LogResource {
 
     @DELETE
     @RolesAllowed({"USER"})
-    public Response deleteLogs (@HeaderParam("userId") String userId,
-                             @HeaderParam("from") String from,
-                             @HeaderParam("to") String to,
-                             @HeaderParam("action") String action ,
+    public Response deleteLogs (@QueryParam("userId") String userId,
+                             @QueryParam("from") String from,
+                             @QueryParam("to") String to,
+                             @QueryParam("action") String action ,
                              @Context RoutingContext routingContext,
                              @Context SecurityContext securityContext) {
 

@@ -145,6 +145,25 @@ Bis nächsten Termin
 +Dockerzieren
 +Bericht weiterschreiben und anpassen
 +Mockups  for Frontend
++Login seite
 +APP Qualität testen loader.io
+    -ich habe Clever Heroku Ngrok netlify, the server of the Hochschule Probiert
+    -Jmeter Api Tester
+
 
 https://h-brs.webex.com/meet/teena-chakkalayil.hassan
+
+server hs config docker
+quarkus.datasource.jdbc.url = jdbc:postgresql://172.18.0.3:5432/userrechttooldb
+quarkus.datasource.jdbc.url = jdbc:postgresql://172.18.0.2:5433/auditlogdb
+audit-logs/mp-rest/url=${AUDIT_LOGS:http://auditlogs:9001}
+
+
+next
+the same Performance test for a Spring App 1
+Front Implement 1
+Dockerize React 1
+Weiter Schreiben
++Optional erweiterung jede 30 Tage Neue Speicherung der Logs.
+
+19.07 14Uhrp
