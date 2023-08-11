@@ -14,7 +14,7 @@ import javax.ws.rs.core.Response;
 import java.io.File;
 import java.util.List;
 
-@Path("/loaderio-1a08b6c76a1dbdc92a0b983cd500fb2d/")
+@Path("/loaderio-9d16910805a5fb836347cdb39de4ec04/")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class TestPerformance {
@@ -25,8 +25,8 @@ public class TestPerformance {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public File getVerificationTokenFile() {
-        return new File("uploads/loaderio-1a08b6c76a1dbdc92a0b983cd500fb2d.txt");
+    public String getVerificationTokenFile() {
+        return "loaderio-9d16910805a5fb836347cdb39de4ec04";
     }
     @GET
     @PermitAll

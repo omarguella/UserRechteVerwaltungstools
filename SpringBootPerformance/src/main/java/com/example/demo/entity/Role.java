@@ -1,6 +1,7 @@
-package com.example.demo.model;
+package com.example.demo.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class Role {
@@ -9,19 +10,20 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(unique = true, length = 50)
+    @NotNull
     private String name;
-    private Long sessionTimer=0L;
-    private boolean isMailToVerify;
+    private Long sessiontimer=0L;
+    private boolean ismailtoverify;
     private int level;
-    private boolean isPrivate;
+    private boolean isprivate;
 
-    public Role(Long id, String name, Long sessionTimer, boolean isMailToVerify, int level, boolean isPrivate) {
+    public Role(Long id, String name, Long sessiontimer, boolean ismailtoverify, int level, boolean isprivate) {
         this.id = id;
         this.name = name;
-        this.sessionTimer = sessionTimer;
-        this.isMailToVerify = isMailToVerify;
+        this.sessiontimer = sessiontimer;
+        this.ismailtoverify = ismailtoverify;
         this.level = level;
-        this.isPrivate = isPrivate;
+        this.isprivate = isprivate;
     }
 
     public Role() {
@@ -44,19 +46,19 @@ public class Role {
     }
 
     public Long getSessionTimer() {
-        return sessionTimer;
+        return sessiontimer;
     }
 
-    public void setSessionTimer(Long sessionTimer) {
-        this.sessionTimer = sessionTimer;
+    public void setSessionTimer(Long sessiontimer) {
+        this.sessiontimer = sessiontimer;
     }
 
     public boolean getIsMailToVerify() {
-        return isMailToVerify;
+        return ismailtoverify;
     }
 
-    public void setIsMailToVerify(boolean mailToVerify) {
-        isMailToVerify = mailToVerify;
+    public void setIsMailToVerify(boolean ismailtoverify) {
+        ismailtoverify = ismailtoverify;
     }
 
     public int getLevel() {
@@ -68,11 +70,11 @@ public class Role {
     }
 
     public boolean getIsPrivate() {
-        return isPrivate;
+        return isprivate;
     }
 
-    public void setIsPrivate(boolean isPrivate) {
-        this.isPrivate = isPrivate;
+    public void setIsPrivate(boolean isprivate) {
+        this.isprivate = isprivate;
     }
 
 
@@ -81,10 +83,10 @@ public class Role {
         return "Role{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", sessionTimer=" + sessionTimer +
-                ", isMailToVerify=" + isMailToVerify +
+                ", sessionTimer=" + sessiontimer +
+                ", isMailToVerify=" + ismailtoverify +
                 ", level=" + level +
-                ", isPrivate=" + isPrivate +
+                ", isPrivate=" + isprivate +
                 '}';
     }
 }

@@ -67,10 +67,10 @@ https://www.youtube.com/watch?v=7YgaZIFn7mY ssl certificate
 
 DATA BASE POSTGRES:
 psql -U postgres
-CREATE USER auditlog WITH PASSWORD 'postgres';
-GRANT postgres TO auditlog;
-CREATE DATABASE auditlogdb;
-grant all privileges on database auditlogdb to auditlog;
+CREATE USER userrechttool WITH PASSWORD 'postgres';
+    GRANT postgres TO userrechttool;
+CREATE DATABASE userrechttooldb;
+grant all privileges on database userrechttooldb to userrechttool;
 
 CREATE USER auditlog WITH PASSWORD 'postgres';
 GRANT postgres TO auditlog;
@@ -137,7 +137,7 @@ Verifying API Access Authorization cannot working when the email is not verified
 http://localhost:9000/swagger-ui.html/ Swagger for Dokumentation / Insomnia zum testen
 
 NGROK
-ngrok http http://localhost:9000 --host-header="localhost:9000"
+./ngrok http http://localhost:9000 --host-header="localhost:9000"
 
 Bis nächsten Termin
 

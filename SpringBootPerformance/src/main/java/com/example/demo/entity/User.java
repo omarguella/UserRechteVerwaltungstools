@@ -1,7 +1,9 @@
-package com.example.demo.model;
+package com.example.demo.entity;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
@@ -12,27 +14,33 @@ import java.util.List;
     public class User {
 
         @Id
-        @Column(name = "userId")
+        @Column(name = "userid")
         @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "auto_gen")
-        private long id;
+        private long userid;
 
         @Column(unique = true, length = 50)
+        @Email
         private String email;
 
-        private String password;
+    @NotNull
+    private String password;
 
-        @Column(unique = true, length = 50)
-        private String username;
+    @NotNull
+    @Column(unique = true, length = 50)
+    private String username;
 
-        private String name;
-        private String lastname;
+    @NotNull
+    private String name;
+    @NotNull
+    private String lastname;
 
-        private String phoneNumber;
-        private boolean isVerifiedEmail = false;
+    private String phonenumber;
+    private boolean isverifiedemail = false;
 
-        private String pinEmail;
+    private  String pinemail;
 
-        @ManyToMany
+
+    @ManyToMany
         @JoinTable(name = "user_role",
                 joinColumns = @JoinColumn(name = "user_id"),
                 inverseJoinColumns = @JoinColumn(name = "role_id"))
@@ -40,11 +48,11 @@ import java.util.List;
 
 
         public long getId() {
-            return id;
+            return userid;
         }
 
-        public void setId(long id) {
-            this.id = id;
+        public void setId(long userid) {
+            this.userid = userid;
         }
 
         public String getEmail() {
@@ -88,31 +96,31 @@ import java.util.List;
         }
 
         public String getPhoneNumber() {
-            return phoneNumber;
+            return phonenumber;
         }
 
-        public void setPhoneNumber(String phoneNumber) {
-            this.phoneNumber = phoneNumber;
+        public void setPhoneNumber(String phonenumber) {
+            this.phonenumber = phonenumber;
         }
 
 
         public String getPinEmail() {
-            return pinEmail;
+            return pinemail;
         }
 
-        public void setPinEmail(String pinEmail) {
-            this.pinEmail = pinEmail;
+        public void setPinEmail(String pinemail) {
+            this.pinemail = pinemail;
         }
 
         public User() {
         }
 
         public boolean getIsVerifiedEmail() {
-            return isVerifiedEmail;
+            return isverifiedemail;
         }
 
-        public void setIsVerifiedEmail(boolean isVerifiedEmail) {
-            this.isVerifiedEmail = isVerifiedEmail;
+        public void setIsVerifiedEmail(boolean isverifiedemail) {
+            this.isverifiedemail = isverifiedemail;
         }
 
 
@@ -127,14 +135,14 @@ import java.util.List;
         @Override
         public String toString() {
             return "User{" +
-                    "id=" + id +
+                    "id=" + userid +
                     ", email='" + email + '\'' +
                     ", password='" + password + '\'' +
                     ", username='" + username + '\'' +
                     ", name='" + name + '\'' +
                     ", lastname='" + lastname + '\'' +
-                    ", phoneNumber='" + phoneNumber + '\'' +
-                    ", verifiedEmail='" + isVerifiedEmail + '\'' +
+                    ", phoneNumber='" + phonenumber + '\'' +
+                    ", verifiedEmail='" + isverifiedemail + '\'' +
                     '}';
 
 
