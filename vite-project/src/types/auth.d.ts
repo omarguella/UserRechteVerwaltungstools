@@ -10,7 +10,7 @@ export type TRegistration = {
   name: string;
   lastname: string;
   phoneNumber: string;
-  role: string;
+  roles: string;
 };
 
 export type TTokens = {

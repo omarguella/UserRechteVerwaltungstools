@@ -5,11 +5,20 @@ import { _GET } from "../../../api/config";
 import { Role } from "../../../types/roles";
 import { ReformatRole } from "../../../utils/roles";
 
-const SearchRoles = () => {
+interface Props {
+  setRole: (value: string) => void;
+  role: string;
+}
+
+const SearchRoles = ({ setRole, role }: Props) => {
+  const onChangeHandler = async (e: any) => {
+    setRole(e);
+  };
+
   const { data, isLoading, isError } = useQuery(
     ["available-roles"],
     async () => {
-      const response = await _GET("/roles");
+      const response = await _GET("/roles/edit");
       return response.data as Role[];
     }
   );
@@ -27,6 +36,8 @@ const SearchRoles = () => {
           options={formattedRole}
           loading={isLoading}
           placeholder="Role choice"
+          onChange={onChangeHandler}
+          allowClear
         />
       </Form.Item>
     </Col>

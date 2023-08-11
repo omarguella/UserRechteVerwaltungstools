@@ -1,13 +1,14 @@
-import { FC } from "react";
-import { User } from "../../../types/user";
 import { Table } from "antd";
+import { FC } from "react";
 import { Role } from "../../../types/roles";
+import { User } from "../../../types/user";
 
 type RoleListProps = Pick<User, "roles">;
 
 const RoleList: FC<RoleListProps> = ({ roles }) => {
-  const dataSource: Role[] = roles;
-
+  const dataSource: any[] = roles;
+  /* const _formatted = ReformatRole(roles);
+  CreateCookies("current-role", _formatted); */
   const columns = [
     {
       title: "Name",

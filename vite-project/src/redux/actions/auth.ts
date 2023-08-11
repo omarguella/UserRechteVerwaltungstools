@@ -1,8 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-import { TLogin, TRegistration, TTokens } from "../../types/auth";
 import UseGetAuth from "../../hooks/getAuth";
-import { store } from "../store";
+import { TLogin } from "../../types/auth";
 
 const BASE_URL = import.meta.env.VITE_URL;
 
@@ -22,7 +21,7 @@ export const LoginAction = createAsyncThunk(
 // Registration
 export const RegisterAction = createAsyncThunk(
   "auth/registration",
-  async (data: TRegistration, { rejectWithValue }) => {
+  async (data: any, { rejectWithValue }) => {
     const { role, ...rest } = data;
     try {
       const response = await axios.post(

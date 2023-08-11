@@ -6,3 +6,8 @@ export type Role = {
   name: string;
   sessionTimer: number;
 };
+
+export type Builder = {
+  value: string;
+  path: any;
+};

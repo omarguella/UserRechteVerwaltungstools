@@ -7,6 +7,8 @@ const persistConfig = {
   key: "root", // The key prefix for the persisted state
   storage, // The storage mechanism to use
   // Additional configuration options if needed
+  whiteList: ["auth"],
+  blackList: ["users"],
 };
 const persistedReducer = persistReducer(persistConfig, reducers);
 

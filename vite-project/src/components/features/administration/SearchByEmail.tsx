@@ -1,21 +1,14 @@
 import { Col, Form } from "antd";
-import { Button, Search } from "../../forms/style.d";
-import { User } from "../../../types/user";
-import UseNotification from "../../../hooks/notification";
-import { _GET } from "../../../api/config";
+import { Search } from "../../forms/style.d";
 
 interface Props {
-  setUsers: (value: User[]) => void;
+  setEmail: (value: string) => void;
+  email: string;
 }
-const SearchByEmail = ({ setUsers }: Props) => {
+const SearchByEmail = ({ setEmail }: Props) => {
   const [EmailForm] = Form.useForm();
   const onChangeHandler = async (e: any) => {
-    try {
-      const response = await _GET(`/users/email/${e.target.value}`);
-      setUsers(response?.data);
-    } catch (error: any) {
-      UseNotification().openErrorNotification(error?.message);
-    }
+    setEmail(e.target.value);
   };
   return (
     <Col xs={24} sm={24} md={12} lg={8} xl={8}>

@@ -49,7 +49,7 @@ const Profile = () => {
         {/* Form email */}
         <Col xs={24} sm={24} md={24} lg={12} xl={12}>
           <Card title="Update Email">
-            <EmailForm email={data.email} />
+            <EmailForm id={data.id} email={data.email} />
           </Card>
 
           <Card
@@ -61,13 +61,14 @@ const Profile = () => {
               name={data?.name}
               lastname={data?.lastname}
               phoneNumber={data?.phoneNumber}
+              id={data?.id}
             />
           </Card>
         </Col>
         {/* Form password */}
         <Col xs={24} sm={24} md={24} lg={12} xl={12}>
           <Card title="Update Password">
-            <PasswordForm />
+            <PasswordForm id={data?.id} />
           </Card>
           <Card title="My Roles" style={{ marginTop: "20px" }}>
             <RoleList roles={data?.roles} />

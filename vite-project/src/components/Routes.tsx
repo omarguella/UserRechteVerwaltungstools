@@ -8,11 +8,16 @@ const RegisterPage = React.lazy(() => import("../pages/Register"));
 const LoginPage = React.lazy(() => import("../pages/Login"));
 const ProfilePage = React.lazy(() => import("../pages/Profile"));
 const AdministrationPage = React.lazy(() => import("../pages/Administration"));
+const RolesAdministrationPage = React.lazy(
+  () => import("../pages/RolesAdministration")
+);
 /* with loading */
 const Register = withLoading(RegisterPage);
 const Login = withLoading(LoginPage);
 const Profile = withLoading(ProfilePage);
 const Administration = withLoading(AdministrationPage);
+const RolesAdministration = withLoading(RolesAdministrationPage);
+
 const routes = createBrowserRouter([
   {
     path: "/",
@@ -35,6 +40,14 @@ const routes = createBrowserRouter([
         element: (
           <PrivateRoute>
             <Administration />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/roles",
+        element: (
+          <PrivateRoute>
+            <RolesAdministration />
           </PrivateRoute>
         ),
       },

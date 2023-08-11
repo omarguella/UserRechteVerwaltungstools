@@ -25,34 +25,32 @@ export const AuthSlice = createSlice({
   reducers: {},
   extraReducers(builder) {
     builder
-      .addCase(LoginAction.pending, state => {
+      .addCase("auth/login/pending" || "auth/registration/pending", state => {
         // Add user to the state array
         state.loading = true;
       })
-      .addCase(RegisterAction.pending, state => {
+
+      .addCase("auth/registration/fulfilled", state => {
         // Add user to the state array
-        state.loading = true;
+        state.loading = false;
       })
-      .addCase(LoginAction.fulfilled, (state, action: { payload: TTokens }) => {
+      .addCase("auth/login/fulfilled", (state, action: any) => {
         state.loading = false;
         // Add user to the state array
         state.isConnected = true;
         state.tokens = action.payload;
       })
-      .addCase(LoginAction.rejected, state => {
+      .addCase("auth/login/rejected", state => {
         state.loading = false;
       })
-      .addCase(RegisterAction.rejected, state => {
+      .addCase("auth/registration/rejected", state => {
         // Add user to the state array
         state.loading = false;
       })
-      .addCase(
-        GetAccessAction.fulfilled,
-        (state, action: { payload: TTokens }) => {
-          state.tokens = action.payload;
-        }
-      )
-      .addCase(LogoutAction.fulfilled, (state, action) => {
+      .addCase("auth/access/fulfilled", (state, action: any) => {
+        state.tokens = action.payload;
+      })
+      .addCase("auth/logout/fulfilled", (state, action) => {
         state.isConnected = false;
         state.tokens = null;
       });

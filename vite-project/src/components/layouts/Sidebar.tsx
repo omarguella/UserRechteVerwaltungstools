@@ -1,8 +1,8 @@
 import type { MenuProps } from "antd";
 import { Button, Menu } from "antd";
 import {
+  Check,
   LogOutIcon,
-  MenuSquare,
   Settings2,
   SidebarClose,
   SidebarOpen,
@@ -10,8 +10,8 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useAppDispatch } from "../../redux/store";
 import { LogoutAction } from "../../redux/actions/auth";
+import { useAppDispatch } from "../../redux/store";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -46,6 +46,13 @@ const items: MenuItem[] = [
       <Settings2 />
     </Link>
   ),
+  getItem(
+    "Roles Administration",
+    "3",
+    <Link to={"/roles"}>
+      <Check />
+    </Link>
+  ),
 ];
 
 const Sidebar: React.FC = () => {
@@ -58,6 +65,7 @@ const Sidebar: React.FC = () => {
   const activeMenu = {
     "/": ["1"],
     "/administration": ["2"],
+    "/roles": ["3"],
   };
   return (
     <div

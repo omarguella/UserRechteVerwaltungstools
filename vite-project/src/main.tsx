@@ -6,7 +6,7 @@ import "./index.css";
 import { ConfigProvider } from "antd";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Provider } from "react-redux";
-import { persistor, store } from "./redux/store.ts";
+import { persistor, store } from "./redux/store";
 import { PersistGate } from "redux-persist/integration/react";
 const queryClient = new QueryClient();
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(

@@ -55,8 +55,8 @@ export const _POST = async (endpoint: string, payload: any) => {
  * @param payload
  * @returns {Response}
  */
-export const _PUT = async (endpoint: string, payload: JSON) => {
-  const response = await axios.put(endpoint, payload);
+export const _PUT = async (endpoint: string, payload: any) => {
+  const response = await api.put(endpoint, payload);
   return response;
 };
 
@@ -66,6 +66,6 @@ export const _PUT = async (endpoint: string, payload: JSON) => {
  * @returns {Response}
  */
 export const _DELETE = async (endpoint: string) => {
-  const response: Response = await axios.delete(endpoint);
+  const response: Response = await api.delete(endpoint);
   return response;
 };

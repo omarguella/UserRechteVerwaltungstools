@@ -38,6 +38,7 @@ function Register() {
               onFinish={(values: TRegistration) => {
                 dispatch(RegisterAction(values))
                   .unwrap()
+                  .then(() => (window.location.href = "/login"))
                   .catch(err => openErrorNotification(err));
               }}
             >
