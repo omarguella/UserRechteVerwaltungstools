@@ -162,6 +162,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
             throw new UserNotAuthorized("USER IS NOT AUTHOROZIED FOR THE PERMISSION");
         }
     }
+
     public void checkAddPermissionKey(String addPermissionKeyWithType, String token) throws UserNotAuthorized, PermissionNotValid {
         addPermissionKeyWithType = addPermissionKeyWithType.toUpperCase();
         String[] parts = addPermissionKeyWithType.split("_");
@@ -230,6 +231,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
         Map<String, Object> map = claimsOfUserService.listClaimUsingJWT(token);
         List<String> list = (List<String>) map.get("allPermissionsOfUser");
+        LOGGER.info(list.toString());
         return list;
 
     }

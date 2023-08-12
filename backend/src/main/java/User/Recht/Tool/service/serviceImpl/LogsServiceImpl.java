@@ -5,6 +5,8 @@ import User.Recht.Tool.dtos.auditLogDto.LogDto;
 import User.Recht.Tool.exception.logs.DateException;
 import User.Recht.Tool.service.LogsService;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -15,6 +17,8 @@ import java.util.List;
 
 @RequestScoped
 public class LogsServiceImpl implements LogsService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogsServiceImpl.class);
 
     @Inject
     @RestClient
@@ -51,6 +55,7 @@ public class LogsServiceImpl implements LogsService {
         if (to != null) {
             isDateValid(to);
         }
+
 
         return logsAPI.getLogs(userId, from, to, action, token);
 

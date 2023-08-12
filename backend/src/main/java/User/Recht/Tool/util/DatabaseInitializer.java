@@ -218,7 +218,7 @@ public class DatabaseInitializer {
 
 
             permission = new Permission();
-            permission.setKey("AUDIT_LOGS_DELETE_ALL");
+            permission.setKey("AUDIT_LOGS_DELETE");
             permission.setName("AUDIT_LOGS");
             permissionRepository.persist(permission);
 
@@ -230,7 +230,7 @@ public class DatabaseInitializer {
             permissionRoleRepository.persist(permissionRole);
 
             permission = new Permission();
-            permission.setKey("AUDIT_LOGS_POST_ALL");
+            permission.setKey("AUDIT_LOGS_POST");
             permission.setName("AUDIT_LOGS");
             permissionRepository.persist(permission);
 
@@ -242,7 +242,7 @@ public class DatabaseInitializer {
             permissionRoleRepository.persist(permissionRole);
 
             permission = new Permission();
-            permission.setKey("AUDIT_LOGS_GET_ALL");
+            permission.setKey("AUDIT_LOGS_GET");
             permission.setName("AUDIT_LOGS");
             permissionRepository.persist(permission);
 
