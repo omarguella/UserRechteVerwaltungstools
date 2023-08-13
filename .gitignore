@@ -17,6 +17,7 @@ lerna-debug.log*
 
 /vite-project/node_modules
 /vite-project/dist
+/vite-project/build
 dist-ssr
 *.local
 

@@ -1,6 +1,21 @@
 version: '3.8'
 
 services:
+  frontend:
+    container_name: userrechtverwaltungstoolfront
+    image: guellaomar/userrechtverwaltungstoolfront:latest
+    build:
+      context: .
+      dockerfile: vite-project/Dockerfile
+    volumes:
+      - './vite-project:/app'
+      - '/app/node_modules'
+    ports:
+      - 5173:5173
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    networks:
+      - mynetwork
   backend:
     container_name: backend-user-recht-tool
     image: guellaomar/backend-user-recht-tool:latest

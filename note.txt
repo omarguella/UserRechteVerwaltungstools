@@ -85,6 +85,7 @@ grant all privileges on database auditlogdb to auditlog;
 build Images
 docker build -f src/main/docker/Dockerfile.jvm -t backend-user-recht-tool .
 docker build -f src/main/docker/Dockerfile.jvm -t auditlogs .
+docker build . -t react-app-tool
 
 create Repo for the two images
 
@@ -92,9 +93,11 @@ Docker login with acesstoken
 
 docker tag backend-user-recht-tool guellaomar/backend-user-recht-tool:latest
 docker tag auditlogs guellaomar/auditlogs:latest
+docker tag react-app-tool:latest guellaomar/userrechtverwaltungstoolfront:latest
 
 docker push guellaomar/backend-user-recht-tool:latest
 docker push guellaomar/auditlogs:latest
+docker push guellaomar/userrechtverwaltungstoolfront:latest
 
 
 send Logs for every api
