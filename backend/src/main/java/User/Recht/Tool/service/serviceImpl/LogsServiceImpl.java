@@ -4,12 +4,14 @@ import User.Recht.Tool.auditLogs.api.LogsAPI;
 import User.Recht.Tool.dtos.auditLogDto.LogDto;
 import User.Recht.Tool.exception.logs.DateException;
 import User.Recht.Tool.service.LogsService;
+import io.quarkus.qute.Results;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.ws.rs.NotFoundException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -86,7 +88,11 @@ public class LogsServiceImpl implements LogsService {
             isDateValid(to);
         }
         logsAPI.deleteLogs(userId, from, to, action, token);
+    }
+    @Override
+    public void deleteLog(Long id, String token) throws NotFoundException {
 
+        logsAPI.deleteLog(id, token);
     }
 
 

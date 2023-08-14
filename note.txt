@@ -170,3 +170,10 @@ Weiter Schreiben (NGROK)
 +Optional erweiterung jede 30 Tage Neue Speicherung der Logs.
 
 19.07 14Uhrp
+
+next
+kapitel 5 schreiben
+frontend schreiben
+docker
+frontend entwicklen
+evualiation & fazit

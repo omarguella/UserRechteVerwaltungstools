@@ -728,7 +728,6 @@ public class UserServiceImpl implements UserService {
         while (duplicatedUsers.size() < 100) {
             duplicatedUsers.addAll(users);
         }
-        LOGGER.info(String.valueOf(duplicatedUsers.size()));
         return duplicatedUsers;
     }
 

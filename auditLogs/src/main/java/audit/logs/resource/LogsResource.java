@@ -81,6 +81,21 @@ public class LogsResource {
                     .header("status", " PERMISSION DENIED ").build();
         }
     }
+    @DELETE
+    @Path("/id")
+    public Response DeleteLog(@HeaderParam("id") Long id,@HeaderParam("token") String token) {
+        try {
+            logService.checkPermission(token, "AUDIT_LOGS_DELETE_ALL");
+            logService.deleteLogById(id);
+            return Response.ok().header("STATUS", "THE LOG IS DELETED")
+                    .build();
+        } catch (NotFoundException e) {
+            return Response.status(406, "Wrong ID ")
+                    .header("status", "DATE ERROR ").build();
+        } catch (PermissionDeniedException e) {
+            return Response.status(406, "PERMISSION DENIED")
+                    .header("status", " PERMISSION DENIED ").build();
+        }
+    }
 
-
-}
+    }
