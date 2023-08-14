@@ -8,6 +8,7 @@ import { User } from "../types/user";
 import { useQuery } from "@tanstack/react-query";
 import { useAppDispatch } from "../redux/store";
 import { GetUsersAction } from "../redux/actions/user";
+import { Helmet } from "react-helmet";
 
 const Administration = () => {
   const [email, setEmail] = useState<string>("");
@@ -28,12 +29,18 @@ const Administration = () => {
       return data;
     }
 
-    return data?.filter(
-      item =>
-        item.username.toLowerCase().includes(username.toLowerCase()) &&
-        item.email.toLowerCase().includes(email.toLowerCase()) &&
-        item.roles.some(r => r.name.toLowerCase() === role.toLowerCase())
-    );
+    return data?.filter(item => {
+      const isUsernameMatch =
+        !username ||
+        item.username.toLowerCase().includes(username.toLowerCase());
+      const isEmailMatch =
+        !email || item.email.toLowerCase().includes(email.toLowerCase());
+      const isRoleMatch =
+        !role ||
+        item.roles.some(r => r.name.toLowerCase() === role.toLowerCase());
+
+      return isUsernameMatch && isEmailMatch && isRoleMatch;
+    });
   }, [data, email, username, role]);
 
   if (isLoading) {
@@ -45,6 +52,9 @@ const Administration = () => {
   }
   return (
     <div style={{ width: "100%" }}>
+      <Helmet>
+        <title>Users administration</title>
+      </Helmet>
       <Space direction="vertical" size="middle" style={{ display: "flex" }}>
         <Alert
           message="Users Administration"

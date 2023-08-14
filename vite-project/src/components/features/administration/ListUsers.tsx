@@ -9,7 +9,7 @@ import {
   CreatePrivateUserAction,
   DeleteUserAction,
   GetUserAction,
-  UpdateProfileAction,
+  UpdateProfileUsersAction,
 } from "../../../redux/actions/user";
 import { UsersSlice } from "../../../redux/reducers/user";
 import { useAppDispatch } from "../../../redux/store";
@@ -45,6 +45,7 @@ const ListUsers: FC<ListUsersProps> = ({ users, refetch }) => {
     dispatch(GetUserAction(id))
       .unwrap()
       .then((res: any) => {
+        InfoForm.resetFields();
         InfoForm.setFieldsValue(res);
         InfoForm.setFieldValue("roles", ReformatRole(res.roles));
       })
@@ -76,10 +77,10 @@ const ListUsers: FC<ListUsersProps> = ({ users, refetch }) => {
   };
 
   const UpdateUser = (values: any, id: number) => {
-    dispatch(UpdateProfileAction({ data: values, id: id }))
+    dispatch(UpdateProfileUsersAction({ data: values, id: id }))
       .unwrap()
       .then(() => {
-        openSuccessNotification(`User successfully deleted`);
+        openSuccessNotification(`User successfully updated`);
         refetch();
       })
       .catch(err => openErrorNotification(err));
@@ -120,25 +121,6 @@ const ListUsers: FC<ListUsersProps> = ({ users, refetch }) => {
             >
               Update User
             </Button>
-            <Drawer
-              title="Update User"
-              open={modalUpdate}
-              onClose={() => dispatch(UsersSlice.actions.CloseUpdateModal())}
-              placement="right"
-            >
-              {loadingUpdate ? (
-                <Skeleton />
-              ) : (
-                <UserForm
-                  InfoForm={InfoForm}
-                  action={UpdateUser}
-                  mode={"multiple"}
-                  role="mixte"
-                  id={record?.id}
-                  form="update"
-                />
-              )}
-            </Drawer>
 
             <Popconfirm
               title="Delete the User"
@@ -146,6 +128,9 @@ const ListUsers: FC<ListUsersProps> = ({ users, refetch }) => {
               onConfirm={() => DeleteUser(record?.id)}
               okText="Yes"
               cancelText="No"
+              disabled={
+                !cookiesPermission.some(p => p === "USER_MANAGER_DELETE_ALL")
+              }
             >
               <Button
                 type="primary"
@@ -201,6 +186,21 @@ const ListUsers: FC<ListUsersProps> = ({ users, refetch }) => {
           action={CreateUser}
           role="private"
           form="create"
+        />
+      </Drawer>
+
+      <Drawer
+        title="Update User"
+        open={modalUpdate}
+        onClose={() => dispatch(UsersSlice.actions.CloseUpdateModal())}
+        placement="right"
+      >
+        <UserForm
+          InfoForm={InfoForm}
+          action={UpdateUser}
+          mode={"multiple"}
+          role="mixte"
+          form="update"
         />
       </Drawer>
     </>

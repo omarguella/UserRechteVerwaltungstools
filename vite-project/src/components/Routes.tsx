@@ -3,6 +3,7 @@ import { createBrowserRouter } from "react-router-dom";
 import { withLoading } from "../hoc/withLoading.hoc";
 import PrivateRoute from "./PrivateRoute";
 import Layout from "./layouts/Layout";
+import RolePermissions from "../pages/RolePermissions";
 
 const RegisterPage = React.lazy(() => import("../pages/Register"));
 const LoginPage = React.lazy(() => import("../pages/Login"));
@@ -11,12 +12,16 @@ const AdministrationPage = React.lazy(() => import("../pages/Administration"));
 const RolesAdministrationPage = React.lazy(
   () => import("../pages/RolesAdministration")
 );
+const PermissionsAdministrationPage = React.lazy(
+  () => import("../pages/PermissionsAdministration")
+);
 /* with loading */
 const Register = withLoading(RegisterPage);
 const Login = withLoading(LoginPage);
 const Profile = withLoading(ProfilePage);
 const Administration = withLoading(AdministrationPage);
 const RolesAdministration = withLoading(RolesAdministrationPage);
+const PermissionsAdministration = withLoading(PermissionsAdministrationPage);
 
 const routes = createBrowserRouter([
   {
@@ -48,6 +53,22 @@ const routes = createBrowserRouter([
         element: (
           <PrivateRoute>
             <RolesAdministration />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/roles/:name",
+        element: (
+          <PrivateRoute>
+            <RolePermissions />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/permissions",
+        element: (
+          <PrivateRoute>
+            <PermissionsAdministration />
           </PrivateRoute>
         ),
       },

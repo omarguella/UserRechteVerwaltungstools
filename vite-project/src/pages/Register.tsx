@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from "../hooks/redux";
 import UseNotification from "../hooks/notification";
 import { RegisterAction } from "../redux/actions/auth";
 import { TRegistration } from "../types/auth";
+import { Helmet } from "react-helmet";
 
 function Register() {
   const { Title } = Typography;
@@ -26,6 +27,9 @@ function Register() {
   const phonePattern = /^(\\+[0-9]{1,3})?[0-9]{9,15}$/;
   return (
     <Container style={{ flexDirection: "column" }}>
+      <Helmet>
+        <title>Register</title>
+      </Helmet>
       {contextHolder}
       <Back>
         <Row gutter={[16, 16]}>

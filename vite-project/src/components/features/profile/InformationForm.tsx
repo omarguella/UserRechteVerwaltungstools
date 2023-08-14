@@ -25,23 +25,19 @@ const InformationForm: FC<InformationFormProps> = ({
   const { contextHolder, openErrorNotification, openSuccessNotification } =
     UseNotification();
 
-  const UpdateProfile = (values: User) => {
-    dispatch(UpdateProfileAction({ data: values, id: id }))
-      .unwrap()
-      .then(() => openSuccessNotification(`Profile successfully updated`))
-      .catch(err => openErrorNotification(err));
-  };
-
   const phonePattern = /^(\\+[0-9]{1,3})?[0-9]{9,15}$/;
   return (
     <>
       {contextHolder}
       <Form
-        name="info-form"
+        name="form"
         layout="vertical"
         form={InfoForm}
         onFinish={values => {
-          UpdateProfile(values);
+          dispatch(UpdateProfileAction({ data: values, id: id }))
+            .unwrap()
+            .then(() => openSuccessNotification(`Profile successfully updated`))
+            .catch(err => openErrorNotification(err));
         }}
       >
         <Space direction="vertical" size="middle" style={{ display: "flex" }}>

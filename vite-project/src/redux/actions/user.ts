@@ -72,9 +72,26 @@ export const UpdateProfileAction = createAsyncThunk(
   "users/profile",
   async ({ data, id }: { data: User; id: number }, { rejectWithValue }) => {
     try {
+      const response = await _PUT(`/users/profile/${id}`, data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(`Something wrong try again`);
+    }
+  }
+);
+
+/**
+ * Update profile
+ */
+export const UpdateProfileUsersAction = createAsyncThunk(
+  "users/profile-users",
+  async ({ data, id }: { data: User; id: number }, { rejectWithValue }) => {
+    try {
       data.roles =
         data.roles.length === 1
-          ? data.roles.map(role => role?.label)
+          ? data.roles.map(role => {
+              return role.value ? role.value : role;
+            })
           : data.roles;
       const response = await _PUT(`/users/profile/${id}`, data);
       return response.data;

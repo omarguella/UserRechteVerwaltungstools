@@ -8,6 +8,7 @@ import VerifyButtons from "../components/features/profile/VerifyButtons";
 import { User } from "../types/user";
 import RoleList from "../components/features/profile/RoleList";
 import PermissionsForm from "../components/features/profile/PermissionsForm";
+import { Helmet } from "react-helmet";
 
 const Profile = () => {
   const { data, isLoading, isError } = useQuery({
@@ -35,6 +36,9 @@ const Profile = () => {
 
   return (
     <div style={{ width: "100%" }}>
+      <Helmet>
+        <title>Profile</title>
+      </Helmet>
       <Space direction="vertical" size="middle" style={{ display: "flex" }}>
         <Alert
           message="My Profile"

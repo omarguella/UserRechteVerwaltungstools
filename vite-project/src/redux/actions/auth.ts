@@ -2,6 +2,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import UseGetAuth from "../../hooks/getAuth";
 import { TLogin } from "../../types/auth";
+import { DeleteCookies } from "../../lib/cookies";
 
 const BASE_URL = import.meta.env.VITE_URL;
 
@@ -54,5 +55,6 @@ export const GetAccessAction = createAsyncThunk("auth/access", async () => {
 });
 
 export const LogoutAction = createAsyncThunk("auth/logout", async () => {
+  DeleteCookies("current-role");
   return null;
 });

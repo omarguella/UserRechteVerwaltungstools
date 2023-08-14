@@ -32,14 +32,24 @@ const UserForm: FC<UserFormProps> = ({
       layout="vertical"
       form={InfoForm}
       onFinish={values => {
+        console.log(InfoForm.getFieldsValue());
         if (form === "update") {
-          action(values, id);
+          action(values, values.id);
         } else {
           action(values);
         }
       }}
     >
       <Space direction="vertical" size="middle" style={{ display: "flex" }}>
+        {form === "update" && (
+          <Form.Item
+            label="Id"
+            name={"id"}
+            rules={[{ required: true, message: "Required field" }]}
+          >
+            <Input disabled={true} />
+          </Form.Item>
+        )}
         <Form.Item
           label="Username"
           name={"username"}

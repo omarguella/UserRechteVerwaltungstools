@@ -53,6 +53,13 @@ const items: MenuItem[] = [
       <Check />
     </Link>
   ),
+  getItem(
+    "Permissions Administration",
+    "4",
+    <Link to={"/permissions"}>
+      <Check />
+    </Link>
+  ),
 ];
 
 const Sidebar: React.FC = () => {
@@ -66,6 +73,7 @@ const Sidebar: React.FC = () => {
     "/": ["1"],
     "/administration": ["2"],
     "/roles": ["3"],
+    "/permissions": ["4"],
   };
   return (
     <div

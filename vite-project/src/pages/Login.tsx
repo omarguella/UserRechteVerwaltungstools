@@ -1,6 +1,7 @@
 import { Col, Form, Row, Space, Typography } from "antd";
 import { useForm } from "antd/es/form/Form";
 import { LogInIcon } from "lucide-react";
+import { Helmet } from "react-helmet";
 import { Link } from "react-router-dom";
 import Input from "../components/forms/Input";
 import { Button, Password } from "../components/forms/style.d";
@@ -20,6 +21,9 @@ function Login() {
 
   return (
     <Container>
+      <Helmet>
+        <title>Login</title>
+      </Helmet>
       {contextHolder}
       <Back>
         <Row gutter={[16, 16]}>
