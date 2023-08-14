@@ -5,29 +5,55 @@ import { Helmet } from "react-helmet";
 import { _GET } from "../api/config";
 import Loading from "../components/common/Loading";
 import { Button } from "../components/forms/style.d";
-import { Trash } from "lucide-react";
+import { Plus, Trash } from "lucide-react";
 import Search from "antd/es/input/Search";
 import { useMemo, useState } from "react";
 import { Permissions } from "../types/permissions";
+import { useAppDispatch } from "../redux/store";
+import { DeletePermissionByKeyAction } from "../redux/actions/permissions";
+import { PermissionsSlice } from "../redux/reducers/permissions";
+import Drawer from "../components/common/Drawer";
+import { useAppSelector } from "../hooks/redux";
+import PermissionsForm from "../components/forms/permissions/PermissionsForm";
+import { FindCookies } from "../lib/cookies";
+import UseNotification from "../hooks/notification";
 
 const PermissionsAdministration = () => {
   const [text, setText] = useState("");
-  const { data, isError, isLoading } = useQuery(["permissions"], async () => {
-    const response = await _GET(`/auto/allPermissions`);
-    return response.data as Permissions[];
-  });
+  const dispatch = useAppDispatch();
+  const { modal, loading } = useAppSelector(state => state.permissions.create);
+  const cookiesPermission: [] = FindCookies("current-role");
+    const {  openErrorNotification, openSuccessNotification } =
+        UseNotification();
+
+  const { data, isError, isLoading, refetch } = useQuery(
+    ["permissions"],
+    async () => {
+      const response = await _GET(`/permissions`);
+      return response.data as Permissions[];
+    }
+  );
   const filtredData = useMemo(() => {
     if (!text) {
       return data;
     }
-    console.log(text);
     return data?.filter(role => {
       const isMatchText =
-        !text || role.roleName.toLowerCase().includes(text.toLowerCase());
+        !text || role.name.toLowerCase().includes(text.toLowerCase());
       return isMatchText;
     });
   }, [data, text]);
 
+  const DeletePermissionByKey = (key: string) => {
+    dispatch(DeletePermissionByKeyAction({ key }))
+        .unwrap()
+        .then(() => {
+            refetch();
+            openSuccessNotification("Permission Deleted Successfully");
+        })
+        .catch(err => openErrorNotification(err));
+
+  };
   if (isLoading) {
     return <Loading />;
   }
@@ -47,10 +73,15 @@ const PermissionsAdministration = () => {
   }
   const columns = [
     {
-      title: "Permission Key",
-      dataIndex: "permissionKey",
-      key: "permissionKey",
+      title: "Permission Keys",
+      dataIndex: "key",
+      key: "key",
     },
+      {
+          title: "Permission name",
+          dataIndex: "name",
+          key: "name",
+      },
     {
       title: "Delete",
       key: "delete",
@@ -59,9 +90,12 @@ const PermissionsAdministration = () => {
           <Popconfirm
             title="Delete the Permission"
             description="Do you want to delete this permission? this action is irreversible"
-            onConfirm={() => console.log("ok")}
+            onConfirm={() => DeletePermissionByKey(record.key)}
             okText="Yes"
             cancelText="No"
+            disabled={
+              !cookiesPermission.some(p => p === "PERMISSION_MANAGER_DELETE_ALL")
+            }
           >
             <Button
               type="primary"
@@ -73,6 +107,9 @@ const PermissionsAdministration = () => {
                 justifyContent: "center",
               }}
               danger
+              disabled={
+                !cookiesPermission.some(p => p === "PERMISSION_MANAGER_DELETE_ALL")
+              }
             />
           </Popconfirm>
         );
@@ -99,9 +136,29 @@ const PermissionsAdministration = () => {
           onChange={e => setText(e.target.value)}
         />
       </div>
+
+      <Button
+        type="default"
+        icon={<Plus />}
+        style={{ marginTop: "30px" }}
+        onClick={() => dispatch(PermissionsSlice.actions.OpenCreateModal())}
+        disabled={!cookiesPermission.some(p => p === "PERMISSION_MANAGER_POST_ALL")}
+      >
+        Add Permission
+      </Button>
+
       <Card style={{ marginTop: "20px" }}>
         <Table dataSource={datasource} columns={columns} />
       </Card>
+
+      <Drawer
+        title="Create Permission"
+        open={modal}
+        onClose={() => dispatch(PermissionsSlice.actions.CloseCreateModal())}
+        placement="right"
+      >
+        <PermissionsForm refetch={refetch} />
+      </Drawer>
     </div>
   );
 };

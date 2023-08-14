@@ -2,6 +2,7 @@ import type { MenuProps } from "antd";
 import { Button, Menu } from "antd";
 import {
   Check,
+  Lock,
   LogOutIcon,
   Settings2,
   SidebarClose,
@@ -57,7 +58,7 @@ const items: MenuItem[] = [
     "Permissions Administration",
     "4",
     <Link to={"/permissions"}>
-      <Check />
+      <Lock />
     </Link>
   ),
 ];

@@ -151,8 +151,8 @@ const AddPermission: FC<AddPermissionProps> = ({ refetch }) => {
                   value: "ALL",
                 },
                 {
-                  lable: "ONE",
-                  value: "ONE",
+                  lable: "ME",
+                  value: "ME",
                 },
               ]}
             />

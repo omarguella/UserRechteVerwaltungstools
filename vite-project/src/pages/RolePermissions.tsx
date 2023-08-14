@@ -13,7 +13,7 @@ const RolePermissions = () => {
   const { data, isError, isLoading, refetch } = useQuery(
     ["permissions"],
     async () => {
-      const response = await _GET(`/permissionRole/all/${name}`);
+      const response = await _GET(`/permissionRole/${name}`);
       return response.data;
     }
   );

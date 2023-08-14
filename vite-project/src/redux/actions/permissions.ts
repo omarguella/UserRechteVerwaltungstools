@@ -55,3 +55,35 @@ export const DeletePermissionAction = createAsyncThunk(
     }
   }
 );
+
+/**
+ * Delete Permission by key
+ */
+
+export const DeletePermissionByKeyAction = createAsyncThunk(
+  "permissions/deletekey",
+  async ({ key }: { key: string }, { rejectWithValue }) => {
+    try {
+      const response = await _DELETE(`/permissions/key/${key}`);
+      return response as unknown;
+    } catch (error) {
+      return rejectWithValue("Something wrong try again");
+    }
+  }
+);
+
+/**
+ * Delete Permission by key
+ */
+
+export const CreatePermissionByMethodAction = createAsyncThunk(
+  "permissions/create",
+  async ({ data }: { data: any }, { rejectWithValue }) => {
+    try {
+      const response = await _POST(`/permissions`, data);
+      return response as unknown;
+    } catch (error) {
+      return rejectWithValue("Something wrong try again");
+    }
+  }
+);

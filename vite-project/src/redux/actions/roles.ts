@@ -24,8 +24,8 @@ export const UpdateRoleByNameAction = createAsyncThunk(
   "roles/update",
   async ({ data }: { data: Role }, { rejectWithValue }) => {
     try {
-      const { name, ...rest } = data;
-      const response = await _PUT(`/roles/name/${name}`, rest);
+      const { id, ...rest } = data;
+      const response = await _PUT(`/roles/name/${id}`, rest);
       return response.data as unknown;
     } catch (error) {
       return rejectWithValue("Something wrong try again please");

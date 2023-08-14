@@ -8,7 +8,7 @@ const persistConfig = {
   storage, // The storage mechanism to use
   // Additional configuration options if needed
   whiteList: ["auth"],
-  blackList: ["users", "roles"],
+  blackList: ["users", "roles", "permissions"],
 };
 const persistedReducer = persistReducer(persistConfig, reducers);
 
