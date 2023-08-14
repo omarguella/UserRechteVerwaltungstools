@@ -13,15 +13,12 @@ import org.slf4j.LoggerFactory;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
+import javax.ws.rs.NotFoundException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-
-import static org.eclipse.microprofile.jwt.Claims.groups;
-import static org.eclipse.microprofile.jwt.Claims.upn;
 
 @RequestScoped
 public class LogServiceImpl implements LogService {
@@ -113,48 +110,22 @@ public class LogServiceImpl implements LogService {
     @Transactional
     public void deleteLogs(String userId, String from, String to, String action) throws DateException {
 
-        StringBuilder queryBuilder = new StringBuilder("DELETE FROM Log l WHERE 1=1");
-        Map<String, Object> queryParams = new HashMap<>();
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        List<Log> logs = getLogs(userId,from,to,action);
 
-        LocalDate fromDate = null;
-        if (from != null) {
-            fromDate = LocalDate.parse(from, formatter);
+        for (Log log:logs) {
+            logRepository.delete(log);
         }
+    }
 
-        LocalDate toDate = null;
-        if (to != null) {
-            toDate = LocalDate.parse(to, formatter);
-        }
-
-        if (userId != null) {
-            queryBuilder.append(" AND l.userId = :userId");
-            queryParams.put("userId", Long.parseLong(userId));
-        }
-
-        if (from != null) {
-            queryBuilder.append(" AND l.date >= :fromDate");
-            queryParams.put("fromDate", fromDate);
-        }
-
-        if (to != null) {
-            queryBuilder.append(" AND l.date <= :toDate");
-            queryParams.put("toDate", toDate);
-        }
-
-        if (action != null) {
-            queryBuilder.append(" AND l.action = :action");
-            queryParams.put("action", action.toUpperCase());
-        }
-
-        try {
-            Query query = entityManager.createQuery(queryBuilder.toString());
-            for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
-                query.setParameter(entry.getKey(), entry.getValue());
-            }
-            int deletedCount = query.executeUpdate();
-        } catch (Exception e) {
+    @Override
+    @Transactional
+    public void deleteLogById(Long id) throws NotFoundException {
+        Log log = logRepository.findById(id);
+        if (log != null) {
+            logRepository.delete(log);
+        } else {
+            throw new NotFoundException("ID WRONG");
         }
     }
 

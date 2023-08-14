@@ -28,6 +28,10 @@ public interface LogsAPI {
                          @HeaderParam("action") String action,
                          @HeaderParam("token") String token);
 
+    @DELETE
+    @Path("/id")
+    void deleteLog (@HeaderParam("id") Long id,@HeaderParam("token") String token);
+
     @POST
     LogDto saveLog( @HeaderParam("action") String action, @HeaderParam("token") String token);
 

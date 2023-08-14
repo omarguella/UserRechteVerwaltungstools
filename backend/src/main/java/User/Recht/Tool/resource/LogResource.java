@@ -93,4 +93,32 @@ public class LogResource {
     }
 
 
+    @DELETE
+    @Path("/{id}")
+    @RolesAllowed({"USER"})
+    public Response deleteLog ( @PathParam("id")Long id,
+                                @Context RoutingContext routingContext,
+                                @Context SecurityContext securityContext) {
+
+        try {
+            String token = routingContext.request().getHeader("Authorization").substring(7);
+            // CHECK PERMISSIONS
+            authorizationService.checkExistedUserPermission("AUDIT_LOGS_DELETE", token);
+
+            logsService.deleteLog(id, token);
+
+            return Response.ok().header("STATUS", "LOG with the ID = "+id+" IS DELETED")
+                    .build();
+
+        } catch (UserNotAuthorized e) {
+            return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
+                    .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
+        } catch (NotFoundException e) {
+            return Response.status(406, "THE ID OF THE LOG NOT FOUND")
+                    .header("status", "THE ID OF THE LOG NOT FOUND").build();
+        }
+
+    }
+
+
 }

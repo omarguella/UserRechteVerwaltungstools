@@ -168,9 +168,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         String[] parts = addPermissionKeyWithType.split("_");
         String type = parts[parts.length - 1];
         String PermissionKey=addPermissionKeyWithType.substring(0,addPermissionKeyWithType.indexOf(type)-1);
-
-        LOGGER.info(PermissionKey);
-
         if (!getMyPermissions(token).contains(addPermissionKeyWithType)) {
             if(!getMyPermissions(token).contains(PermissionKey+"_ALL")){
                 throw new PermissionNotValid("CANNOT ADD A PERMISSION OF LOWER TYPE");
@@ -231,7 +228,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
         Map<String, Object> map = claimsOfUserService.listClaimUsingJWT(token);
         List<String> list = (List<String>) map.get("allPermissionsOfUser");
-        LOGGER.info(list.toString());
         return list;
 
     }
