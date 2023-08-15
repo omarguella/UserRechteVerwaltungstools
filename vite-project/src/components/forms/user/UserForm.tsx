@@ -69,7 +69,7 @@ const UserForm: FC<UserFormProps> = ({
         </Form.Item>
         <Form.Item
           label="Password"
-          name={"password"}
+          name={""}
           rules={[
             {
               required: true,
