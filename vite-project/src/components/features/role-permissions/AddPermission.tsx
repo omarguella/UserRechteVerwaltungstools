@@ -9,19 +9,21 @@ import { Check, PlusCircle } from "lucide-react";
 import { useAppDispatch } from "../../../redux/store";
 import { CreatePermissionAction } from "../../../redux/actions/permissions";
 import UseNotification from "../../../hooks/notification";
+import {useParams} from "react-router-dom";
 
 interface AddPermissionProps {
   refetch: () => void;
 }
 
 const AddPermission: FC<AddPermissionProps> = ({ refetch }) => {
+  const { name } = useParams();
   const [form] = Form.useForm();
   const dispatch = useAppDispatch();
   const [disabled, setDisabled] = useState<boolean>(true);
   const [disabledSelect, setDisabledSelect] = useState<boolean>(true);
   const { contextHolder, openErrorNotification, openSuccessNotification } =
     UseNotification();
-  const { data, isError, isLoading } = useQuery(["permissions"], async () => {
+  const { data, isError, isLoading } = useQuery(["addPermissions"], async () => {
     const response = await _GET(`/auto/allPermissions`);
     return response.data;
   });
@@ -38,8 +40,8 @@ const AddPermission: FC<AddPermissionProps> = ({ refetch }) => {
     form.setFieldsValue(data);
   };
 
-  const CreatePermission = (data: Omit<Permissions, "id">) => {
-    dispatch(CreatePermissionAction({ data }))
+  const CreatePermission = (data: Omit<Permissions, "id">,name: string) => {
+    dispatch(CreatePermissionAction({ data,name }))
       .unwrap()
       .then(() => {
         refetch();
@@ -107,7 +109,7 @@ const AddPermission: FC<AddPermissionProps> = ({ refetch }) => {
         name="permission"
         form={form}
         layout="vertical"
-        onFinish={values => CreatePermission(values)}
+        onFinish={values => CreatePermission(values,name!)}
       >
         <div
           style={{

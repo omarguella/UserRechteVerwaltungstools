@@ -9,6 +9,7 @@ const RegisterPage = React.lazy(() => import("../pages/Register"));
 const LoginPage = React.lazy(() => import("../pages/Login"));
 const ProfilePage = React.lazy(() => import("../pages/Profile"));
 const AdministrationPage = React.lazy(() => import("../pages/Administration"));
+const LogsPage = React.lazy(() => import("../pages/Logs"));
 const RolesAdministrationPage = React.lazy(
   () => import("../pages/RolesAdministration")
 );
@@ -22,7 +23,7 @@ const Profile = withLoading(ProfilePage);
 const Administration = withLoading(AdministrationPage);
 const RolesAdministration = withLoading(RolesAdministrationPage);
 const PermissionsAdministration = withLoading(PermissionsAdministrationPage);
-
+const Logs = withLoading(LogsPage);
 const routes = createBrowserRouter([
   {
     path: "/",
@@ -69,6 +70,14 @@ const routes = createBrowserRouter([
         element: (
           <PrivateRoute>
             <PermissionsAdministration />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/logs",
+        element: (
+          <PrivateRoute>
+            <Logs />
           </PrivateRoute>
         ),
       },

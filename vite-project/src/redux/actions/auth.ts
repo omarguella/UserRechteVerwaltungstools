@@ -3,6 +3,7 @@ import axios from "axios";
 import UseGetAuth from "../../hooks/getAuth";
 import { TLogin } from "../../types/auth";
 import { DeleteCookies } from "../../lib/cookies";
+import { _POST } from "../../api/config";
 
 const BASE_URL = import.meta.env.VITE_URL;
 
@@ -58,3 +59,15 @@ export const LogoutAction = createAsyncThunk("auth/logout", async () => {
   DeleteCookies("current-role");
   return null;
 });
+
+export const LogoutAllAction = createAsyncThunk(
+  "auth/logout/all",
+  async ({ val }, { rejectWithValue }) => {
+    try {
+      const response = await _POST("/auth/logoutAll", val);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue("Something wrong try again");
+    }
+  }
+);

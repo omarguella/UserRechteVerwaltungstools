@@ -2,8 +2,10 @@ import type { MenuProps } from "antd";
 import { Button, Menu } from "antd";
 import {
   Check,
+  DivideCircleIcon,
   Lock,
   LogOutIcon,
+  PieChart,
   Settings2,
   SidebarClose,
   SidebarOpen,
@@ -11,8 +13,9 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { LogoutAction } from "../../redux/actions/auth";
+import { LogoutAction, LogoutAllAction } from "../../redux/actions/auth";
 import { useAppDispatch } from "../../redux/store";
+import UseNotification from "../../hooks/notification";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -61,10 +64,19 @@ const items: MenuItem[] = [
       <Lock />
     </Link>
   ),
+  getItem(
+    "Logs",
+    "5",
+    <Link to={"/logs"}>
+      <PieChart />
+    </Link>
+  ),
 ];
 
 const Sidebar: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const { contextHolder, openErrorNotification, openSuccessNotification } =
+    UseNotification();
   const dispatch = useAppDispatch();
   const toggleCollapsed = () => {
     setCollapsed(!collapsed);
@@ -75,6 +87,7 @@ const Sidebar: React.FC = () => {
     "/administration": ["2"],
     "/roles": ["3"],
     "/permissions": ["4"],
+    "/logs": ["5"],
   };
   return (
     <div
@@ -82,6 +95,8 @@ const Sidebar: React.FC = () => {
         height: "100vh",
       }}
     >
+      {contextHolder}
+
       <Button
         type="default"
         onClick={toggleCollapsed}
@@ -103,6 +118,27 @@ const Sidebar: React.FC = () => {
           justifyContent: "start",
         }}
       />
+      <Button
+        type="default"
+        style={{
+          position: "absolute",
+          bottom: 0,
+          marginBottom: 70,
+          marginLeft: "10px",
+        }}
+        title="Logout ALL"
+        onClick={() =>
+          dispatch(LogoutAllAction({ value: "LoggedOut" }))
+            .unwrap()
+            .then(() => openSuccessNotification("All devices disconnected now"))
+              .then(()=> window.location.href="/login")
+            .catch(err => openErrorNotification(err))
+        }
+      >
+        <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+          <DivideCircleIcon />
+        </span>
+      </Button>
       <Button
         type="default"
         style={{

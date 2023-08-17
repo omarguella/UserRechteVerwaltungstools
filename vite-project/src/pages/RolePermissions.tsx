@@ -10,10 +10,10 @@ import ListPermissions from "../components/features/role-permissions/ListPermiss
 const RolePermissions = () => {
   const { name } = useParams();
 
-  const { data, isError, isLoading, refetch } = useQuery(
-    ["permissions"],
+  const { data: roleName, isError, isLoading, refetch } = useQuery(
+    ["getPermissions"],
     async () => {
-      const response = await _GET(`/permissionRole/${name}`);
+      const response = await _GET(`/permissionRole/all/${name}`);
       return response.data;
     }
   );
@@ -49,7 +49,7 @@ const RolePermissions = () => {
           style={{ fontWeight: "bold" }}
         />
       </Space>
-      <ListPermissions permissions={data} refetch={refetch} />
+      <ListPermissions permissions={roleName} refetch={refetch} />
       <AddPermission refetch={refetch} />
     </div>
   );

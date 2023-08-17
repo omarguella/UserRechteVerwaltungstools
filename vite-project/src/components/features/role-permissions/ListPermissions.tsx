@@ -1,30 +1,34 @@
-import { Card, Popconfirm, Table, Tag } from "antd";
+import { Card, Popconfirm, Table } from "antd";
 import { Trash } from "lucide-react";
 import { FC } from "react";
-import { Permissions } from "../../../types/permissions";
-import { Button } from "../../forms/style.d";
-import { useDispatch } from "react-redux";
+import UseNotification from "../../../hooks/notification";
 import {
   DeletePermissionAction,
   UpdatePermissionAction,
 } from "../../../redux/actions/permissions";
-import UseNotification from "../../../hooks/notification";
+import { useAppDispatch } from "../../../redux/store";
+import { Permissions } from "../../../types/permissions";
+import { Button } from "../../forms/style.d";
 
 interface ListPermissionsProps {
   permissions: Permissions[];
   refetch: () => void;
 }
 
+export type PayloadPermission = Partial<
+  Pick<Permissions, "permissionKey" | "roleName" | "type">
+>;
+
 const ListPermissions: FC<ListPermissionsProps> = ({
   permissions,
   refetch,
 }) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const { contextHolder, openErrorNotification, openSuccessNotification } =
     UseNotification();
 
-  const UpdateType = (data: any) => {
+  const UpdateType = (data: PayloadPermission) => {
     dispatch(UpdatePermissionAction({ data }))
       .unwrap()
       .then(() => {
@@ -34,7 +38,7 @@ const ListPermissions: FC<ListPermissionsProps> = ({
       .catch(err => openErrorNotification(err));
   };
 
-  const DeletePermission = (data: any) => {
+  const DeletePermission = (data: Omit<PayloadPermission, "type">) => {
     dispatch(DeletePermissionAction({ data }))
       .unwrap()
       .then(() => {
