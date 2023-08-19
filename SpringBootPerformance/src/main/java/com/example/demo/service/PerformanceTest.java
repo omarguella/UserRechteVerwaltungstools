@@ -19,9 +19,9 @@ public class PerformanceTest {
     private UserRepository userRepository;
 
 
-    @GetMapping("/loaderio-c4986c2f1714efa54e93dbe57d0da13f/")
+    @GetMapping("/loaderio-b5bf6d15d7e206092973396d61ba86c6/")
     public @ResponseBody String getLoaderToken() {
-        return "loaderio-c4986c2f1714efa54e93dbe57d0da13f";
+        return "loaderio-b5bf6d15d7e206092973396d61ba86c6";
     }
         @GetMapping("/performanceTest")
     public List<User> performanceTest() {
