@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface PermissionService {
     @Transactional
-    List<Permission> createPermission(PermissionDto permissionDto) throws IllegalArgumentException, IllegalAccessException, PermissionNotFound;
+    List<Permission> createPermission(PermissionDto permissionDto) throws IllegalArgumentException, IllegalAccessException, PermissionNotFound, CannotModifySuperAdminException, RoleNotFoundException, PermissionToRoleNotFound;
 
     Permission getPermissionByKey(String key) throws PermissionNotFound;
 

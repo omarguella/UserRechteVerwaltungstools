@@ -2,6 +2,7 @@ package User.Recht.Tool.service.serviceImpl;
 
 
 import User.Recht.Tool.dtos.permissionDtos.PermissionDto;
+import User.Recht.Tool.dtos.permissionDtos.PermissionRoleDto;
 import User.Recht.Tool.entity.Permission;
 import User.Recht.Tool.entity.Role;
 import User.Recht.Tool.exception.Permission.CannotDeleteInitPermissions;
@@ -44,7 +45,7 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Transactional
     @Override
-    public List<Permission> createPermission(PermissionDto permissionDto) throws IllegalArgumentException, IllegalAccessException {
+    public List<Permission> createPermission(PermissionDto permissionDto) throws IllegalArgumentException, IllegalAccessException, PermissionNotFound, CannotModifySuperAdminException, RoleNotFoundException, PermissionToRoleNotFound {
 
 
         permissionDto = permissionFactory.createPermissionKey(permissionDto);
@@ -61,7 +62,16 @@ public class PermissionServiceImpl implements PermissionService {
             List<Role> roles = new ArrayList<Role>();
             toSavePermission.setRoles(roles);
             savePermission(toSavePermission);
+
+            PermissionRoleDto permissionRoleDto=new PermissionRoleDto();
+            permissionRoleDto.setPermissionKey(keyPermission);
+            permissionRoleDto.setRoleName("SUPERADMIN");
+            permissionRoleDto.setType("ALL");
+
+            permissionToRoleService.addPermissionToRole(permissionRoleDto);
+
         }
+
         return getPermissionsByName(permissionDto.getName());
 
     }

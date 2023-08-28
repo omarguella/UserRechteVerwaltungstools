@@ -191,7 +191,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         Map<String, Object> map = claimsOfUserService.listClaimUsingJWT(token);
         boolean isMailToVerify = (boolean) map.get("isMailToVerify");
 
-        if (isMailToVerify && !user.getIsVerifiedEmail()) {
+        if ( !user.getIsVerifiedEmail()) {
             throw new EmailNotVerified("THE EMAIL IS NOT VERIFIED");
         }
 

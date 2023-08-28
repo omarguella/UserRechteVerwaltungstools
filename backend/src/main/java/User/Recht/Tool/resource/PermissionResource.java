@@ -88,6 +88,12 @@ public class PermissionResource {
             return Response.status(406, "USER IS NOT AUTHOROZIED FOR THE PERMISSION")
                     .header("STATUS", "USER IS NOT AUTHOROZIED FOR THE PERMISSION").build();
 
+        } catch (CannotModifySuperAdminException e) {
+            throw new RuntimeException(e);
+        } catch (RoleNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (PermissionToRoleNotFound e) {
+            throw new RuntimeException(e);
         }
     }
 
